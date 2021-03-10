@@ -17,6 +17,7 @@
 from dataclasses import dataclass
 
 import numpy as np
+from sklearn.base import BaseEstimator
 from sklearn.pipeline import Pipeline
 
 
@@ -26,18 +27,19 @@ class RecallPredictorInput:
     no_of_pred_labels: np.array
 
 
-class RecallPredictor:
+class RecallPredictor(BaseEstimator):
 
     def __init__(self, regressor):
+        self.regressor = regressor
         self.pipeline = Pipeline([
             ("features", LabelCalibrationFeatures()),
             ("regressor", regressor)
         ])
 
-    def fit(self, X, y):
+    def fit(self, X: RecallPredictorInput, y):
         self.pipeline.fit(X, y)
 
-    def predict(self, X):
+    def predict(self, X: RecallPredictorInput):
         return self.pipeline.predict(X)
 
 

@@ -14,25 +14,16 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
+from dataclasses import dataclass
 from typing import List
 
-from sklearn.base import BaseEstimator
-from sklearn.pipeline import Pipeline
-
-from stwfsapy.text_features import mk_text_features
+Concepts = List[str]
+Documents = List[str]
 
 
-class LabelCalibrator(BaseEstimator):
+@dataclass
+class TrainInput:
 
-    def __init__(self, regressor):
-        self.regressor = regressor
-        features = mk_text_features()
-        self._pipeline = Pipeline(
-            [("features", features), ("regressor", regressor)]
-        )
-
-    def fit(self, X: List[str], y):
-        self._pipeline.fit(X, y)
-
-    def predict(self, X: List[str]):
-        return self._pipeline.predict(X)
+    docs: Documents
+    predicted_concepts: List[Concepts]
+    true_concepts: List[Concepts]
