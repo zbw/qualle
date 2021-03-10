@@ -14,22 +14,41 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
+from dataclasses import dataclass
+
 import numpy as np
+from sklearn.pipeline import Pipeline
+
+
+@dataclass
+class RecallPredictorInput:
+    label_calibration: np.array
+    no_of_pred_labels: np.array
 
 
 class RecallPredictor:
 
-    def __init__(self, estimator):
-        self.estimator = estimator
+    def __init__(self, regressor):
+        self.pipeline = Pipeline([
+            ("features", LabelCalibrationFeatures()),
+            ("regressor", regressor)
+        ])
 
     def fit(self, X, y):
-        data = np.zeros((len(X), 2))
-        data[:, 0] = X['label_calibration']
-        data[:, 1] = X['label_calibration'] - X['no_of_pred_labels']
-        self.estimator.fit(data, y)
+        self.pipeline.fit(X, y)
 
     def predict(self, X):
-        data = np.zeros((len(X), 2))
-        data[:, 0] = X['label_calibration']
-        data[:, 1] = X['label_calibration'] - X['no_of_pred_labels']
-        return self.estimator.predict(X)
+        return self.pipeline.predict(X)
+
+
+class LabelCalibrationFeatures():
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X: RecallPredictorInput):
+        rows = len(X.label_calibration)
+        data = np.zeros((rows, 2))
+        data[:, 0] = X.label_calibration
+        data[:, 1] = X.label_calibration - X.no_of_pred_labels
+        return data
