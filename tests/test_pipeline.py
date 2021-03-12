@@ -16,25 +16,34 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+import pytest
+from sklearn.exceptions import NotFittedError
 
-from qualle.models import TrainInput
-from qualle.pipeline import recall, QualityEstimationPipeline
+from qualle.models import TrainData, PredictData
+from qualle.pipeline import QualityEstimationPipeline
 
 
 def test_train(mocker):
     concepts = [['c'] for _ in range(5)]
-    data = TrainInput(
+    data = TrainData(
         docs=[f'd{i}' for i in range(5)],
         true_concepts=concepts,
         predicted_concepts=concepts
     )
     qp = QualityEstimationPipeline()
-    spy = mocker.spy(qp._rp, 'fit')
+    spy_lc = mocker.spy(qp._lc, 'fit')
+    spy_rp = mocker.spy(qp._rp, 'fit')
 
     qp.train(data)
 
-    actual_rp_input = spy.call_args[0][0]
-    actual_true_recall = spy.call_args[0][1]
+    actual_lc_docs = spy_lc.call_args[0][0]
+    actual_lc_no_of_true_labels = spy_lc.call_args[0][1]
+
+    assert actual_lc_docs == data.docs
+    assert np.array_equal(actual_lc_no_of_true_labels, [1] * 5)
+
+    actual_rp_input = spy_rp.call_args[0][0]
+    actual_true_recall = spy_rp.call_args[0][1]
 
     # Because of how our input data is designed,
     # we can make following assertions
@@ -44,10 +53,32 @@ def test_train(mocker):
     assert actual_true_recall == only_ones
 
 
-def test_recall():
-    true_concepts = [['x0', 'x2'], ['x1'], ['x3']]
-    pred_concepts = [['x0', 'x1'], ['x2'], ['x3']]
+def test_predict_wihout_train_raises_exc():
+    concepts = [['c'] for _ in range(5)]
+    data = PredictData(
+        docs=[f'd{i}' for i in range(5)],
+        predicted_concepts=concepts
+    )
+    qp = QualityEstimationPipeline()
+    with pytest.raises(NotFittedError):
+        qp.predict(data)
 
-    assert recall(
-        true_concepts=true_concepts, predicted_concepts=pred_concepts) == [
-        0.5, 0, 1]
+
+def test_predict():
+    concepts = [['c'] for _ in range(5)]
+    t_data = TrainData(
+        docs=[f'd{i}' for i in range(5)],
+        true_concepts=concepts,
+        predicted_concepts=concepts
+    )
+    p_data = PredictData(
+        docs=t_data.docs,
+        predicted_concepts=t_data.predicted_concepts
+    )
+    qp = QualityEstimationPipeline()
+
+    qp.train(t_data)
+
+    # Because of how our input data is designed,
+    # we can make following assertion
+    assert np.array_equal(qp.predict(p_data), [1] * 5)

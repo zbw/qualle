@@ -22,8 +22,15 @@ Documents = List[str]
 
 
 @dataclass
-class TrainInput:
+class TrainData:
 
     docs: Documents
     predicted_concepts: List[Concepts]
     true_concepts: List[Concepts]
+
+
+@dataclass
+class PredictData:
+
+    docs: Documents
+    predicted_concepts: List[Concepts]

@@ -16,12 +16,12 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 import csv
 
-from qualle.models import TrainInput
+from qualle.models import TrainData
 
 
 def train_input_from_tsv(
         path_to_tsv: str
-) -> TrainInput:
+) -> TrainData:
     docs = []
     pred_concepts = []
     true_concepts = []
@@ -35,5 +35,5 @@ def train_input_from_tsv(
             ))
             true_concepts.append(row[2].split(','))
 
-    return TrainInput(docs=docs, predicted_concepts=pred_concepts,
-                      true_concepts=true_concepts)
+    return TrainData(docs=docs, predicted_concepts=pred_concepts,
+                     true_concepts=true_concepts)

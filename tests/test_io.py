@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 from qualle.io import train_input_from_tsv
-from qualle.models import TrainInput
+from qualle.models import TrainData
 
 
 def test_train_input_from_tsv(mocker):
@@ -25,7 +25,7 @@ def test_train_input_from_tsv(mocker):
     )
     mocker.patch('qualle.io.open', m)
 
-    assert train_input_from_tsv('dummypath') == TrainInput(
+    assert train_input_from_tsv('dummypath') == TrainData(
         docs=['title0', 'title1'],
         predicted_concepts=[
             ['concept0', 'concept1'], ['concept2', 'concept3']
