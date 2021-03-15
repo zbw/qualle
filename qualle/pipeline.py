@@ -21,8 +21,9 @@ from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.model_selection import cross_val_predict
 
 from qualle.label_calibration import LabelCalibrator
-from qualle.models import Concepts, TrainData, PredictData
+from qualle.models import TrainData, PredictData
 from qualle.quality_estimation import RecallPredictor, RecallPredictorInput
+from qualle.utils import recall
 
 
 class QualityEstimationPipeline:
@@ -53,15 +54,7 @@ class QualityEstimationPipeline:
         label_calibration = self._lc.predict(data.docs)
         no_of_pred_labels = np.array(list(map(len, data.predicted_concepts)))
         rp_input = RecallPredictorInput(
-            no_rows=len(data.docs), no_of_pred_labels=no_of_pred_labels,
+            no_of_pred_labels=no_of_pred_labels,
             label_calibration=label_calibration
         )
         return self._rp.predict(rp_input)
-
-
-def recall(
-        true_concepts: List[Concepts], predicted_concepts: List[Concepts]
-) -> List:
-    return [len(set(tc) & set(pc)) / len(tc) for tc, pc in zip(
-        true_concepts, predicted_concepts)
-     ]
