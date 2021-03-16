@@ -34,6 +34,7 @@ class QualityEstimationPipeline:
             ExtraTreesRegressor(n_estimators=10, min_samples_leaf=20)
         )
         self._rp = RecallPredictor(ExtraTreesRegressor())
+        self._train_data_last_run = {}
 
     def train(self, data: TrainData):
         no_of_true_labels = np.array(list(map(len, data.true_concepts)))
@@ -49,6 +50,21 @@ class QualityEstimationPipeline:
         )
         true_recall = recall(data.true_concepts, data.predicted_concepts)
         self._rp.fit(rp_input, true_recall)
+
+        self._train_data_last_run = dict(
+            label_calibration=label_calibration,
+            no_of_pred_labels=no_of_pred_labels,
+            true_recall=true_recall
+        )
+
+    def reset_and_fit_recall_predictor(self, rp: RecallPredictor):
+        self._rp = rp
+
+        rp_input = RecallPredictorInput(
+            no_of_pred_labels=self._train_data_last_run['no_of_pred_labels'],
+            label_calibration=self._train_data_last_run['label_calibration']
+        )
+        self._rp.fit(rp_input, self._train_data_last_run['true_recall'])
 
     def predict(self, data: PredictData) -> List[float]:
         label_calibration = self._lc.predict(data.docs)
