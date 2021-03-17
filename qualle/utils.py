@@ -14,9 +14,10 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
+import csv
 from typing import List
 
-from qualle.models import Concepts
+from qualle.models import Concepts, TrainData
 
 
 def recall(
@@ -25,3 +26,25 @@ def recall(
     return [len(set(tc) & set(pc)) / len(tc) for tc, pc in zip(
         true_concepts, predicted_concepts)
      ]
+
+
+def train_input_from_tsv(
+        path_to_tsv: str
+) -> TrainData:
+    docs = []
+    pred_concepts = []
+    true_concepts = []
+
+    with open(path_to_tsv, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter='\t')
+        for row in reader:
+            docs.append(row[0])
+            pred_concepts.append(list(
+                map(lambda s: s.split(':')[0], row[1].split(','))
+            ))
+            true_concepts.append(row[2].split(','))
+
+    return TrainData(
+        docs=docs, predicted_concepts=pred_concepts,
+        true_concepts=true_concepts
+    )

@@ -14,7 +14,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
-from qualle.utils import recall
+from qualle.models import TrainData
+from qualle.utils import recall, train_input_from_tsv
 
 
 def test_recall():
@@ -24,3 +25,19 @@ def test_recall():
     assert recall(
         true_concepts=true_concepts, predicted_concepts=pred_concepts) == [
         0.5, 0, 1]
+
+
+def test_train_input_from_tsv(mocker):
+    m = mocker.mock_open(
+        read_data='title0\tconcept0:1,concept1:0.5\tconcept1,concept3\n'
+                  'title1\tconcept2:1,concept3:0.5\tconcept3'
+    )
+    mocker.patch('qualle.utils.open', m)
+
+    assert train_input_from_tsv('dummypath') == TrainData(
+        docs=['title0', 'title1'],
+        predicted_concepts=[
+            ['concept0', 'concept1'], ['concept2', 'concept3']
+        ],
+        true_concepts=[['concept1', 'concept3'], ['concept3']]
+    )
