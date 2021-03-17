@@ -28,12 +28,12 @@ from qualle.utils import recall
 
 class QualityEstimationPipeline:
 
-    def __init__(self):
+    def __init__(self, rp: RecallPredictor):
         # TODO: Make regressors configurable
         self._lc = LabelCalibrator(
             ExtraTreesRegressor(n_estimators=10, min_samples_leaf=20)
         )
-        self._rp = RecallPredictor(ExtraTreesRegressor())
+        self._rp = rp
         self._train_data_last_run = {}
 
     def train(self, data: TrainData):
