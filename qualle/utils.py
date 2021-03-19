@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 import csv
-from typing import List
+from typing import List, Dict
 
 from qualle.models import Concepts, TrainData
 
@@ -48,3 +48,13 @@ def train_input_from_tsv(
         docs=docs, predicted_concepts=pred_concepts,
         true_concepts=true_concepts
     )
+
+
+def write_to_tsv(data: List[Dict], path_to_tsv: str):
+    with open(path_to_tsv, 'w', newline='',) as csvfile:
+        fieldnames = data[0].keys()
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='\t')
+
+        writer.writeheader()
+        for d in data:
+            writer.writerow(d)
