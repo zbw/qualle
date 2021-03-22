@@ -14,6 +14,9 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
+
+import numpy as np
+
 from qualle.models import TrainData
 from qualle.utils import recall, train_input_from_tsv
 
@@ -25,6 +28,18 @@ def test_recall():
     assert recall(
         true_concepts=true_concepts, predicted_concepts=pred_concepts) == [
         0.5, 0, 1]
+
+
+def test_recall_empty_true_concepts_return_nan():
+    assert recall(true_concepts=[[]], predicted_concepts=[['x']]) == [np.nan]
+
+
+def test_recall_empty_pred_concepts_return_zero():
+    assert recall(true_concepts=[['x']], predicted_concepts=[[]]) == [0]
+
+
+def test_recall_empty_input():
+    assert recall(true_concepts=[], predicted_concepts=[]) == []
 
 
 def test_train_input_from_tsv(mocker):

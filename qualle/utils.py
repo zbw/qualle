@@ -18,15 +18,18 @@ import csv
 import logging
 from typing import List
 
+import numpy as np
+
 from qualle.models import Concepts, TrainData
 
 
 def recall(
         true_concepts: List[Concepts], predicted_concepts: List[Concepts]
 ) -> List:
-    return [len(set(tc) & set(pc)) / len(tc) for tc, pc in zip(
-        true_concepts, predicted_concepts)
-     ]
+    return [
+        len(set(tc) & set(pc)) / len_tc if (len_tc := len(tc)) > 0
+        else np.nan for tc, pc in zip(true_concepts, predicted_concepts)
+    ]
 
 
 def train_input_from_tsv(
