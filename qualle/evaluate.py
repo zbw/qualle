@@ -14,60 +14,31 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
-from typing import Generator, List, Dict
+from typing import List, Dict
 
 import numpy as np
-from sklearn import ensemble
-from sklearn.linear_model import LinearRegression
 from sklearn.metrics import explained_variance_score, mean_squared_error
-from sklearn.tree import DecisionTreeRegressor
 
-from qualle.models import PredictData
+from qualle.models import PredictData, TrainData
 from qualle.pipeline import QualityEstimationPipeline
-from qualle.quality_estimation import RecallPredictor
-from qualle.utils import recall, train_input_from_tsv
-
-# TODO: make configurable
-QE_ESTIMATORS = [
-    LinearRegression(), DecisionTreeRegressor(),
-    ensemble.GradientBoostingRegressor(),
-    ensemble.GradientBoostingRegressor(n_estimators=50, max_depth=4),
-    ensemble.AdaBoostRegressor(), ensemble.ExtraTreesRegressor()
-]
+from qualle.utils import recall
 
 
 class Evaluator:
 
-    def __init__(self, train_file: str, eval_file: str):
-        self._train_file = train_file
-        self._eval_file = eval_file
-        self._qe_p = QualityEstimationPipeline(RecallPredictor(
-            QE_ESTIMATORS[0]))
+    def __init__(self, test_data: TrainData, qe_p: QualityEstimationPipeline):
+        self._test_data = test_data
+        self._qe_p = qe_p
 
-    def evaluate(self) -> List[Dict]:
-        return [s for s in self._evaluate_estimators()]
+    def evaluate(self) -> Dict:
+        pred_recall = self._qe_p.predict(
+            PredictData(docs=self._test_data.docs,
+                        predicted_concepts=self._test_data.predicted_concepts)
+        )
+        true_recall = recall(self._test_data.true_concepts,
+                             self._test_data.predicted_concepts)
 
-    def _evaluate_estimators(self) -> Generator[Dict, None, None]:
-        t_input = train_input_from_tsv(self._train_file)
-        e_input = train_input_from_tsv(self._eval_file)
-
-        for i, qe_e in enumerate(QE_ESTIMATORS):
-            if i == 0:
-                self._qe_p.train(t_input)
-            else:
-                rp = RecallPredictor(qe_e)
-                self._qe_p.reset_and_fit_recall_predictor(rp)
-
-            pred_recall = self._qe_p.predict(
-                PredictData(docs=e_input.docs,
-                            predicted_concepts=e_input.predicted_concepts)
-            )
-            true_recall = recall(e_input.true_concepts,
-                                 e_input.predicted_concepts)
-
-            scores_for_qe_e = dict(qe_estimator=str(qe_e))
-            scores_for_qe_e.update(scores(true_recall, pred_recall))
-            yield scores_for_qe_e
+        return scores(true_recall, pred_recall)
 
 
 def scores(true_recall: List[float], pred_recall: List[float]) -> Dict:

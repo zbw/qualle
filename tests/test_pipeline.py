@@ -63,39 +63,6 @@ def test_train(qp, train_data, mocker):
     assert actual_true_recall == only_ones
 
 
-def test_train_stores_last_train_data(qp, train_data):
-    qp.train(train_data)
-
-    tdlr = qp._train_data_last_run
-
-    assert tdlr
-    assert np.array_equal(tdlr['label_calibration'], [1] * 5)
-    assert np.array_equal(tdlr['no_of_pred_labels'], [1] * 5)
-    assert qp._train_data_last_run['true_recall'] == [1] * 5
-
-
-def test_reset_and_fit_recall_predictor_without_train_raises_exc(qp):
-    with pytest.raises(KeyError):
-        qp.reset_and_fit_recall_predictor(RecallPredictor(None))
-
-
-def test_reset_and_fit_recall_predictor_fits_with_last_train_data(
-        qp, train_data, mocker
-):
-    spy_rp = mocker.spy(qp._rp, 'fit')
-
-    qp.train(train_data)
-
-    qp.reset_and_fit_recall_predictor(RecallPredictor(None))
-
-    actual_rp_input = spy_rp.call_args[0][0]
-    actual_true_recall = spy_rp.call_args[0][1]
-
-    assert np.array_equal(actual_rp_input.label_calibration, [1] * 5)
-    assert np.array_equal(actual_rp_input.no_of_pred_labels, [1] * 5)
-    assert actual_true_recall == [1] * 5
-
-
 def test_predict_wihout_train_raises_exc(qp):
     data = PredictData(
         docs=[],

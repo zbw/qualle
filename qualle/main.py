@@ -17,24 +17,25 @@
 
 
 import argparse
-from joblib import dump
+import logging
+
+from joblib import dump, load
 
 from qualle.evaluate import Evaluator
 from qualle.train import Trainer
+from qualle.utils import get_logger, train_input_from_tsv
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
-        description='Content-Based Quality Estimation for Automatic Subject '
-                    'Indexing of Short Texts under Precision and Recall '
-                    'Constraints'
+        description='Quality Estimation for Automatic Subject Indexing'
     )
 
     parser.add_argument(
-        '--eval', '-e', type=str, nargs=3,
+        '--eval', '-e', type=str, nargs=2,
         help='Run evaluation on training data using different estimators. '
-             'Specify train and eval tsv and output directoy as arguments.'
-             ' E.g.: --eval train.tsv eval.tsv output_dir'
+             'Specify test tsv and model input file as arguments.'
+             ' E.g.: --eval test.tsv input.model'
     )
     parser.add_argument(
         '--train', '-t', type=str, nargs=2,
@@ -46,11 +47,19 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.eval:
-        path_to_train_tsv = args.eval[0]
-        path_to_eval_tsv = args.eval[1]
-        path_to_out_dir = args.eval[2]
-        ev = Evaluator(path_to_train_tsv, path_to_eval_tsv)
+        path_to_test_tsv = args.eval[0]
+        path_to_model_file = args.eval[1]
+        model = load(path_to_model_file)
+        test_input = train_input_from_tsv(path_to_test_tsv)
+        ev = Evaluator(test_input, model)
         eval_data = ev.evaluate()
+        logger = get_logger()
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        logger.addHandler(ch)
+        logger.setLevel(logging.INFO)
+        for metric, score in eval_data.items():
+            logger.info(f'{metric}: {score}')
     elif args.train:
         path_to_train_tsv = args.train[0]
         path_to_model_output_file = args.train[1]

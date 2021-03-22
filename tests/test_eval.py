@@ -15,55 +15,31 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 import pytest
+from sklearn.ensemble import ExtraTreesRegressor
 
-from qualle import evaluate
 from qualle.evaluate import Evaluator, scores
+from qualle.models import TrainData
+from qualle.pipeline import QualityEstimationPipeline
+from qualle.quality_estimation import RecallPredictor
 
 
 @pytest.fixture
-def train_tsv():
-    return '\n'.join(
-        [f'Title{i}\tpred_concept{i}1,pred_concept{i}2\t'
-         f'true_concept{i}1,true_concept{i}2' for i in range(20)]
+def evaluator():
+    data = TrainData(
+        docs=['Title'] * 20,
+        predicted_concepts=[['concept']] * 20,
+        true_concepts=[['concept']] * 20
     )
+    qe_p = QualityEstimationPipeline(RecallPredictor(ExtraTreesRegressor()))
+    qe_p.train(data)
+    return Evaluator(data, qe_p)
 
 
-@pytest.fixture
-def evaluator(train_tsv, mocker):
-    m = mocker.mock_open(read_data=train_tsv)
-    mocker.patch('qualle.utils.open', m)
-    return Evaluator('', '')
+def test_evaluate_returns_scores(evaluator):
+    scores = evaluator.evaluate()
 
-
-def test_evaluate_returns_scores_for_each_estimator(evaluator):
-    l_of_scores = evaluator.evaluate()
-
-    assert set(str(qe_est) for qe_est in evaluate.QE_ESTIMATORS) == set([
-        s['qe_estimator'] for s in l_of_scores
-    ])
-    assert {'qe_estimator', 'explained_variance_score', 'mean_squared_error',
-            'correlation_coefficient'} == set(
-        key for s in l_of_scores for key in s.keys())
-
-
-def test_evaluate_trains_fully_only_once(evaluator, mocker):
-    spy = mocker.spy(evaluator._qe_p, 'train')
-
-    evaluator.evaluate()
-
-    assert spy.call_count == 1
-
-
-def test_evaluate_resets_recall_predictor_for_each_nonfirst_estimator(
-        evaluator, mocker
-):
-    spy = mocker.spy(evaluator._qe_p, 'reset_and_fit_recall_predictor')
-
-    evaluator.evaluate()
-
-    assert spy.call_count == len(evaluate.QE_ESTIMATORS) - 1
-    assert set(map(lambda x: x[0][0].regressor, spy.call_args_list)) == set(
-        evaluate.QE_ESTIMATORS[1:])
+    assert {'explained_variance_score', 'mean_squared_error',
+            'correlation_coefficient'} == set(scores.keys())
 
 
 def test_scores():
