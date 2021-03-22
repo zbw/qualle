@@ -18,21 +18,15 @@ import pytest
 from sklearn.ensemble import ExtraTreesRegressor
 
 from qualle.evaluate import Evaluator, scores
-from qualle.models import TrainData
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import RecallPredictor
 
 
 @pytest.fixture
-def evaluator():
-    data = TrainData(
-        docs=['Title'] * 20,
-        predicted_concepts=[['concept']] * 20,
-        true_concepts=[['concept']] * 20
-    )
+def evaluator(train_data):
     qe_p = QualityEstimationPipeline(RecallPredictor(ExtraTreesRegressor()))
-    qe_p.train(data)
-    return Evaluator(data, qe_p)
+    qe_p.train(train_data)
+    return Evaluator(train_data, qe_p)
 
 
 def test_evaluate_returns_scores(evaluator):

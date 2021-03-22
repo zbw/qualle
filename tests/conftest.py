@@ -14,12 +14,15 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
-from qualle.train import Trainer
+import pytest
+
+from qualle.models import TrainData
 
 
-def test_train_trains_qe_pipeline(train_data, mocker):
-    t = Trainer(train_data)
-    spy = mocker.spy(t._qe_p, 'train')
-    t.train()
-
-    spy.assert_called_once()
+@pytest.fixture
+def train_data():
+    return TrainData(
+        docs=['Title'] * 20,
+        predicted_concepts=[['concept']] * 20,
+        true_concepts=[['concept']] * 20
+    )
