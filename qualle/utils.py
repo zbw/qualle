@@ -18,7 +18,6 @@ import csv
 import logging
 from typing import List
 
-import numpy as np
 
 from qualle.models import Concepts, TrainData
 
@@ -27,8 +26,8 @@ def recall(
         true_concepts: List[Concepts], predicted_concepts: List[Concepts]
 ) -> List:
     return [
-        len(set(tc) & set(pc)) / len_tc if (len_tc := len(tc)) > 0
-        else np.nan for tc, pc in zip(true_concepts, predicted_concepts)
+        len(set(tc) & set(pc)) / len_tc if (len_tc := len(tc)) > 0 else 0
+        for tc, pc in zip(true_concepts, predicted_concepts)
     ]
 
 
