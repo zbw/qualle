@@ -1,0 +1,22 @@
+stages:
+  - test
+
+variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    PIPENV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pipenv"
+
+
+cache:
+  key: pip
+  paths:
+    - $CI_PROJECT_DIR/.cache/pip
+    - $CI_PROJECT_DIR/.cache/pipenv
+
+test:
+  stage: test
+  image: python:3.8-slim
+  script:
+    - pip install pipenv flake8 pytest-cov
+    - pipenv install --system --dev
+    - flake8
+    - pytest --cov=qualle
