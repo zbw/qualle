@@ -17,6 +17,7 @@
 
 import numpy as np
 import pytest
+from sklearn.exceptions import NotFittedError
 
 from qualle.quality_estimation import RecallPredictor, RecallPredictorInput, \
     LabelCalibrationFeatures
@@ -55,13 +56,20 @@ def test_rp_predict(predictor, X):
     )
 
 
-def test_rp_fit_fits_pipeline(predictor, X, mocker):
+def test_rp_fit_fits_regressor_with_label_features(predictor, X, mocker):
     y = np.array([0.8, 1., 4])
-
-    spy = mocker.spy(predictor.pipeline, 'fit')
+    X_transformed = LabelCalibrationFeatures().transform(X)
+    spy = mocker.spy(predictor.regressor, 'fit')
     predictor.fit(X, y)
 
-    spy.assert_called_once_with(X, y)
+    spy.assert_called_once()
+    assert (spy.call_args[0][0] == X_transformed).all()
+    assert (spy.call_args[0][1] == y).all()
+
+
+def test_rp_predict_without_fit_raises_exc(predictor, X):
+    with pytest.raises(NotFittedError):
+        predictor.predict(X)
 
 
 def test_calibration_features_transform(X):

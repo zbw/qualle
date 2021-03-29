@@ -17,8 +17,10 @@
 from dataclasses import dataclass
 
 import numpy as np
-from sklearn.base import BaseEstimator
+from sklearn import ensemble
+from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.pipeline import Pipeline
+from sklearn.utils.validation import check_is_fitted
 
 
 @dataclass
@@ -27,25 +29,27 @@ class RecallPredictorInput:
     no_of_pred_labels: np.array
 
 
-class RecallPredictor(BaseEstimator):
+class RecallPredictor(BaseEstimator, RegressorMixin):
 
-    def __init__(self, regressor):
+    def __init__(self, regressor=ensemble.AdaBoostRegressor()):
         self.regressor = regressor
-        self.pipeline = Pipeline([
-            ("features", LabelCalibrationFeatures()),
-            ("regressor", regressor)
-        ])
 
     def fit(self, X: RecallPredictorInput, y):
-        self.pipeline.fit(X, y)
+        self.pipeline_ = Pipeline([
+            ("features", LabelCalibrationFeatures()),
+            ("regressor", self.regressor)
+        ])
+        self.pipeline_.fit(X, y)
+        return self
 
     def predict(self, X: RecallPredictorInput):
-        return self.pipeline.predict(X)
+        check_is_fitted(self)
+        return self.pipeline_.predict(X)
 
 
-class LabelCalibrationFeatures():
+class LabelCalibrationFeatures(BaseEstimator, TransformerMixin):
 
-    def fit(self, X, y=None):
+    def fit(self, X=None, y=None):
         return self
 
     def transform(self, X: RecallPredictorInput):

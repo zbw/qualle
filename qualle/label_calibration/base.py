@@ -16,23 +16,27 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 from typing import List
 
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.pipeline import Pipeline
+from sklearn.utils.validation import check_is_fitted
 
 from stwfsapy.text_features import mk_text_features
 
 
-class LabelCalibrator(BaseEstimator):
+class LabelCalibrator(BaseEstimator, RegressorMixin):
 
-    def __init__(self, regressor):
+    def __init__(self, regressor=ExtraTreesRegressor()):
         self.regressor = regressor
-        features = mk_text_features()
-        self._pipeline = Pipeline(
-            [("features", features), ("regressor", regressor)]
-        )
 
     def fit(self, X: List[str], y):
-        self._pipeline.fit(X, y)
+        features = mk_text_features()
+        self.pipeline_ = Pipeline(
+            [("features", features), ("regressor", self.regressor)]
+        )
+        self.pipeline_.fit(X, y)
+        return self
 
     def predict(self, X: List[str]):
-        return self._pipeline.predict(X)
+        check_is_fitted(self)
+        return self.pipeline_.predict(X)

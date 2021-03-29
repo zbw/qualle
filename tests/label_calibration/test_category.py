@@ -19,23 +19,32 @@ import numpy as np
 from sklearn.exceptions import NotFittedError
 
 from qualle.label_calibration.category import MultiCategoryLabelCalibrator
-from tests.label_calibration.common import DummyRegressor
+
+
+class DummyRegressor:
+
+    def fit(self, X, y):
+        self.X = X
+        self.y = y
+
+    def predict(self, X):
+        return np.array(range(X.shape[0]))
 
 
 @pytest.fixture
 def calibrator():
-    return MultiCategoryLabelCalibrator(DummyRegressor(), 2)
+    return MultiCategoryLabelCalibrator(DummyRegressor)
 
 
-def test_mclc_zero_categories_raises_value_error():
+def test_mclc_fit_zero_categories_raises_value_error(calibrator, X):
     with pytest.raises(ValueError) as excinfo:
-        MultiCategoryLabelCalibrator(DummyRegressor(), 0)
+        calibrator.fit(X, np.array([]))
     assert str(excinfo.value) == 'Number of categories must be greater 0'
 
 
 def test_mclc_predict(calibrator, X):
-    calibrator.fit(X, [[3, 5], [1, 2]])
-    assert (calibrator.predict(X) == [[0, 1]] * 2).all()
+    calibrator.fit(X, np.array([[3, 5, 6], [1, 2, 7]]))
+    assert (calibrator.predict(X) == [[0, 1]] * 3).all()
 
 
 def test_mclc_predict_without_fit_raises_exc(calibrator, X):
@@ -43,17 +52,15 @@ def test_mclc_predict_without_fit_raises_exc(calibrator, X):
         calibrator.predict(X)
 
 
-def test_mclc_fit_fits_calibrators(calibrator, X, mocker):
+def test_mclc_fit_fits_calibrators(calibrator, X):
     y = np.array([[3, 5], [1, 2]])
-    spies = []
-    for c in calibrator._calibrators:
-        spies.append(mocker.spy(c, 'fit'))
-    calibrator.fit(X, y)
-    for i, spy in enumerate(spies):
-        spy.assert_called_once()
-        X_actual = spy.call_args[0][0]
-        y_actual = spy.call_args[0][1]
 
-        assert X_actual == X
+    calibrator.fit(X, y)
+
+    for i, clbtr in enumerate(calibrator.calibrators_):
+        X_actual = clbtr.regressor.X
+        y_actual = clbtr.regressor.y
+
+        assert X_actual.shape[0] == len(X)
         assert type(y_actual) == np.ndarray
-        assert (y_actual == y[i]).all()
+        assert (y_actual == y[:, i]).all()

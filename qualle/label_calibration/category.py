@@ -17,32 +17,41 @@
 from typing import List
 
 import numpy as np
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.utils.validation import check_is_fitted
 
 from qualle.label_calibration.base import LabelCalibrator
 
 
-class MultiCategoryLabelCalibrator(BaseEstimator):
+class MultiCategoryLabelCalibrator(BaseEstimator, RegressorMixin):
     """Label calibrator for multiple distinct categories.
     E.g. to predict the no of labels for different thesauri."""
 
-    def __init__(self, regressor, no_categories: int):
-        if no_categories < 1:
-            raise ValueError('Number of categories must be greater 0')
-        self._calibrators = [
-            LabelCalibrator(regressor) for _ in range(no_categories)
-        ]
+    def __init__(self, regressor_class=ExtraTreesRegressor):
+        self.regressor_class = regressor_class
 
     def fit(self, X: List[str], y: np.array):
         """
         :param X: list of content, e.g. doc titles
-        :param y: 2-dim array where each row corresponds to no of labels for
+        :param y: 2-dim array where each column corresponds to no of labels for
             respective category
         :return: self
         """
-        for i, c in enumerate(self._calibrators):
-            c.fit(X, y[i])
+        try:
+            no_categories = y.shape[1]
+        except IndexError:
+            raise ValueError('Number of categories must be greater 0')
+
+        self.calibrators_ = [
+            LabelCalibrator(self.regressor_class())
+            for _ in range(no_categories)
+        ]
+
+        for i, c in enumerate(self.calibrators_):
+            c.fit(X, y[:, i])
         return self
 
     def predict(self, X: List[str]):
-        return np.vstack([c.predict(X) for c in self._calibrators])
+        check_is_fitted(self)
+        return np.vstack([c.predict(X) for c in self.calibrators_])
