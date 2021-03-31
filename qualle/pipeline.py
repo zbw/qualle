@@ -20,7 +20,7 @@ import numpy as np
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.model_selection import cross_val_predict
 
-from qualle.label_calibration.base import LabelCalibrator
+from qualle.label_calibration.simple import LabelCalibrator
 from qualle.models import TrainData, PredictData
 from qualle.quality_estimation import RecallPredictor, RecallPredictorInput
 from qualle.utils import recall

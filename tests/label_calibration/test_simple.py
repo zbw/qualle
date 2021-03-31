@@ -20,7 +20,7 @@ import pytest
 from sklearn.exceptions import NotFittedError
 from stwfsapy.text_features import mk_text_features
 
-from qualle.label_calibration.base import LabelCalibrator
+from qualle.label_calibration.simple import LabelCalibrator
 from tests.common import DummyRegressor
 
 
