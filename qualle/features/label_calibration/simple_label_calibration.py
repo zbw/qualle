@@ -14,14 +14,16 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
+
 from typing import List
 
 import numpy as np
-from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
 
-from qualle.label_calibration.base import LabelCalibrator
+from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
+    AbstractLabelCalibrationFeatures
+from qualle.label_calibration.simple import LabelCalibrator
 from qualle.models import LabelCalibrationData, Documents, Concepts
 
 
@@ -29,7 +31,7 @@ def transform_to_label_count(X: List[Concepts]) -> np.array:
     return np.array(list(map(len, X)))
 
 
-class SimpleLabelCalibrator(BaseEstimator, RegressorMixin):
+class SimpleLabelCalibrator(AbstractLabelCalibrator):
 
     def __init__(
             self, regressor=ExtraTreesRegressor(
@@ -49,7 +51,7 @@ class SimpleLabelCalibrator(BaseEstimator, RegressorMixin):
         return self.calibrator_.predict(X)
 
 
-class SimpleLabelCalibrationFeatures(BaseEstimator, TransformerMixin):
+class SimpleLabelCalibrationFeatures(AbstractLabelCalibrationFeatures):
 
     def fit(self, X=None, y=None):
         return self

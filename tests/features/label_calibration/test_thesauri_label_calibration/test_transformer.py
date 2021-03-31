@@ -21,7 +21,8 @@ import pytest
 from rdflib import URIRef
 from sklearn.exceptions import NotFittedError
 
-from tests.features.test_thesauri_label_calibration import common as c
+from tests.features.label_calibration.test_thesauri_label_calibration import \
+    common as c
 
 
 def test_fit_stores_concept_to_subthesauri_mapping(transformer):

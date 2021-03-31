@@ -19,8 +19,10 @@ import numpy as np
 import pytest
 from sklearn.exceptions import NotFittedError
 
-from qualle.features.thesauri_label_calibration import ThesauriLabelCalibrator
-import tests.features.test_thesauri_label_calibration.common as c
+from qualle.features.label_calibration.thesauri_label_calibration import \
+    ThesauriLabelCalibrator
+import tests.features.label_calibration.test_thesauri_label_calibration.common\
+    as c
 
 
 class DummyRegressor:

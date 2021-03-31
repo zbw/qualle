@@ -21,7 +21,7 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
 
-from qualle.label_calibration.base import LabelCalibrator
+from qualle.label_calibration.simple import LabelCalibrator
 
 
 class MultiCategoryLabelCalibrator(BaseEstimator, RegressorMixin):

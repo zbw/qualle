@@ -18,9 +18,10 @@ import pytest
 from rdflib import Graph, RDF
 from rdflib.namespace import SKOS
 
-from qualle.features.thesauri_label_calibration import \
+from qualle.features.label_calibration.thesauri_label_calibration import \
     LabelCountForSubthesauriTransformer
-from tests.features.test_thesauri_label_calibration import common as c
+from tests.features.label_calibration.test_thesauri_label_calibration import \
+    common as c
 
 
 @pytest.fixture

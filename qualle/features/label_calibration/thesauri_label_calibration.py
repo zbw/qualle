@@ -14,6 +14,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
+
 import logging
 from collections import defaultdict
 from typing import List, Set
@@ -21,10 +22,12 @@ from typing import List, Set
 import numpy as np
 from rdflib import URIRef, Graph
 from rdflib.namespace import SKOS, RDF
-from sklearn.base import TransformerMixin, BaseEstimator, RegressorMixin
+from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
 
+from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
+    AbstractLabelCalibrationFeatures
 from qualle.label_calibration.category import MultiCategoryLabelCalibrator
 from qualle.models import Concepts, Documents, LabelCalibrationData
 
@@ -82,7 +85,7 @@ class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
         return concepts
 
 
-class ThesauriLabelCalibrator(BaseEstimator, RegressorMixin):
+class ThesauriLabelCalibrator(AbstractLabelCalibrator):
 
     def __init__(
             self, transformer: LabelCountForSubthesauriTransformer,
@@ -104,7 +107,7 @@ class ThesauriLabelCalibrator(BaseEstimator, RegressorMixin):
         return self.calibrator_.predict(X)
 
 
-class ThesauriLabelCalibrationFeatures(BaseEstimator, TransformerMixin):
+class ThesauriLabelCalibrationFeatures(AbstractLabelCalibrationFeatures):
 
     def __init__(self, transformer: LabelCountForSubthesauriTransformer):
         self.transformer = transformer

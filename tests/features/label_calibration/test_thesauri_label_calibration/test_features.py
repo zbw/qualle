@@ -19,11 +19,12 @@ import numpy as np
 import pytest
 from sklearn.exceptions import NotFittedError
 
-from qualle.features.thesauri_label_calibration import \
+from qualle.features.label_calibration.thesauri_label_calibration import \
     ThesauriLabelCalibrationFeatures
 from qualle.models import LabelCalibrationData
 
-import tests.features.test_thesauri_label_calibration.common as c
+import tests.features.label_calibration.test_thesauri_label_calibration.common\
+    as c
 
 
 @pytest.fixture
