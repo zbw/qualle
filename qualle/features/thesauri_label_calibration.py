@@ -26,7 +26,7 @@ from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
 
 from qualle.label_calibration.category import MultiCategoryLabelCalibrator
-from qualle.models import Concepts, Documents
+from qualle.models import Concepts, Documents, LabelCalibrationData
 
 
 class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
@@ -102,3 +102,22 @@ class ThesauriLabelCalibrator(BaseEstimator, RegressorMixin):
     def predict(self, X: Documents):
         check_is_fitted(self)
         return self.calibrator_.predict(X)
+
+
+class ThesauriLabelCalibrationFeatures(BaseEstimator, TransformerMixin):
+
+    def __init__(self, transformer: LabelCountForSubthesauriTransformer):
+        self.transformer = transformer
+
+    def fit(self, X=None, y=None):
+        return self
+
+    def transform(self, X: LabelCalibrationData):
+        rows = len(X.predicted_no_of_concepts)
+        no_of_predicted_concepts = self.transformer.transform(
+            X.predicted_concepts
+        )
+        data = np.zeros((rows, 2, len(self.transformer.subthesauri)))
+        data[:, 0] = X.predicted_no_of_concepts
+        data[:, 1] = X.predicted_no_of_concepts - no_of_predicted_concepts
+        return data
