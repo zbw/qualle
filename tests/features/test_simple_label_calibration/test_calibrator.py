@@ -18,34 +18,45 @@
 import numpy as np
 import pytest
 from sklearn.exceptions import NotFittedError
-from stwfsapy.text_features import mk_text_features
 
-from qualle.label_calibration.base import LabelCalibrator
+from qualle.features.simple_label_calibration import SimpleLabelCalibrator
 from tests.common import DummyRegressor
 
 
 @pytest.fixture
 def calibrator():
-    return LabelCalibrator(DummyRegressor())
+    return SimpleLabelCalibrator(DummyRegressor())
 
 
-def test_lc_predict(calibrator, X):
-    calibrator.fit(X, [3, 5])
-    assert np.array_equal(calibrator.predict(X), [0, 1])
+@pytest.fixture
+def X():
+    return ['doc0', 'doc1']
 
 
-def test_lc_predict_without_fit_raises_exc(calibrator, X):
+@pytest.fixture
+def y():
+    return [['c0'], ['c0', 'c1']]
+
+
+def test_fit_fits_underlying_regressor(calibrator, X, y):
+    calibrator.fit(X, y)
+
+    assert calibrator.regressor.X is not None
+    assert calibrator.regressor.y is not None
+
+
+def test_fit_fits_underlying_regressor_with_transformed_y(calibrator, X, y):
+    calibrator.fit(X, y)
+
+    assert calibrator.regressor.y is not None
+    assert (calibrator.regressor.y == np.array([1, 2])).all()
+
+
+def test_predict_without_fit_raises_exc(calibrator, X):
     with pytest.raises(NotFittedError):
         calibrator.predict(X)
 
 
-def test_lc_fit_fits_regressor_with_txt_features(calibrator, X, mocker):
-    y = [3, 5]
-    txt_features = mk_text_features().fit(X)
-    X_transformed = txt_features.transform(X)
-
-    spy = mocker.spy(calibrator.regressor, 'fit')
+def test_predict(calibrator, X, y):
     calibrator.fit(X, y)
-    spy.assert_called_once()
-    assert (spy.call_args[0][0].toarray() == X_transformed.toarray()).all()
-    assert spy.call_args[0][1] == y
+    assert (calibrator.predict(X) == np.array([[0, 1]] * 2)).all()

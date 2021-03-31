@@ -19,16 +19,7 @@ import numpy as np
 from sklearn.exceptions import NotFittedError
 
 from qualle.label_calibration.category import MultiCategoryLabelCalibrator
-
-
-class DummyRegressor:
-
-    def fit(self, X, y):
-        self.X = X
-        self.y = y
-
-    def predict(self, X):
-        return np.array(range(X.shape[0]))
+from tests.common import DummyRegressor
 
 
 @pytest.fixture
