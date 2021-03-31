@@ -21,10 +21,12 @@ from typing import List, Set
 import numpy as np
 from rdflib import URIRef, Graph
 from rdflib.namespace import SKOS, RDF
-from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.base import TransformerMixin, BaseEstimator, RegressorMixin
+from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
 
-from qualle.models import Concepts
+from qualle.label_calibration.category import MultiCategoryLabelCalibrator
+from qualle.models import Concepts, Documents
 
 
 class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
@@ -78,3 +80,25 @@ class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
             else:
                 logging.warning('unknown narrower type %s', str(x))
         return concepts
+
+
+class ThesauriLabelCalibrator(BaseEstimator, RegressorMixin):
+
+    def __init__(
+            self, transformer: LabelCountForSubthesauriTransformer,
+            regressor_class=ExtraTreesRegressor
+    ):
+        self.transformer = transformer
+        self.regressor_class = regressor_class
+
+    def fit(self, X: Documents, y: List[Concepts]):
+        self.calibrator_ = MultiCategoryLabelCalibrator(
+            regressor_class=self.regressor_class
+        )
+        y_transformed = self.transformer.transform(y)
+        self.calibrator_.fit(X, y_transformed)
+        return self
+
+    def predict(self, X: Documents):
+        check_is_fitted(self)
+        return self.calibrator_.predict(X)
