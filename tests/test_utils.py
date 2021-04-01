@@ -20,24 +20,24 @@ from qualle.utils import recall, train_input_from_tsv
 
 
 def test_recall():
-    true_concepts = [['x0', 'x2'], ['x1'], ['x3']]
-    pred_concepts = [['x0', 'x1'], ['x2'], ['x3']]
+    true_labels = [['x0', 'x2'], ['x1'], ['x3']]
+    pred_labels = [['x0', 'x1'], ['x2'], ['x3']]
 
     assert recall(
-        true_concepts=true_concepts, predicted_concepts=pred_concepts) == [
+        true_labels=true_labels, predicted_labels=pred_labels) == [
         0.5, 0, 1]
 
 
-def test_recall_empty_true_concepts_return_zero():
-    assert recall(true_concepts=[[]], predicted_concepts=[['x']]) == [0]
+def test_recall_empty_true_labels_return_zero():
+    assert recall(true_labels=[[]], predicted_labels=[['x']]) == [0]
 
 
-def test_recall_empty_pred_concepts_return_zero():
-    assert recall(true_concepts=[['x']], predicted_concepts=[[]]) == [0]
+def test_recall_empty_pred_labels_return_zero():
+    assert recall(true_labels=[['x']], predicted_labels=[[]]) == [0]
 
 
 def test_recall_empty_input():
-    assert recall(true_concepts=[], predicted_concepts=[]) == []
+    assert recall(true_labels=[], predicted_labels=[]) == []
 
 
 def test_train_input_from_tsv(mocker):
@@ -49,8 +49,8 @@ def test_train_input_from_tsv(mocker):
 
     assert train_input_from_tsv('dummypath') == TrainData(
         docs=['title0', 'title1'],
-        predicted_concepts=[
+        predicted_labels=[
             ['concept0', 'concept1'], ['concept2', 'concept3']
         ],
-        true_concepts=[['concept1', 'concept3'], ['concept3']]
+        true_labels=[['concept1', 'concept3'], ['concept3']]
     )

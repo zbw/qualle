@@ -23,6 +23,6 @@ from qualle.models import TrainData
 def train_data():
     return TrainData(
         docs=['Title'] * 20,
-        predicted_concepts=[['concept']] * 20,
-        true_concepts=[['concept']] * 20
+        predicted_labels=[['concept']] * 20,
+        true_labels=[['concept']] * 20
     )

@@ -38,11 +38,11 @@ def qp(mocker):
 
 @pytest.fixture
 def train_data():
-    concepts = [['c'] for _ in range(5)]
+    labels = [['c'] for _ in range(5)]
     return TrainData(
         docs=[f'd{i}' for i in range(5)],
-        true_concepts=concepts,
-        predicted_concepts=concepts
+        true_labels=labels,
+        predicted_labels=labels
     )
 
 
@@ -54,10 +54,10 @@ def test_train(qp, train_data, mocker):
     qp._rp.fit.assert_called_once()
 
     actual_lc_docs = qp._label_calibrator.fit.call_args[0][0]
-    actual_lc_true_concepts = qp._label_calibrator.fit.call_args[0][1]
+    actual_lc_true_labels = qp._label_calibrator.fit.call_args[0][1]
 
     assert actual_lc_docs == train_data.docs
-    assert actual_lc_true_concepts == train_data.true_concepts
+    assert actual_lc_true_labels == train_data.true_labels
 
     actual_label_calibration_data = qp._rp.fit.call_args[0][0]
     actual_true_recall = qp._rp.fit.call_args[0][1]
@@ -65,9 +65,9 @@ def test_train(qp, train_data, mocker):
     # Because of how our input data is designed,
     # we can make following assertions
     only_ones = [1] * 5
-    assert (actual_label_calibration_data.predicted_no_of_concepts
+    assert (actual_label_calibration_data.predicted_no_of_labels
             == only_ones)
-    assert actual_label_calibration_data.predicted_concepts == [['c']] * 5
+    assert actual_label_calibration_data.predicted_labels == [['c']] * 5
     assert actual_true_recall == only_ones
 
 
@@ -75,7 +75,7 @@ def test_predict(qp, train_data):
     qp._rp.predict.return_value = [1] * 5
     p_data = PredictData(
         docs=train_data.docs,
-        predicted_concepts=train_data.predicted_concepts
+        predicted_labels=train_data.predicted_labels
     )
 
     qp.train(train_data)

@@ -36,21 +36,21 @@ class QualityEstimationPipeline:
 
     def train(self, data: TrainData):
         predicted_no_of_labels = cross_val_predict(
-            self._label_calibrator, data.docs, data.true_concepts
+            self._label_calibrator, data.docs, data.true_labels
         )
-        self._label_calibrator.fit(data.docs, data.true_concepts)
+        self._label_calibrator.fit(data.docs, data.true_labels)
 
         label_calibration_data = LabelCalibrationData(
-            predicted_concepts=data.predicted_concepts,
-            predicted_no_of_concepts=predicted_no_of_labels
+            predicted_labels=data.predicted_labels,
+            predicted_no_of_labels=predicted_no_of_labels
         )
-        true_recall = recall(data.true_concepts, data.predicted_concepts)
+        true_recall = recall(data.true_labels, data.predicted_labels)
         self._rp.fit(label_calibration_data, true_recall)
 
     def predict(self, data: PredictData) -> List[float]:
         predicted_no_of_labels = self._label_calibrator.predict(data.docs)
         label_calibration_data = LabelCalibrationData(
-            predicted_concepts=data.predicted_concepts,
-            predicted_no_of_concepts=predicted_no_of_labels
+            predicted_labels=data.predicted_labels,
+            predicted_no_of_labels=predicted_no_of_labels
         )
         return self._rp.predict(label_calibration_data)

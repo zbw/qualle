@@ -35,8 +35,8 @@ def features(transformer):
 
 def test_transform(features):
     data = LabelCalibrationData(
-        predicted_concepts=[[c.CONCEPT_x0], [c.CONCEPT_x1, c.CONCEPT_x2]],
-        predicted_no_of_concepts=np.array([[1, 2], [0, 3]])
+        predicted_labels=[[c.CONCEPT_x0], [c.CONCEPT_x1, c.CONCEPT_x2]],
+        predicted_no_of_labels=np.array([[1, 2], [0, 3]])
     )
     assert (features.transform(data) == [
         [[1, 2], [0, 2]], [[0, 3], [-2, 1]]
@@ -47,7 +47,7 @@ def test_transform_with_unfitted_underlying_tranformer_raises_exc(transformer):
     with pytest.raises(NotFittedError):
         ThesauriLabelCalibrationFeatures(transformer).transform(
             LabelCalibrationData(
-                predicted_concepts=[c.CONCEPT_x0],
-                predicted_no_of_concepts=np.array([[1]])
+                predicted_labels=[c.CONCEPT_x0],
+                predicted_no_of_labels=np.array([[1]])
             )
         )

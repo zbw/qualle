@@ -38,8 +38,8 @@ class DummyRegressor:
 @pytest.fixture
 def X():
     return LabelCalibrationData(
-        predicted_no_of_concepts=np.array([3, 1, 1], dtype="int32"),
-        predicted_concepts=[['c'] * 2, ['c'], ['c'] * 5]
+        predicted_no_of_labels=np.array([3, 1, 1], dtype="int32"),
+        predicted_labels=[['c'] * 2, ['c'], ['c'] * 5]
     )
 
 

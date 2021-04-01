@@ -29,7 +29,7 @@ from sklearn.utils.validation import check_is_fitted
 from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
     AbstractLabelCalibrationFeatures
 from qualle.label_calibration.category import MultiCategoryLabelCalibrator
-from qualle.models import Concepts, Documents, LabelCalibrationData
+from qualle.models import Labels, Documents, LabelCalibrationData
 
 
 class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
@@ -55,7 +55,7 @@ class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
                 self.mapping_[c][idx] = True
         return self
 
-    def transform(self, X: List[Concepts]) -> np.array:
+    def transform(self, X: List[Labels]) -> np.array:
         """Transform rows of concepts to 2-dimensional count array
 
         Each row in the result array  contains in each column the total
@@ -94,7 +94,7 @@ class ThesauriLabelCalibrator(AbstractLabelCalibrator):
         self.transformer = transformer
         self.regressor_class = regressor_class
 
-    def fit(self, X: Documents, y: List[Concepts]):
+    def fit(self, X: Documents, y: List[Labels]):
         self.calibrator_ = MultiCategoryLabelCalibrator(
             regressor_class=self.regressor_class
         )
@@ -116,11 +116,11 @@ class ThesauriLabelCalibrationFeatures(AbstractLabelCalibrationFeatures):
         return self
 
     def transform(self, X: LabelCalibrationData):
-        rows = len(X.predicted_no_of_concepts)
-        no_of_predicted_concepts = self.transformer.transform(
-            X.predicted_concepts
+        rows = len(X.predicted_no_of_labels)
+        no_of_predicted_labels = self.transformer.transform(
+            X.predicted_labels
         )
         data = np.zeros((rows, 2, len(self.transformer.subthesauri)))
-        data[:, 0] = X.predicted_no_of_concepts
-        data[:, 1] = X.predicted_no_of_concepts - no_of_predicted_concepts
+        data[:, 0] = X.predicted_no_of_labels
+        data[:, 1] = X.predicted_no_of_labels - no_of_predicted_labels
         return data

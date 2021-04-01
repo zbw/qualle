@@ -30,7 +30,7 @@ def features():
 
 def test_transform(features):
     data = LabelCalibrationData(
-        predicted_concepts=[['c0'], ['c0', 'c1']],
-        predicted_no_of_concepts=np.array([1, 4])
+        predicted_labels=[['c0'], ['c0', 'c1']],
+        predicted_no_of_labels=np.array([1, 4])
     )
     assert (features.transform(data) == [[1, 0], [4, 2]]).all()

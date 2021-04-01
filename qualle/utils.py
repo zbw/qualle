@@ -19,15 +19,15 @@ import logging
 from typing import List
 
 
-from qualle.models import Concepts, TrainData
+from qualle.models import Labels, TrainData
 
 
 def recall(
-        true_concepts: List[Concepts], predicted_concepts: List[Concepts]
+        true_labels: List[Labels], predicted_labels: List[Labels]
 ) -> List:
     return [
         len(set(tc) & set(pc)) / len_tc if (len_tc := len(tc)) > 0 else 0
-        for tc, pc in zip(true_concepts, predicted_concepts)
+        for tc, pc in zip(true_labels, predicted_labels)
     ]
 
 
@@ -35,21 +35,21 @@ def train_input_from_tsv(
         path_to_tsv: str
 ) -> TrainData:
     docs = []
-    pred_concepts = []
-    true_concepts = []
+    pred_labels = []
+    true_labels = []
 
     with open(path_to_tsv, newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter='\t')
         for row in reader:
             docs.append(row[0])
-            pred_concepts.append(list(
+            pred_labels.append(list(
                 map(lambda s: s.split(':')[0], row[1].split(','))
             ))
-            true_concepts.append(row[2].split(','))
+            true_labels.append(row[2].split(','))
 
     return TrainData(
-        docs=docs, predicted_concepts=pred_concepts,
-        true_concepts=true_concepts
+        docs=docs, predicted_labels=pred_labels,
+        true_labels=true_labels
     )
 
 

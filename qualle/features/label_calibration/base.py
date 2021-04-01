@@ -18,12 +18,12 @@ from typing import List
 
 from sklearn.base import RegressorMixin, BaseEstimator, TransformerMixin
 
-from qualle.models import LabelCalibrationData, Documents, Concepts
+from qualle.models import LabelCalibrationData, Documents, Labels
 
 
 class AbstractLabelCalibrator(BaseEstimator, RegressorMixin):
 
-    def fit(self, X: Documents, y: List[Concepts]):
+    def fit(self, X: Documents, y: List[Labels]):
         pass  # pragma: no cover
 
     def predict(self, X: Documents):

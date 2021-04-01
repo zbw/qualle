@@ -33,10 +33,10 @@ class Evaluator:
     def evaluate(self) -> Dict:
         pred_recall = self._qe_p.predict(
             PredictData(docs=self._test_data.docs,
-                        predicted_concepts=self._test_data.predicted_concepts)
+                        predicted_labels=self._test_data.predicted_labels)
         )
-        true_recall = recall(self._test_data.true_concepts,
-                             self._test_data.predicted_concepts)
+        true_recall = recall(self._test_data.true_labels,
+                             self._test_data.predicted_labels)
 
         return scores(true_recall, pred_recall)
 

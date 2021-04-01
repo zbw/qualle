@@ -24,10 +24,10 @@ from sklearn.utils.validation import check_is_fitted
 from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
     AbstractLabelCalibrationFeatures
 from qualle.label_calibration.simple import LabelCalibrator
-from qualle.models import LabelCalibrationData, Documents, Concepts
+from qualle.models import LabelCalibrationData, Documents, Labels
 
 
-def transform_to_label_count(X: List[Concepts]) -> np.array:
+def transform_to_label_count(X: List[Labels]) -> np.array:
     return np.array(list(map(len, X)))
 
 
@@ -40,7 +40,7 @@ class SimpleLabelCalibrator(AbstractLabelCalibrator):
     ):
         self.regressor = regressor
 
-    def fit(self, X: Documents, y: List[Concepts]):
+    def fit(self, X: Documents, y: List[Labels]):
         self.calibrator_ = LabelCalibrator(self.regressor)
         y_transformed = transform_to_label_count(y)
         self.calibrator_.fit(X, y_transformed)
@@ -57,9 +57,9 @@ class SimpleLabelCalibrationFeatures(AbstractLabelCalibrationFeatures):
         return self
 
     def transform(self, X: LabelCalibrationData):
-        no_of_pred_labels = transform_to_label_count(X.predicted_concepts)
-        rows = len(X.predicted_no_of_concepts)
+        no_of_pred_labels = transform_to_label_count(X.predicted_labels)
+        rows = len(X.predicted_no_of_labels)
         data = np.zeros((rows, 2))
-        data[:, 0] = X.predicted_no_of_concepts
-        data[:, 1] = X.predicted_no_of_concepts - no_of_pred_labels
+        data[:, 0] = X.predicted_no_of_labels
+        data[:, 1] = X.predicted_no_of_labels - no_of_pred_labels
         return data
