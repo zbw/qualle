@@ -14,47 +14,38 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
-from dataclasses import dataclass
 
-import numpy as np
 from sklearn import ensemble
-from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
+from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_is_fitted
 
-
-@dataclass
-class RecallPredictorInput:
-    label_calibration: np.array
-    no_of_pred_labels: np.array
+from qualle.features.label_calibration.base import \
+    AbstractLabelCalibrationFeatures
+from qualle.features.label_calibration.simple_label_calibration import \
+    SimpleLabelCalibrationFeatures
+from qualle.models import LabelCalibrationData
 
 
 class RecallPredictor(BaseEstimator, RegressorMixin):
 
-    def __init__(self, regressor=ensemble.AdaBoostRegressor()):
+    def __init__(
+            self,
+            regressor=ensemble.AdaBoostRegressor(),
+            label_calibration_features: AbstractLabelCalibrationFeatures =
+            SimpleLabelCalibrationFeatures()
+    ):
         self.regressor = regressor
+        self.label_calibration_features = label_calibration_features
 
-    def fit(self, X: RecallPredictorInput, y):
+    def fit(self, X: LabelCalibrationData, y):
         self.pipeline_ = Pipeline([
-            ("features", LabelCalibrationFeatures()),
+            ("features", self.label_calibration_features),
             ("regressor", self.regressor)
         ])
         self.pipeline_.fit(X, y)
         return self
 
-    def predict(self, X: RecallPredictorInput):
+    def predict(self, X: LabelCalibrationData):
         check_is_fitted(self)
         return self.pipeline_.predict(X)
-
-
-class LabelCalibrationFeatures(BaseEstimator, TransformerMixin):
-
-    def fit(self, X=None, y=None):
-        return self
-
-    def transform(self, X: RecallPredictorInput):
-        rows = len(X.label_calibration)
-        data = np.zeros((rows, 2))
-        data[:, 0] = X.label_calibration
-        data[:, 1] = X.label_calibration - X.no_of_pred_labels
-        return data

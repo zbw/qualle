@@ -17,6 +17,9 @@
 
 
 from sklearn import ensemble
+
+from qualle.features.label_calibration.simple_label_calibration import \
+    SimpleLabelCalibrationFeatures, SimpleLabelCalibrator
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import RecallPredictor
 
@@ -25,8 +28,12 @@ class Trainer:
 
     def __init__(self, train_data):
         # TODO: make regressor configurable
-        self._qe_p = QualityEstimationPipeline(RecallPredictor(
-            ensemble.AdaBoostRegressor())
+        self._qe_p = QualityEstimationPipeline(
+            rp=RecallPredictor(
+                regressor=ensemble.AdaBoostRegressor(),
+                label_calibration_features=SimpleLabelCalibrationFeatures()
+            ),
+            label_calibrator=SimpleLabelCalibrator()
         )
         self._train_data = train_data
 

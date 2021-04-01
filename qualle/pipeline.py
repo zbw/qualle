@@ -16,45 +16,41 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 from typing import List
 
-import numpy as np
-from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.model_selection import cross_val_predict
 
-from qualle.label_calibration.simple import LabelCalibrator
-from qualle.models import TrainData, PredictData
-from qualle.quality_estimation import RecallPredictor, RecallPredictorInput
+from qualle.features.label_calibration.base import AbstractLabelCalibrator
+from qualle.models import TrainData, PredictData, LabelCalibrationData
+from qualle.quality_estimation import RecallPredictor
 from qualle.utils import recall
 
 
 class QualityEstimationPipeline:
 
-    def __init__(self, rp: RecallPredictor):
-        # TODO: Make regressors configurable
-        self._lc = LabelCalibrator(
-            ExtraTreesRegressor(n_estimators=10, min_samples_leaf=20)
-        )
+    def __init__(
+            self,
+            label_calibrator: AbstractLabelCalibrator,
+            rp: RecallPredictor
+    ):
+        self._label_calibrator = label_calibrator
         self._rp = rp
 
     def train(self, data: TrainData):
-        no_of_true_labels = np.array(list(map(len, data.true_concepts)))
-        label_calibration = cross_val_predict(
-            self._lc, data.docs, no_of_true_labels
+        predicted_no_of_labels = cross_val_predict(
+            self._label_calibrator, data.docs, data.true_concepts
         )
-        self._lc.fit(data.docs, no_of_true_labels)
+        self._label_calibrator.fit(data.docs, data.true_concepts)
 
-        no_of_pred_labels = np.array(list(map(len, data.predicted_concepts)))
-        rp_input = RecallPredictorInput(
-            no_of_pred_labels=no_of_pred_labels,
-            label_calibration=label_calibration
+        label_calibration_data = LabelCalibrationData(
+            predicted_concepts=data.predicted_concepts,
+            predicted_no_of_concepts=predicted_no_of_labels
         )
         true_recall = recall(data.true_concepts, data.predicted_concepts)
-        self._rp.fit(rp_input, true_recall)
+        self._rp.fit(label_calibration_data, true_recall)
 
     def predict(self, data: PredictData) -> List[float]:
-        label_calibration = self._lc.predict(data.docs)
-        no_of_pred_labels = np.array(list(map(len, data.predicted_concepts)))
-        rp_input = RecallPredictorInput(
-            no_of_pred_labels=no_of_pred_labels,
-            label_calibration=label_calibration
+        predicted_no_of_labels = self._label_calibrator.predict(data.docs)
+        label_calibration_data = LabelCalibrationData(
+            predicted_concepts=data.predicted_concepts,
+            predicted_no_of_concepts=predicted_no_of_labels
         )
-        return self._rp.predict(rp_input)
+        return self._rp.predict(label_calibration_data)

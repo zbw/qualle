@@ -17,17 +17,23 @@
 
 import numpy as np
 import pytest
-from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.exceptions import NotFittedError
 
 from qualle.models import TrainData, PredictData
 from qualle.pipeline import QualityEstimationPipeline
-from qualle.quality_estimation import RecallPredictor
 
 
 @pytest.fixture
-def qp():
-    return QualityEstimationPipeline(RecallPredictor(ExtraTreesRegressor()))
+def qp(mocker):
+    label_calibrator = mocker.Mock()
+    recall_predictor = mocker.Mock()
+    mocker.patch(
+        'qualle.pipeline.cross_val_predict',
+        mocker.Mock(return_value=[1] * 5)
+    )
+    return QualityEstimationPipeline(
+        label_calibrator=label_calibrator,
+        rp=recall_predictor
+    )
 
 
 @pytest.fixture
@@ -41,38 +47,32 @@ def train_data():
 
 
 def test_train(qp, train_data, mocker):
-    spy_lc = mocker.spy(qp._lc, 'fit')
-    spy_rp = mocker.spy(qp._rp, 'fit')
 
     qp.train(train_data)
 
-    actual_lc_docs = spy_lc.call_args[0][0]
-    actual_lc_no_of_true_labels = spy_lc.call_args[0][1]
+    qp._label_calibrator.fit.assert_called()
+    qp._rp.fit.assert_called_once()
+
+    actual_lc_docs = qp._label_calibrator.fit.call_args[0][0]
+    actual_lc_true_concepts = qp._label_calibrator.fit.call_args[0][1]
 
     assert actual_lc_docs == train_data.docs
-    assert np.array_equal(actual_lc_no_of_true_labels, [1] * 5)
+    assert actual_lc_true_concepts == train_data.true_concepts
 
-    actual_rp_input = spy_rp.call_args[0][0]
-    actual_true_recall = spy_rp.call_args[0][1]
+    actual_label_calibration_data = qp._rp.fit.call_args[0][0]
+    actual_true_recall = qp._rp.fit.call_args[0][1]
 
     # Because of how our input data is designed,
     # we can make following assertions
     only_ones = [1] * 5
-    assert np.array_equal(actual_rp_input.no_of_pred_labels, only_ones)
-    assert np.array_equal(actual_rp_input.label_calibration, only_ones)
+    assert (actual_label_calibration_data.predicted_no_of_concepts
+            == only_ones)
+    assert actual_label_calibration_data.predicted_concepts == [['c']] * 5
     assert actual_true_recall == only_ones
 
 
-def test_predict_wihout_train_raises_exc(qp):
-    data = PredictData(
-        docs=[],
-        predicted_concepts=[]
-    )
-    with pytest.raises(NotFittedError):
-        qp.predict(data)
-
-
 def test_predict(qp, train_data):
+    qp._rp.predict.return_value = [1] * 5
     p_data = PredictData(
         docs=train_data.docs,
         predicted_concepts=train_data.predicted_concepts
