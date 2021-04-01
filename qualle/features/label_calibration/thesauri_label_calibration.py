@@ -40,15 +40,20 @@ class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
             subthesaurus_type_uri: URIRef,
             concept_type_uri: URIRef,
             subthesauri: List[URIRef],
-
+            concept_uri_prefix: str
     ):
         self.graph = graph
         self.subthesaurus_type_uri = subthesaurus_type_uri
         self.concept_type_uri = concept_type_uri
         self.subthesauri = subthesauri
+        self.concept_uri_prefix = concept_uri_prefix
 
     def fit(self, X=None, y=None):
         self.mapping_ = defaultdict(lambda: [False] * len(self.subthesauri))
+        self.concept_uri_prefix_len_ = len(
+            self.concept_uri_prefix.rstrip('/') + '/'
+        )
+
         for idx, s in enumerate(self.subthesauri):
             concepts = self._get_concepts_for_thesaurus(s)
             for c in concepts:
@@ -79,10 +84,13 @@ class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
                     x)
                 concepts = concepts.union(concepts_from_subthesaurus)
             elif (x, RDF.type, self.concept_type_uri) in self.graph:
-                concepts.add(x)
+                concepts.add(self._extract_concept_id_from_uri_ref(x))
             else:
                 logging.warning('unknown narrower type %s', str(x))
         return concepts
+
+    def _extract_concept_id_from_uri_ref(self,  concept_uri: URIRef):
+        return concept_uri.toPython()[self.concept_uri_prefix_len_:]
 
 
 class ThesauriLabelCalibrator(AbstractLabelCalibrator):

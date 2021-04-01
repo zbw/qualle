@@ -23,9 +23,8 @@ SUBTHESAURUS_A = URIRef('http://thsys/A')
 SUBTHESAURUS_B = URIRef('http://thsys/B')
 SUBTHESAURUS_C = URIRef('http://thsys/C')
 
-
-CONCEPT_x0 = URIRef('http://concept/x0')
-CONCEPT_x1 = URIRef('http://concept/x1')
-CONCEPT_x2 = URIRef('http://concept/x2')
-
-CONCEPT_INVALID = URIRef('http://concept/invalid')
+CONCEPT_URI_PREFIX = 'http://concept'
+CONCEPT_x0 = 'x0'
+CONCEPT_x1 = 'x1'
+CONCEPT_x2 = 'x2'
+CONCEPT_INVALID = 'invalid'

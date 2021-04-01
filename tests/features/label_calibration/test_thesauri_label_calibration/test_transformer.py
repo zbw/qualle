@@ -52,6 +52,7 @@ def test_transform_returns_count_matrix(transformer):
 
 
 def test_get_concepts_for_thesaurus(transformer):
+    transformer.fit()
     concepts = transformer._get_concepts_for_thesaurus(c.SUBTHESAURUS_A)
     assert concepts == {c.CONCEPT_x0, c.CONCEPT_x1, c.CONCEPT_x2}
 
@@ -63,5 +64,12 @@ def test_get_concepts_for_thesaurus(transformer):
 
 
 def test_get_concepts_for_thesaurus_not_found_returns_empty(transformer):
+    transformer.fit()
     assert transformer._get_concepts_for_thesaurus(
-        URIRef('http://thsys/invalid')) == set()
+        URIRef(c.CONCEPT_URI_PREFIX + '/' + c.CONCEPT_INVALID)) == set()
+
+
+def test_extract_concept_from_uri_ref(transformer):
+    transformer.fit()
+    assert transformer._extract_concept_id_from_uri_ref(
+        URIRef(c.CONCEPT_URI_PREFIX + '/' + c.CONCEPT_x0)) == c.CONCEPT_x0

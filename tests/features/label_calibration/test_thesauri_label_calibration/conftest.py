@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 import pytest
-from rdflib import Graph, RDF
+from rdflib import Graph, RDF, URIRef
 from rdflib.namespace import SKOS
 
 from qualle.features.label_calibration.thesauri_label_calibration import \
@@ -26,13 +26,17 @@ from tests.features.label_calibration.test_thesauri_label_calibration import \
 
 @pytest.fixture
 def graph():
+    c_x0 = URIRef(f'{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x0}')
+    c_x1 = URIRef(f'{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x1}')
+    c_x2 = URIRef(f'{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x2}')
+
     g = Graph()
     for s in (c.SUBTHESAURUS_A, c.SUBTHESAURUS_B, c.SUBTHESAURUS_C):
         g.add((
             s,
             RDF.type,
             c.DUMMY_SUBTHESAURUS_TYPE))
-    for concept in (c.CONCEPT_x0, c.CONCEPT_x1, c.CONCEPT_x2):
+    for concept in (c_x0, c_x1, c_x2):
         g.add((
             concept,
             RDF.type,
@@ -47,27 +51,27 @@ def graph():
     g.add((
         c.SUBTHESAURUS_A,
         SKOS.narrower,
-        c.CONCEPT_x0,
+        c_x0,
     ))
     g.add((
         c.SUBTHESAURUS_A,
         SKOS.narrower,
-        c.CONCEPT_x1,
+        c_x1,
     ))
     g.add((
         c.SUBTHESAURUS_B,
         SKOS.narrower,
-        c.CONCEPT_x1,
+        c_x1,
     ))
     g.add((
         c.SUBTHESAURUS_B,
         SKOS.narrower,
-        c.CONCEPT_x2,
+        c_x2,
     ))
     g.add((
         c.SUBTHESAURUS_C,
         SKOS.narrower,
-        c.CONCEPT_x2,
+        c_x2,
     ))
     return g
 
@@ -78,5 +82,6 @@ def transformer(graph):
         graph=graph,
         subthesaurus_type_uri=c.DUMMY_SUBTHESAURUS_TYPE,
         concept_type_uri=c.DUMMY_CONCEPT_TYPE,
-        subthesauri=[c.SUBTHESAURUS_A, c.SUBTHESAURUS_B]
+        subthesauri=[c.SUBTHESAURUS_A, c.SUBTHESAURUS_B],
+        concept_uri_prefix=c.CONCEPT_URI_PREFIX
     )
