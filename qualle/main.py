@@ -22,6 +22,8 @@ import logging
 from joblib import dump, load
 
 from qualle.evaluate import Evaluator
+from qualle.features.label_calibration.simple_label_calibration import \
+    SimpleLabelCalibrator, SimpleLabelCalibrationFeatures
 from qualle.train import Trainer
 from qualle.utils import get_logger, train_input_from_tsv
 
@@ -65,7 +67,11 @@ if __name__ == '__main__':
         path_to_model_output_file = args.train[1]
         train_data = train_input_from_tsv(path_to_train_tsv)
 
-        t = Trainer(train_data)
+        t = Trainer(
+            train_data=train_data,
+            label_calibrator=SimpleLabelCalibrator(),
+            label_calibration_features=SimpleLabelCalibrationFeatures()
+        )
 
         model = t.train()
         dump(model, path_to_model_output_file)

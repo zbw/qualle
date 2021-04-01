@@ -15,25 +15,28 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 from sklearn import ensemble
 
-from qualle.features.label_calibration.simple_label_calibration import \
-    SimpleLabelCalibrationFeatures, SimpleLabelCalibrator
+from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
+    AbstractLabelCalibrationFeatures
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import RecallPredictor
 
 
 class Trainer:
 
-    def __init__(self, train_data):
+    def __init__(
+            self, train_data,
+            label_calibrator: AbstractLabelCalibrator,
+            label_calibration_features: AbstractLabelCalibrationFeatures
+    ):
         # TODO: make regressor configurable
         self._qe_p = QualityEstimationPipeline(
             rp=RecallPredictor(
                 regressor=ensemble.AdaBoostRegressor(),
-                label_calibration_features=SimpleLabelCalibrationFeatures()
+                label_calibration_features=label_calibration_features
             ),
-            label_calibrator=SimpleLabelCalibrator()
+            label_calibrator=label_calibrator
         )
         self._train_data = train_data
 
