@@ -43,9 +43,11 @@ def train_input_from_tsv(
         for row in reader:
             docs.append(row[0])
             pred_labels.append(list(
-                map(lambda s: s.split(':')[0], row[1].split(','))
+                    filter(bool, map(
+                        lambda s: s.split(':')[0], row[1].split(',')
+                    ))
             ))
-            true_labels.append(row[2].split(','))
+            true_labels.append(list(filter(bool, row[2].split(','))))
 
     return TrainData(
         docs=docs, predicted_labels=pred_labels,

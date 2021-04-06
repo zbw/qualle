@@ -54,3 +54,19 @@ def test_train_input_from_tsv(mocker):
         ],
         true_labels=[['concept1', 'concept3'], ['concept3']]
     )
+
+
+def test_train_input_from_tsv_empty_labels__returns_empty_list(mocker):
+    m = mocker.mock_open(
+        read_data='title0\t\tconcept1,concept3\n'
+                  'title1\tconcept2:1,concept3:0.5\t'
+    )
+    mocker.patch('qualle.utils.open', m)
+
+    assert train_input_from_tsv('dummypath') == TrainData(
+        docs=['title0', 'title1'],
+        predicted_labels=[
+            [], ['concept2', 'concept3']
+        ],
+        true_labels=[['concept1', 'concept3'], []]
+    )
