@@ -35,7 +35,7 @@ def test_mclc_fit_zero_categories_raises_value_error(calibrator, X):
 
 def test_mclc_predict(calibrator, X):
     calibrator.fit(X, np.array([[3, 5, 6], [1, 2, 7]]))
-    assert (calibrator.predict(X) == [[0, 1]] * 3).all()
+    assert (calibrator.predict(X) == [[0] * 3, [1] * 3]).all()
 
 
 def test_mclc_predict_without_fit_raises_exc(calibrator, X):

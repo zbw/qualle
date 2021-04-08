@@ -88,4 +88,4 @@ def test_predict_without_fit_raises_exc(calibrator, X):
 
 def test_predict(calibrator, X, y):
     calibrator.fit(X, y)
-    assert (calibrator.predict(X) == np.array([[0, 1]] * 2)).all()
+    assert (calibrator.predict(X) == np.array([[0, 0], [1, 1]])).all()

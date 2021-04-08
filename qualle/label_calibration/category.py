@@ -54,4 +54,4 @@ class MultiCategoryLabelCalibrator(BaseEstimator, RegressorMixin):
 
     def predict(self, X: List[str]):
         check_is_fitted(self)
-        return np.vstack([c.predict(X) for c in self.calibrators_])
+        return np.column_stack([c.predict(X) for c in self.calibrators_])
