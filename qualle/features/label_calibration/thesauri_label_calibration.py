@@ -21,7 +21,7 @@ from typing import List, Set
 import numpy as np
 from rdflib import URIRef, Graph
 from rdflib.namespace import SKOS, RDF
-from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.base import TransformerMixin
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
 
@@ -32,7 +32,9 @@ from qualle.models import Labels, Documents, LabelCalibrationData
 from qualle.utils import get_logger
 
 
-class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
+class LabelCountForSubthesauriTransformer(TransformerMixin):
+    # Do not inherit from BaseEstimator to avoid refitting requirement when
+    # transformer gets cloned (e.g. in cross-val-predict)
     """Compute count of labels per Subthesauri for a given RDF Graph."""
     def __init__(
             self,
