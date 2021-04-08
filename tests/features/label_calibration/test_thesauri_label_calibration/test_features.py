@@ -39,7 +39,7 @@ def test_transform(features):
         predicted_no_of_labels=np.array([[1, 2], [0, 3]])
     )
     assert (features.transform(data) == [
-        [[1, 2], [0, 2]], [[0, 3], [-2, 1]]
+        [1, 2, 0, 2], [0, 3, -2, 1]
     ]).all()
 
 

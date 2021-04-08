@@ -142,7 +142,10 @@ class ThesauriLabelCalibrationFeatures(AbstractLabelCalibrationFeatures):
         no_of_predicted_labels = self.transformer.transform(
             X.predicted_labels
         )
-        data = np.zeros((rows, 2, len(self.transformer.subthesauri)))
-        data[:, 0] = X.predicted_no_of_labels
-        data[:, 1] = X.predicted_no_of_labels - no_of_predicted_labels
+        subthesauri_len = len(self.transformer.subthesauri)
+        data = np.zeros((rows, 2 * subthesauri_len))
+        data[:, :subthesauri_len] = X.predicted_no_of_labels
+        data[:, subthesauri_len:] = (
+                X.predicted_no_of_labels - no_of_predicted_labels
+        )
         return data
