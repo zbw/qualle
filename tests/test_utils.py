@@ -16,7 +16,7 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
 from qualle.models import TrainData
-from qualle.utils import recall, train_input_from_tsv
+from qualle.utils import recall, train_input_from_tsv, timeit
 
 
 def test_recall():
@@ -70,3 +70,11 @@ def test_train_input_from_tsv_empty_labels__returns_empty_list(mocker):
         ],
         true_labels=[['concept1', 'concept3'], []]
     )
+
+
+def test_timeit(mocker):
+    m = mocker.Mock(side_effect=[1, 3])
+    mocker.patch('qualle.utils.perf_counter', m)
+    with timeit() as t:
+        _ = 1 + 1
+    assert t() == 2

@@ -28,7 +28,8 @@ class Trainer:
     def __init__(
             self, train_data,
             label_calibrator: AbstractLabelCalibrator,
-            label_calibration_features: AbstractLabelCalibrationFeatures
+            label_calibration_features: AbstractLabelCalibrationFeatures,
+            should_debug=False
     ):
         # TODO: make regressor configurable
         self._qe_p = QualityEstimationPipeline(
@@ -36,7 +37,8 @@ class Trainer:
                 regressor=ensemble.AdaBoostRegressor(),
                 label_calibration_features=label_calibration_features
             ),
-            label_calibrator=label_calibrator
+            label_calibrator=label_calibrator,
+            should_debug=should_debug
         )
         self._train_data = train_data
 

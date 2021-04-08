@@ -16,6 +16,8 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 import csv
 import logging
+from contextlib import contextmanager
+from time import perf_counter
 from typing import List
 
 
@@ -57,3 +59,14 @@ def train_input_from_tsv(
 
 def get_logger():
     return logging.getLogger('qualle')
+
+
+@contextmanager
+def timeit():
+    """Context manager to time the code block wrapped by the manager.
+
+    Yielded object is a lambda function which can be called to compute the
+    duration (in seconds) of the executed code block.
+    """
+    start = perf_counter()
+    yield lambda: perf_counter() - start

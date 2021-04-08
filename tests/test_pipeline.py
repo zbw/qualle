@@ -14,6 +14,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
+import logging
 
 import numpy as np
 import pytest
@@ -83,3 +84,19 @@ def test_predict(qp, train_data):
     # Because of how our input data is designed,
     # we can make following assertion
     assert np.array_equal(qp.predict(p_data), [1] * 5)
+
+
+def test_debug_prints_time_if_activated(qp, caplog):
+    qp._should_debug = True
+    caplog.set_level(logging.DEBUG)
+    with qp._debug('msg'):
+        _ = 1 + 1
+    assert "Ran msg in " in caplog.text
+    assert 'seconds' in caplog.text
+
+
+def test_debug_prints_nothing_if_not_activated(qp, caplog):
+    caplog.set_level(logging.DEBUG)
+    with qp._debug('msg'):
+        _ = 1 + 1
+    assert "" == caplog.text
