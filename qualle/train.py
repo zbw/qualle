@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
-from sklearn import ensemble
+from sklearn.ensemble import GradientBoostingRegressor
 
 from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
     AbstractLabelCalibrationFeatures
@@ -34,7 +34,8 @@ class Trainer:
         # TODO: make regressor configurable
         self._qe_p = QualityEstimationPipeline(
             rp=RecallPredictor(
-                regressor=ensemble.AdaBoostRegressor(),
+                regressor=GradientBoostingRegressor(
+                    n_estimators=10, max_depth=8),
                 label_calibration_features=label_calibration_features
             ),
             label_calibrator=label_calibrator,
