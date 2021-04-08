@@ -14,6 +14,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
+from sklearn.ensemble import ExtraTreesRegressor
 
 from qualle.features.label_calibration.simple_label_calibration import \
     SimpleLabelCalibrator, SimpleLabelCalibrationFeatures
@@ -23,7 +24,7 @@ from qualle.train import Trainer
 def test_train_trains_qe_pipeline(train_data, mocker):
     t = Trainer(
         train_data=train_data,
-        label_calibrator=SimpleLabelCalibrator(),
+        label_calibrator=SimpleLabelCalibrator(ExtraTreesRegressor()),
         label_calibration_features=SimpleLabelCalibrationFeatures()
     )
     spy = mocker.spy(t._qe_p, 'train')

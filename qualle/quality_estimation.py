@@ -15,7 +15,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
-from sklearn import ensemble
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_is_fitted
@@ -31,7 +30,7 @@ class RecallPredictor(BaseEstimator, RegressorMixin):
 
     def __init__(
             self,
-            regressor=ensemble.AdaBoostRegressor(),
+            regressor: RegressorMixin,
             label_calibration_features: AbstractLabelCalibrationFeatures =
             SimpleLabelCalibrationFeatures()
     ):

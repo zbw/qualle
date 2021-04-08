@@ -31,7 +31,7 @@ def evaluator(train_data):
             regressor=ExtraTreesRegressor(),
             label_calibration_features=SimpleLabelCalibrationFeatures()
         ),
-        label_calibrator=SimpleLabelCalibrator()
+        label_calibrator=SimpleLabelCalibrator(ExtraTreesRegressor())
     )
     qe_p.train(train_data)
     return Evaluator(train_data, qe_p)

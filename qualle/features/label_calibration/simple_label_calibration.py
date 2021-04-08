@@ -18,7 +18,7 @@
 from typing import List
 
 import numpy as np
-from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.base import RegressorMixin
 from sklearn.utils.validation import check_is_fitted
 
 from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
@@ -33,11 +33,7 @@ def transform_to_label_count(X: List[Labels]) -> np.array:
 
 class SimpleLabelCalibrator(AbstractLabelCalibrator):
 
-    def __init__(
-            self, regressor=ExtraTreesRegressor(
-                n_estimators=10, min_samples_leaf=20
-            )
-    ):
+    def __init__(self, regressor: RegressorMixin):
         self.regressor = regressor
 
     def fit(self, X: Documents, y: List[Labels]):
