@@ -28,8 +28,13 @@ class MultiCategoryLabelCalibrator(BaseEstimator, RegressorMixin):
     """Label calibrator for multiple distinct categories.
     E.g. to predict the no of labels for different thesauri."""
 
-    def __init__(self, regressor_class=ExtraTreesRegressor):
+    def __init__(
+            self,
+            regressor_class=ExtraTreesRegressor,
+            regressor_params=None
+    ):
         self.regressor_class = regressor_class
+        self.regressor_params = regressor_params or {}
 
     def fit(self, X: List[str], y: np.array):
         """
@@ -44,7 +49,7 @@ class MultiCategoryLabelCalibrator(BaseEstimator, RegressorMixin):
             raise ValueError('Number of categories must be greater 0')
 
         self.calibrators_ = [
-            LabelCalibrator(self.regressor_class())
+            LabelCalibrator(self.regressor_class(**self.regressor_params))
             for _ in range(no_categories)
         ]
 

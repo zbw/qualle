@@ -97,14 +97,17 @@ class ThesauriLabelCalibrator(AbstractLabelCalibrator):
 
     def __init__(
             self, transformer: LabelCountForSubthesauriTransformer,
-            regressor_class=ExtraTreesRegressor
+            regressor_class=ExtraTreesRegressor,
+            regressor_params=None
     ):
         self.transformer = transformer
         self.regressor_class = regressor_class
+        self.regressor_params = regressor_params
 
     def fit(self, X: Documents, y: List[Labels]):
         self.calibrator_ = MultiCategoryLabelCalibrator(
-            regressor_class=self.regressor_class
+            regressor_class=self.regressor_class,
+            regressor_params=self.regressor_params
         )
         y_transformed = self.transformer.transform(y)
         self.calibrator_.fit(X, y_transformed)
