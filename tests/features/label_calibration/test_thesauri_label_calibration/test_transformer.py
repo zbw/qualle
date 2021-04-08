@@ -14,7 +14,6 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
-from collections import defaultdict
 
 import numpy as np
 import pytest
@@ -29,11 +28,11 @@ def test_fit_stores_concept_to_subthesauri_mapping(transformer):
     transformer.fit()
 
     assert hasattr(transformer, 'mapping_')
-    assert transformer.mapping_ == defaultdict(list, {
+    assert transformer.mapping_ == {
         c.CONCEPT_x0: [True, False],
         c.CONCEPT_x1: [True] * 2,
         c.CONCEPT_x2: [True] * 2
-    })
+    }
 
 
 def test_transform_without_fit_raises_exc(transformer):

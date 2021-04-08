@@ -16,7 +16,6 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from collections import defaultdict
 from typing import List, Set
 
 import numpy as np
@@ -30,6 +29,7 @@ from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
     AbstractLabelCalibrationFeatures
 from qualle.label_calibration.category import MultiCategoryLabelCalibrator
 from qualle.models import Labels, Documents, LabelCalibrationData
+from qualle.utils import get_logger
 
 
 class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
@@ -49,14 +49,18 @@ class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
         self.concept_uri_prefix = concept_uri_prefix
 
     def fit(self, X=None, y=None):
-        self.mapping_ = defaultdict(lambda: [False] * len(self.subthesauri))
+        self.mapping_ = dict()
+        self.logger_ = get_logger()
         self.concept_uri_prefix_len_ = len(
             self.concept_uri_prefix.rstrip('/') + '/'
         )
+        subthesauri_len = len(self.subthesauri)
 
         for idx, s in enumerate(self.subthesauri):
             concepts = self._get_concepts_for_thesaurus(s)
             for c in concepts:
+                if c not in self.mapping_:
+                    self.mapping_[c] = [False] * subthesauri_len
                 self.mapping_[c][idx] = True
         return self
 
@@ -71,9 +75,16 @@ class LabelCountForSubthesauriTransformer(BaseEstimator, TransformerMixin):
         count_matrix = np.zeros((len(X), len(self.subthesauri)))
         for row_idx, row in enumerate(X):
             for concept in row:
-                for j, is_in_subthesauri in enumerate(self.mapping_[concept]):
-                    count_matrix[row_idx, j] = count_matrix[row_idx, j] + int(
-                        is_in_subthesauri)
+                subthesauri_counts = self.mapping_.get(concept)
+                if not subthesauri_counts:
+                    self.logger_.warning(
+                        'Concept "%s" not found in concept map. '
+                        'Seems to be invalid for this thesaurus.', concept)
+                else:
+                    for j, is_in_subthesauri in enumerate(subthesauri_counts):
+                        count_matrix[
+                            row_idx, j] = count_matrix[row_idx, j] + int(
+                            is_in_subthesauri)
         return count_matrix
 
     def _get_concepts_for_thesaurus(self, thesaurus: URIRef) -> Set:
