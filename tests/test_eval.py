@@ -27,7 +27,7 @@ from qualle.quality_estimation import RecallPredictor
 @pytest.fixture
 def evaluator(train_data):
     qe_p = QualityEstimationPipeline(
-        rp=RecallPredictor(
+        recall_predictor=RecallPredictor(
             regressor=ExtraTreesRegressor(),
             label_calibration_features=SimpleLabelCalibrationFeatures()
         ),

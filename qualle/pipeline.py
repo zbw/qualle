@@ -30,11 +30,11 @@ class QualityEstimationPipeline:
     def __init__(
             self,
             label_calibrator: AbstractLabelCalibrator,
-            rp: RecallPredictor,
+            recall_predictor: RecallPredictor,
             should_debug=False
     ):
         self._label_calibrator = label_calibrator
-        self._rp = rp
+        self._recall_predictor = recall_predictor
         self._logger = get_logger()
         self._should_debug = should_debug
 
@@ -55,7 +55,7 @@ class QualityEstimationPipeline:
             true_recall = recall(data.true_labels, data.predicted_labels)
 
         with self._debug('RecallPredictor fit'):
-            self._rp.fit(label_calibration_data, true_recall)
+            self._recall_predictor.fit(label_calibration_data, true_recall)
 
     def predict(self, data: PredictData) -> List[float]:
         predicted_no_of_labels = self._label_calibrator.predict(data.docs)
@@ -63,7 +63,7 @@ class QualityEstimationPipeline:
             predicted_labels=data.predicted_labels,
             predicted_no_of_labels=predicted_no_of_labels
         )
-        return self._rp.predict(label_calibration_data)
+        return self._recall_predictor.predict(label_calibration_data)
 
     @contextmanager
     def _debug(self, method_name):
@@ -75,4 +75,4 @@ class QualityEstimationPipeline:
             yield
 
     def __str__(self):
-        return f'{self._label_calibrator}\n{self._rp}'
+        return f'{self._label_calibrator}\n{self._recall_predictor}'

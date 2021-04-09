@@ -30,7 +30,7 @@ class Trainer:
             should_debug=False
     ):
         self._qe_p = QualityEstimationPipeline(
-            rp=recall_predictor,
+            recall_predictor=recall_predictor,
             label_calibrator=label_calibrator,
             should_debug=should_debug
         )

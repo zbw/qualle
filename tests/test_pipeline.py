@@ -33,7 +33,7 @@ def qp(mocker):
     )
     return QualityEstimationPipeline(
         label_calibrator=label_calibrator,
-        rp=recall_predictor
+        recall_predictor=recall_predictor
     )
 
 
@@ -52,7 +52,7 @@ def test_train(qp, train_data, mocker):
     qp.train(train_data)
 
     qp._label_calibrator.fit.assert_called()
-    qp._rp.fit.assert_called_once()
+    qp._recall_predictor.fit.assert_called_once()
 
     actual_lc_docs = qp._label_calibrator.fit.call_args[0][0]
     actual_lc_true_labels = qp._label_calibrator.fit.call_args[0][1]
@@ -60,8 +60,8 @@ def test_train(qp, train_data, mocker):
     assert actual_lc_docs == train_data.docs
     assert actual_lc_true_labels == train_data.true_labels
 
-    actual_label_calibration_data = qp._rp.fit.call_args[0][0]
-    actual_true_recall = qp._rp.fit.call_args[0][1]
+    actual_label_calibration_data = qp._recall_predictor.fit.call_args[0][0]
+    actual_true_recall = qp._recall_predictor.fit.call_args[0][1]
 
     # Because of how our input data is designed,
     # we can make following assertions
@@ -73,7 +73,7 @@ def test_train(qp, train_data, mocker):
 
 
 def test_predict(qp, train_data):
-    qp._rp.predict.return_value = [1] * 5
+    qp._recall_predictor.predict.return_value = [1] * 5
     p_data = PredictData(
         docs=train_data.docs,
         predicted_labels=train_data.predicted_labels
