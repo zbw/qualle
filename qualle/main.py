@@ -30,6 +30,7 @@ from qualle.features.label_calibration.simple_label_calibration import \
 from qualle.features.label_calibration.thesauri_label_calibration import \
     ThesauriLabelCalibrator, ThesauriLabelCalibrationFeatures, \
     LabelCountForSubthesauriTransformer
+from qualle.quality_estimation import RecallPredictor
 from qualle.train import Trainer
 from qualle.utils import get_logger, train_input_from_tsv, timeit
 
@@ -63,8 +64,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '--train', '-t', type=str, nargs=2,
         help='Run training using default estimator.\n'
-        'Specify train input and model output file as arguments.'
-        ' E.g.: --train train.tsv output.model',
+             'Specify train input and model output file as arguments.'
+             ' E.g.: --train train.tsv output.model',
         metavar=('train_file', 'output_file')
     )
     parser.add_argument(
@@ -134,6 +135,9 @@ if __name__ == '__main__':
             logger.debug(
                 'Ran Subthesauri Transformer fit in %.4f seconds', t()
             )
+            label_calibration_features = ThesauriLabelCalibrationFeatures(
+                transformer=transformer
+            )
             t = Trainer(
                 train_data=train_data,
                 label_calibrator=ThesauriLabelCalibrator(
@@ -141,20 +145,27 @@ if __name__ == '__main__':
                     regressor_params=dict(
                         min_samples_leaf=30, max_depth=5, n_estimators=10),
                     transformer=transformer),
-                label_calibration_features=ThesauriLabelCalibrationFeatures(
-                    transformer=transformer
+                recall_predictor=RecallPredictor(
+                    regressor=GradientBoostingRegressor(
+                        n_estimators=10, max_depth=8),
+                    label_calibration_features=label_calibration_features
                 ),
                 should_debug=args.should_debug
             )
         else:
             logger.info('Run training with Simple Label Calibration')
+            label_calibration_features = SimpleLabelCalibrationFeatures()
             t = Trainer(
                 train_data=train_data,
                 label_calibrator=SimpleLabelCalibrator(
                     GradientBoostingRegressor(
                         min_samples_leaf=30, max_depth=5, n_estimators=10)
                 ),
-                label_calibration_features=SimpleLabelCalibrationFeatures(),
+                recall_predictor=RecallPredictor(
+                    regressor=GradientBoostingRegressor(
+                        n_estimators=10, max_depth=8),
+                    label_calibration_features=label_calibration_features
+                ),
                 should_debug=args.should_debug
             )
 

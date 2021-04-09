@@ -15,10 +15,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
-from sklearn.ensemble import GradientBoostingRegressor
 
-from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
-    AbstractLabelCalibrationFeatures
+from qualle.features.label_calibration.base import AbstractLabelCalibrator
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import RecallPredictor
 
@@ -28,16 +26,11 @@ class Trainer:
     def __init__(
             self, train_data,
             label_calibrator: AbstractLabelCalibrator,
-            label_calibration_features: AbstractLabelCalibrationFeatures,
+            recall_predictor: RecallPredictor,
             should_debug=False
     ):
-        # TODO: make regressor configurable
         self._qe_p = QualityEstimationPipeline(
-            rp=RecallPredictor(
-                regressor=GradientBoostingRegressor(
-                    n_estimators=10, max_depth=8),
-                label_calibration_features=label_calibration_features
-            ),
+            rp=recall_predictor,
             label_calibrator=label_calibrator,
             should_debug=should_debug
         )
