@@ -44,8 +44,99 @@ def config_logging(should_debug):
     return logger
 
 
-if __name__ == '__main__':
+def handle_eval(args):
+    logger = get_logger()
+    path_to_test_tsv = args.test_data_file
+    path_to_model_file = args.model
+    model = load(path_to_model_file)
+    logger.info('Run evaluation with model:\n%s', model)
+    test_input = train_input_from_tsv(path_to_test_tsv)
+    ev = Evaluator(test_input, model)
+    eval_data = ev.evaluate()
+    logger.info('\nScores:')
+    for metric, score in eval_data.items():
+        logger.info(f'{metric}: {score}')
 
+
+def handle_train(args):
+    logger = get_logger()
+    path_to_train_tsv = args.train_data_file
+    path_to_model_output_file = args.output
+    train_data = train_input_from_tsv(path_to_train_tsv)
+
+    if args.slc:
+        if not all((args.thsys, args.s_type, args.s_uri_prefix, args.c_type,
+                    args.c_uri_prefix, args.s_ids)):
+            raise Exception(
+                'Not all arguments for Subthesauri Label Calibration '
+                'have been passed. Please see usage.'
+            )
+
+        logger.info('Run training with Subthesauri Label Calibration')
+        path_to_graph = args.thsys[0]
+        g = Graph()
+        with timeit() as t:
+            g.parse(path_to_graph)
+        logger.debug('Parsed RDF Graph in %.4f seconds', t())
+
+        subthesaurus_prefix = args.s_uri_prefix[0]
+        subthesauri = args.s_ids[0].split(',')
+        transformer = LabelCountForSubthesauriTransformer(
+            graph=g,
+            subthesaurus_type_uri=URIRef(args.s_type[0]),
+            concept_type_uri=URIRef(args.c_type[0]),
+            subthesauri=list(map(
+                lambda s: URIRef(
+                    subthesaurus_prefix.rstrip('/') + '/' + s),
+                subthesauri
+            )),
+            concept_uri_prefix=args.c_uri_prefix[0]
+        )
+        with timeit() as t:
+            transformer.fit()
+        logger.debug(
+            'Ran Subthesauri Transformer fit in %.4f seconds', t()
+        )
+        label_calibration_features = ThesauriLabelCalibrationFeatures(
+            transformer=transformer
+        )
+        t = Trainer(
+            train_data=train_data,
+            label_calibrator=ThesauriLabelCalibrator(
+                regressor_class=GradientBoostingRegressor,
+                regressor_params=dict(
+                    min_samples_leaf=30, max_depth=5, n_estimators=10),
+                transformer=transformer),
+            recall_predictor=RecallPredictor(
+                regressor=GradientBoostingRegressor(
+                    n_estimators=10, max_depth=8),
+                label_calibration_features=label_calibration_features
+            ),
+            should_debug=args.should_debug
+        )
+    else:
+        logger.info('Run training with Simple Label Calibration')
+        label_calibration_features = SimpleLabelCalibrationFeatures()
+        t = Trainer(
+            train_data=train_data,
+            label_calibrator=SimpleLabelCalibrator(
+                GradientBoostingRegressor(
+                    min_samples_leaf=30, max_depth=5, n_estimators=10)
+            ),
+            recall_predictor=RecallPredictor(
+                regressor=GradientBoostingRegressor(
+                    n_estimators=10, max_depth=8),
+                label_calibration_features=label_calibration_features
+            ),
+            should_debug=args.should_debug
+        )
+
+    model = t.train()
+    logger.info('Store trained model in %s', path_to_model_output_file)
+    dump(model, path_to_model_output_file)
+
+
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Quality Estimation for Automatic Subject Indexing'
     )
@@ -54,121 +145,57 @@ if __name__ == '__main__':
         '--debug', action='store_true', help='Set Log Level to Debug',
         dest='should_debug'
     )
-    parser.add_argument(
-        '--eval', '-e', type=str, nargs=2,
-        help='Run evaluation on training data using different estimators. '
-             'Specify test tsv and model input file as arguments.'
-             ' E.g.: --eval test.tsv input.model',
-        metavar=('test_input', 'model_input')
+    subparsers = parser.add_subparsers(title='Subcommands')
+
+    eval_parser = subparsers.add_parser(
+        'eval',
+        description='Run evaluation on training data using different '
+                    'estimators.'
     )
-    parser.add_argument(
-        '--train', '-t', type=str, nargs=2,
-        help='Run training using default estimator.\n'
-             'Specify train input and model output file as arguments.'
-             ' E.g.: --train train.tsv output.model',
-        metavar=('train_file', 'output_file')
+    eval_parser.set_defaults(func=handle_eval)
+
+    eval_parser.add_argument('test_data_file', type=str,
+                             help='Path to test data file in tsv format')
+    eval_parser.add_argument('model', type=str, help='Path to model file')
+
+    train_parser = subparsers.add_parser(
+        'train',
+        description='Run training using default estimator.'
     )
-    parser.add_argument(
-        '--subthesauri-label-calibration', type=str, nargs=6,
-        help='Run Label Calibration by distinguishing between label count for'
-             ' different subthesauri. Only valid in conjunction with '
-             '--train option. Requires following arguments:'
-             '\t- path to thesaurus file (must be in RDF format)'
-             '\t- subthesaurus type uri, e.g.:  '
-             'http://zbw.eu/namespaces/zbw-extensions/Thsys'
-             '\t- concept type uri, e.g.: '
-             'http://zbw.eu/namespaces/zbw-extensions/Descriptor'
-             '\t- concept uri prefix, e.g.: http://zbw.eu/stw/descriptor'
-             '\t- subthesaurus uri prefix, e.g.: http://zbw.eu/stw/thsys'
-             '\t- subthesauri ids as comma-separated list, '
-             'e.g.: v,b,n,w,p,g,a',
-        metavar=(
-            'thesaurus', 'subthesaurus_type_uri', 'concept_type_uri',
-            'concept_uri_prefix', 'subthesaurus_uri_prefix', 'subthesauri_ids'
-        )
-    )
+    train_parser.set_defaults(func=handle_train)
+    train_parser.add_argument('train_data_file', type=str,
+                              help='Path to train data file in tsv format')
+    train_parser.add_argument('output', type=str,
+                              help='Path to output model file')
+    slc_group = train_parser.add_argument_group(
+        'subthesauri-label-calibration',
+        description='Run Label Calibration by distinguishing between label '
+                    'count for different subthesauri. '
+                    'All Arguments in this group are required.')
+    slc_group.add_argument('--slc', action='store_true',
+                           help='Activate Subthesauri Label Calibration.')
+    slc_group.add_argument(
+        '--thsys', type=str, nargs=1,
+        help='path to thesaurus file (must be in RDF format)')
+    slc_group.add_argument(
+        '--s-type', type=str, nargs=1,
+        help='subthesaurus type uri, e.g.:  '
+        'http://zbw.eu/namespaces/zbw-extensions/Thsys')
+    slc_group.add_argument(
+        '--s-uri-prefix', type=str, nargs=1,
+        help='subthesaurus uri prefix, e.g.: http://zbw.eu/stw/thsys')
+    slc_group.add_argument(
+        '--c-type', type=str, nargs=1,
+        help='concept type uri, e.g.: '
+        'http://zbw.eu/namespaces/zbw-extensions/Descriptor')
+    slc_group.add_argument(
+        '--c-uri-prefix', type=str, nargs=1,
+        help='concept uri prefix, e.g.: http://zbw.eu/stw/descriptor)')
+    slc_group.add_argument('--s-ids', type=str, nargs=1,
+                           help='subthesauri ids as comma-separated list, '
+                                'e.g.: v,b,n,w,p,g,a')
 
     args = parser.parse_args()
 
-    logger = config_logging(args.should_debug)
-
-    if args.eval:
-        path_to_test_tsv = args.eval[0]
-        path_to_model_file = args.eval[1]
-        model = load(path_to_model_file)
-        logger.info('Run evaluation with model:\n%s', model)
-        test_input = train_input_from_tsv(path_to_test_tsv)
-        ev = Evaluator(test_input, model)
-        eval_data = ev.evaluate()
-        logger.info('\nScores:')
-        for metric, score in eval_data.items():
-            logger.info(f'{metric}: {score}')
-    elif args.train:
-        path_to_train_tsv = args.train[0]
-        path_to_model_output_file = args.train[1]
-        train_data = train_input_from_tsv(path_to_train_tsv)
-
-        if slc_args := args.subthesauri_label_calibration:
-            logger.info('Run training with Subthesauri Label Calibration')
-
-            path_to_graph = slc_args[0]
-            g = Graph()
-            with timeit() as t:
-                g.parse(path_to_graph)
-            logger.debug('Parsed RDF Graph in %.4f seconds', t())
-
-            subthesaurus_prefix = slc_args[4]
-            subthesauri = slc_args[5].split(',')
-            transformer = LabelCountForSubthesauriTransformer(
-                graph=g,
-                subthesaurus_type_uri=URIRef(slc_args[1]),
-                concept_type_uri=URIRef(slc_args[2]),
-                subthesauri=list(map(
-                    lambda s: URIRef(
-                        subthesaurus_prefix.rstrip('/') + '/' + s),
-                    subthesauri
-                )),
-                concept_uri_prefix=slc_args[3]
-            )
-            with timeit() as t:
-                transformer.fit()
-            logger.debug(
-                'Ran Subthesauri Transformer fit in %.4f seconds', t()
-            )
-            label_calibration_features = ThesauriLabelCalibrationFeatures(
-                transformer=transformer
-            )
-            t = Trainer(
-                train_data=train_data,
-                label_calibrator=ThesauriLabelCalibrator(
-                    regressor_class=GradientBoostingRegressor,
-                    regressor_params=dict(
-                        min_samples_leaf=30, max_depth=5, n_estimators=10),
-                    transformer=transformer),
-                recall_predictor=RecallPredictor(
-                    regressor=GradientBoostingRegressor(
-                        n_estimators=10, max_depth=8),
-                    label_calibration_features=label_calibration_features
-                ),
-                should_debug=args.should_debug
-            )
-        else:
-            logger.info('Run training with Simple Label Calibration')
-            label_calibration_features = SimpleLabelCalibrationFeatures()
-            t = Trainer(
-                train_data=train_data,
-                label_calibrator=SimpleLabelCalibrator(
-                    GradientBoostingRegressor(
-                        min_samples_leaf=30, max_depth=5, n_estimators=10)
-                ),
-                recall_predictor=RecallPredictor(
-                    regressor=GradientBoostingRegressor(
-                        n_estimators=10, max_depth=8),
-                    label_calibration_features=label_calibration_features
-                ),
-                should_debug=args.should_debug
-            )
-
-        model = t.train()
-        logger.info('Store trained model in %s', path_to_model_output_file)
-        dump(model, path_to_model_output_file)
+    config_logging(args.should_debug)
+    args.func(args)
