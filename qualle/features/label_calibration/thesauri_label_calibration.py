@@ -53,8 +53,8 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
     def fit(self, X=None, y=None):
         self.mapping_ = dict()
         self.logger_ = get_logger()
-        self.concept_uri_prefix_len_ = len(
-            self.concept_uri_prefix.rstrip('/') + '/'
+        self.concept_uri_prefix_len_ = 1 + len(
+            self.concept_uri_prefix.rstrip('/')
         )
         subthesauri_len = len(self.subthesauri)
 
