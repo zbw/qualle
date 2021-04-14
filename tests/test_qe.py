@@ -17,9 +17,12 @@
 
 import numpy as np
 import pytest
+from sklearn.exceptions import NotFittedError
 
-from qualle.quality_estimation import RecallPredictor, RecallPredictorInput, \
-    LabelCalibrationFeatures
+from qualle.features.label_calibration.simple_label_calibration import \
+    SimpleLabelCalibrationFeatures
+from qualle.models import LabelCalibrationData
+from qualle.quality_estimation import RecallPredictor
 
 
 class DummyRegressor:
@@ -34,15 +37,18 @@ class DummyRegressor:
 
 @pytest.fixture
 def X():
-    return RecallPredictorInput(
-        label_calibration=np.array([3, 1, 1], dtype="int32"),
-        no_of_pred_labels=np.array([2, 1, 5], dtype="int32")
+    return LabelCalibrationData(
+        predicted_no_of_labels=np.array([3, 1, 1], dtype="int32"),
+        predicted_labels=[['c'] * 2, ['c'], ['c'] * 5]
     )
 
 
 @pytest.fixture
 def predictor():
-    return RecallPredictor(DummyRegressor())
+    return RecallPredictor(
+        regressor=DummyRegressor(),
+        label_calibration_features=SimpleLabelCalibrationFeatures()
+    )
 
 
 def test_rp_predict(predictor, X):
@@ -55,17 +61,17 @@ def test_rp_predict(predictor, X):
     )
 
 
-def test_rp_fit_fits_pipeline(predictor, X, mocker):
+def test_rp_fit_fits_regressor_with_label_features(predictor, X, mocker):
     y = np.array([0.8, 1., 4])
-
-    spy = mocker.spy(predictor.pipeline, 'fit')
+    X_transformed = predictor.label_calibration_features.transform(X)
+    spy = mocker.spy(predictor.regressor, 'fit')
     predictor.fit(X, y)
 
-    spy.assert_called_once_with(X, y)
+    spy.assert_called_once()
+    assert (spy.call_args[0][0] == X_transformed).all()
+    assert (spy.call_args[0][1] == y).all()
 
 
-def test_calibration_features_transform(X):
-    lf = LabelCalibrationFeatures()
-    assert np.array_equal(
-        lf.transform(X), np.array([[3, 1], [1, 0], [1, -4]])
-    )
+def test_rp_predict_without_fit_raises_exc(predictor, X):
+    with pytest.raises(NotFittedError):
+        predictor.predict(X)

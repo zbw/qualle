@@ -18,13 +18,21 @@ import pytest
 from sklearn.ensemble import ExtraTreesRegressor
 
 from qualle.evaluate import Evaluator, scores
+from qualle.features.label_calibration.simple_label_calibration import \
+    SimpleLabelCalibrationFeatures, SimpleLabelCalibrator
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import RecallPredictor
 
 
 @pytest.fixture
 def evaluator(train_data):
-    qe_p = QualityEstimationPipeline(RecallPredictor(ExtraTreesRegressor()))
+    qe_p = QualityEstimationPipeline(
+        recall_predictor=RecallPredictor(
+            regressor=ExtraTreesRegressor(),
+            label_calibration_features=SimpleLabelCalibrationFeatures()
+        ),
+        label_calibrator=SimpleLabelCalibrator(ExtraTreesRegressor())
+    )
     qe_p.train(train_data)
     return Evaluator(train_data, qe_p)
 

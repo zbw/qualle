@@ -17,7 +17,9 @@
 from dataclasses import dataclass
 from typing import List
 
-Concepts = List[str]
+import numpy as np
+
+Labels = List[str]
 Documents = List[str]
 
 
@@ -25,12 +27,19 @@ Documents = List[str]
 class TrainData:
 
     docs: Documents
-    predicted_concepts: List[Concepts]
-    true_concepts: List[Concepts]
+    predicted_labels: List[Labels]
+    true_labels: List[Labels]
 
 
 @dataclass
 class PredictData:
 
     docs: Documents
-    predicted_concepts: List[Concepts]
+    predicted_labels: List[Labels]
+
+
+@dataclass
+class LabelCalibrationData:
+
+    predicted_no_of_labels: np.array
+    predicted_labels: List[Labels]

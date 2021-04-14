@@ -16,28 +16,28 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
 from qualle.models import TrainData
-from qualle.utils import recall, train_input_from_tsv
+from qualle.utils import recall, train_input_from_tsv, timeit
 
 
 def test_recall():
-    true_concepts = [['x0', 'x2'], ['x1'], ['x3']]
-    pred_concepts = [['x0', 'x1'], ['x2'], ['x3']]
+    true_labels = [['x0', 'x2'], ['x1'], ['x3']]
+    pred_labels = [['x0', 'x1'], ['x2'], ['x3']]
 
     assert recall(
-        true_concepts=true_concepts, predicted_concepts=pred_concepts) == [
+        true_labels=true_labels, predicted_labels=pred_labels) == [
         0.5, 0, 1]
 
 
-def test_recall_empty_true_concepts_return_zero():
-    assert recall(true_concepts=[[]], predicted_concepts=[['x']]) == [0]
+def test_recall_empty_true_labels_return_zero():
+    assert recall(true_labels=[[]], predicted_labels=[['x']]) == [0]
 
 
-def test_recall_empty_pred_concepts_return_zero():
-    assert recall(true_concepts=[['x']], predicted_concepts=[[]]) == [0]
+def test_recall_empty_pred_labels_return_zero():
+    assert recall(true_labels=[['x']], predicted_labels=[[]]) == [0]
 
 
 def test_recall_empty_input():
-    assert recall(true_concepts=[], predicted_concepts=[]) == []
+    assert recall(true_labels=[], predicted_labels=[]) == []
 
 
 def test_train_input_from_tsv(mocker):
@@ -49,8 +49,32 @@ def test_train_input_from_tsv(mocker):
 
     assert train_input_from_tsv('dummypath') == TrainData(
         docs=['title0', 'title1'],
-        predicted_concepts=[
+        predicted_labels=[
             ['concept0', 'concept1'], ['concept2', 'concept3']
         ],
-        true_concepts=[['concept1', 'concept3'], ['concept3']]
+        true_labels=[['concept1', 'concept3'], ['concept3']]
     )
+
+
+def test_train_input_from_tsv_empty_labels__returns_empty_list(mocker):
+    m = mocker.mock_open(
+        read_data='title0\t\tconcept1,concept3\n'
+                  'title1\tconcept2:1,concept3:0.5\t'
+    )
+    mocker.patch('qualle.utils.open', m)
+
+    assert train_input_from_tsv('dummypath') == TrainData(
+        docs=['title0', 'title1'],
+        predicted_labels=[
+            [], ['concept2', 'concept3']
+        ],
+        true_labels=[['concept1', 'concept3'], []]
+    )
+
+
+def test_timeit(mocker):
+    m = mocker.Mock(side_effect=[1, 3])
+    mocker.patch('qualle.utils.perf_counter', m)
+    with timeit() as t:
+        _ = 1 + 1
+    assert t() == 2

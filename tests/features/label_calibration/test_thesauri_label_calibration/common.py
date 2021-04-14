@@ -14,25 +14,17 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
-from typing import List
+from rdflib import URIRef
 
-from sklearn.base import BaseEstimator
-from sklearn.pipeline import Pipeline
+DUMMY_SUBTHESAURUS_TYPE = URIRef('http://type/Thsys')
+DUMMY_CONCEPT_TYPE = URIRef('http://type/Descriptor')
 
-from stwfsapy.text_features import mk_text_features
+SUBTHESAURUS_A = URIRef('http://thsys/A')
+SUBTHESAURUS_B = URIRef('http://thsys/B')
+SUBTHESAURUS_C = URIRef('http://thsys/C')
 
-
-class LabelCalibrator(BaseEstimator):
-
-    def __init__(self, regressor):
-        self.regressor = regressor
-        features = mk_text_features()
-        self._pipeline = Pipeline(
-            [("features", features), ("regressor", regressor)]
-        )
-
-    def fit(self, X: List[str], y):
-        self._pipeline.fit(X, y)
-
-    def predict(self, X: List[str]):
-        return self._pipeline.predict(X)
+CONCEPT_URI_PREFIX = 'http://concept'
+CONCEPT_x0 = 'x0'
+CONCEPT_x1 = 'x1'
+CONCEPT_x2 = 'x2'
+CONCEPT_INVALID = 'invalid'

@@ -16,44 +16,13 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-import pytest
-from sklearn.exceptions import NotFittedError
-
-from qualle.label_calibration import LabelCalibrator
 
 
 class DummyRegressor:
 
     def fit(self, X, y):
-        # No implementation required
-        pass
+        self.X = X
+        self.y = y
 
     def predict(self, X):
         return np.array(range(X.shape[0]))
-
-
-@pytest.fixture
-def calibrator():
-    return LabelCalibrator(DummyRegressor())
-
-
-@pytest.fixture
-def X():
-    return ['txt0', 'txt1']
-
-
-def test_lc_predict(calibrator, X):
-    calibrator.fit(X, [3, 5])
-    assert np.array_equal(calibrator.predict(X), [0, 1])
-
-
-def test_lc_predict_without_fit_raises_exc(calibrator, X):
-    with pytest.raises(NotFittedError):
-        calibrator.predict(X)
-
-
-def test_lc_fit_fits_pipeline(calibrator, X, mocker):
-    y = [3, 5]
-    spy = mocker.spy(calibrator._pipeline, 'fit')
-    calibrator.fit(X, y)
-    spy.assert_called_with(X, y)

@@ -14,24 +14,23 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
-from sklearn.ensemble import ExtraTreesRegressor
+
+import numpy as np
+import pytest
 
 from qualle.features.label_calibration.simple_label_calibration import \
-    SimpleLabelCalibrator, SimpleLabelCalibrationFeatures
-from qualle.quality_estimation import RecallPredictor
-from qualle.train import Trainer
+    SimpleLabelCalibrationFeatures
+from qualle.models import LabelCalibrationData
 
 
-def test_train_trains_qe_pipeline(train_data, mocker):
-    t = Trainer(
-        train_data=train_data,
-        label_calibrator=SimpleLabelCalibrator(ExtraTreesRegressor()),
-        recall_predictor=RecallPredictor(
-            regressor=ExtraTreesRegressor(),
-            label_calibration_features=SimpleLabelCalibrationFeatures()
-        )
+@pytest.fixture
+def features():
+    return SimpleLabelCalibrationFeatures()
+
+
+def test_transform(features):
+    data = LabelCalibrationData(
+        predicted_labels=[['c0'], ['c0', 'c1']],
+        predicted_no_of_labels=np.array([1, 4])
     )
-    spy = mocker.spy(t._qe_p, 'train')
-    t.train()
-
-    spy.assert_called_once()
+    assert (features.transform(data) == [[1, 0], [4, 2]]).all()

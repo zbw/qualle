@@ -16,17 +16,23 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from sklearn import ensemble
+from qualle.features.label_calibration.base import AbstractLabelCalibrator
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import RecallPredictor
 
 
 class Trainer:
 
-    def __init__(self, train_data):
-        # TODO: make regressor configurable
-        self._qe_p = QualityEstimationPipeline(RecallPredictor(
-            ensemble.AdaBoostRegressor())
+    def __init__(
+            self, train_data,
+            label_calibrator: AbstractLabelCalibrator,
+            recall_predictor: RecallPredictor,
+            should_debug=False
+    ):
+        self._qe_p = QualityEstimationPipeline(
+            recall_predictor=recall_predictor,
+            label_calibrator=label_calibrator,
+            should_debug=should_debug
         )
         self._train_data = train_data
 
