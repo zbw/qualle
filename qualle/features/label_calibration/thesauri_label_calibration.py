@@ -16,6 +16,7 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+from functools import lru_cache
 from typing import List, Set, Optional
 
 import numpy as np
@@ -97,6 +98,7 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
                             is_in_subthesauri)
         return count_matrix
 
+    @lru_cache(maxsize=1000)
     def _get_concepts_for_thesaurus(self, thesaurus: URIRef) -> Set:
         concepts = set()
         for x in self.graph[thesaurus:SKOS.narrower]:
