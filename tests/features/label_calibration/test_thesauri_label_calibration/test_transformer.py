@@ -20,6 +20,8 @@ import pytest
 from rdflib import URIRef
 from sklearn.exceptions import NotFittedError
 
+from qualle.features.label_calibration.thesauri_label_calibration import \
+    LabelCountForSubthesauriTransformer
 from tests.features.label_calibration.test_thesauri_label_calibration import \
     common as c
 
@@ -33,6 +35,38 @@ def test_fit_stores_concept_to_subthesauri_mapping(transformer):
         c.CONCEPT_x1: [True] * 2,
         c.CONCEPT_x2: [True] * 2
     }
+
+
+def test_fit_uses_all_subthesauri_if_no_subthesauri_passed(graph):
+    transformer = LabelCountForSubthesauriTransformer(
+        graph=graph,
+        subthesaurus_type_uri=c.DUMMY_SUBTHESAURUS_TYPE,
+        concept_type_uri=c.DUMMY_CONCEPT_TYPE,
+        concept_uri_prefix=c.CONCEPT_URI_PREFIX
+    )
+    transformer.fit()
+    assert hasattr(transformer, 'mapping_')
+    x0_row = transformer.mapping_.get(c.CONCEPT_x0)
+    x1_row = transformer.mapping_.get(c.CONCEPT_x1)
+    x2_row = transformer.mapping_.get(c.CONCEPT_x2)
+
+    assert all(
+        (type(x0_row) == list, type(x1_row) == list, type(x2_row) == list)
+    )
+    assert all(
+        (len(x0_row) == 3, len(x1_row) == 3, len(x2_row) == 3)
+    )
+    # We dont know the order of the subthesaui extracted. Therefore we check
+    # if the expected columns are present.
+    col0 = [x0_row[0], x1_row[0], x2_row[0]]
+    col1 = [x0_row[1], x1_row[1], x2_row[1]]
+    col2 = [x0_row[2], x1_row[2], x2_row[2]]
+
+    cols = [col0, col1, col2]
+
+    assert [True, True, True] in cols
+    assert [False, True, True] in cols
+    assert [False, False, True] in cols
 
 
 def test_transform_without_fit_raises_exc(transformer):

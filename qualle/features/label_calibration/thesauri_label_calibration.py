@@ -16,7 +16,7 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from typing import List, Set
+from typing import List, Set, Optional
 
 import numpy as np
 from rdflib import URIRef, Graph
@@ -24,6 +24,7 @@ from rdflib.namespace import SKOS, RDF
 from sklearn.base import TransformerMixin
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
+from stwfsapy import thesaurus
 
 from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
     AbstractLabelCalibrationFeatures
@@ -41,8 +42,8 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
             graph: Graph,
             subthesaurus_type_uri: URIRef,
             concept_type_uri: URIRef,
-            subthesauri: List[URIRef],
-            concept_uri_prefix: str
+            concept_uri_prefix: str,
+            subthesauri: Optional[List[URIRef]] = None
     ):
         self.graph = graph
         self.subthesaurus_type_uri = subthesaurus_type_uri
@@ -56,9 +57,16 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
         self.concept_uri_prefix_len_ = 1 + len(
             self.concept_uri_prefix.rstrip('/')
         )
-        subthesauri_len = len(self.subthesauri)
+        if self.subthesauri:
+            self.subthesauri_ = self.subthesauri
+        else:
+            self.subthesauri_ = list(thesaurus.extract_by_type_uri(
+                self.graph,
+                self.subthesaurus_type_uri,
+            ))
+        subthesauri_len = len(self.subthesauri_)
 
-        for idx, s in enumerate(self.subthesauri):
+        for idx, s in enumerate(self.subthesauri_):
             concepts = self._get_concepts_for_thesaurus(s)
             for c in concepts:
                 if c not in self.mapping_:
@@ -74,7 +82,7 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
         in the same order as in the list passed to the constructor.
         """
         check_is_fitted(self)
-        count_matrix = np.zeros((len(X), len(self.subthesauri)))
+        count_matrix = np.zeros((len(X), len(self.subthesauri_)))
         for row_idx, row in enumerate(X):
             for concept in row:
                 subthesauri_counts = self.mapping_.get(concept)
@@ -144,7 +152,7 @@ class ThesauriLabelCalibrationFeatures(AbstractLabelCalibrationFeatures):
         no_of_predicted_labels = self.transformer.transform(
             X.predicted_labels
         )
-        subthesauri_len = len(self.transformer.subthesauri)
+        subthesauri_len = len(self.transformer.subthesauri_)
         data = np.zeros((rows, 2 * subthesauri_len))
         data[:, :subthesauri_len] = X.predicted_no_of_labels
         data[:, subthesauri_len:] = (

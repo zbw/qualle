@@ -65,10 +65,9 @@ def handle_train(args):
     train_data = train_input_from_tsv(path_to_train_tsv)
 
     if args.slc:
-        if not all((args.thsys, args.s_type, args.s_uri_prefix, args.c_type,
-                    args.c_uri_prefix, args.s_ids)):
+        if not all((args.thsys, args.s_type, args.c_type, args.c_uri_prefix)):
             raise Exception(
-                'Not all arguments for Subthesauri Label Calibration '
+                'Not all required arguments for Subthesauri Label Calibration '
                 'have been passed. Please see usage.'
             )
 
@@ -79,17 +78,20 @@ def handle_train(args):
             g.parse(path_to_graph)
         logger.debug('Parsed RDF Graph in %.4f seconds', t())
 
-        subthesaurus_prefix = args.s_uri_prefix[0]
-        subthesauri = args.s_ids[0].split(',')
+        if args.subthesauri:
+            subthesauri = list(map(
+                lambda s: URIRef(s), args.subthesauri[0].split(',')
+            ))
+        else:
+            subthesauri = None
+            logger.info(
+                'No subthesauri passed, will extract subthesauri by type'
+            )
         transformer = LabelCountForSubthesauriTransformer(
             graph=g,
             subthesaurus_type_uri=URIRef(args.s_type[0]),
             concept_type_uri=URIRef(args.c_type[0]),
-            subthesauri=list(map(
-                lambda s: URIRef(
-                    subthesaurus_prefix.rstrip('/') + '/' + s),
-                subthesauri
-            )),
+            subthesauri=subthesauri,
             concept_uri_prefix=args.c_uri_prefix[0]
         )
         with timeit() as t:
@@ -171,7 +173,10 @@ if __name__ == '__main__':
         'subthesauri-label-calibration',
         description='Run Label Calibration by distinguishing between label '
                     'count for different subthesauri. '
-                    'All Arguments in this group are required.')
+                    'All Arguments in this group ,'
+                    ' except --subthesauri , are required. '
+                    'If --subthesauri is not passed, subthesauri used '
+                    'are automatically detected by type.')
     slc_group.add_argument('--slc', action='store_true',
                            help='Activate Subthesauri Label Calibration.')
     slc_group.add_argument(
@@ -182,18 +187,17 @@ if __name__ == '__main__':
         help='subthesaurus type uri, e.g.:  '
         'http://zbw.eu/namespaces/zbw-extensions/Thsys')
     slc_group.add_argument(
-        '--s-uri-prefix', type=str, nargs=1,
-        help='subthesaurus uri prefix, e.g.: http://zbw.eu/stw/thsys')
-    slc_group.add_argument(
         '--c-type', type=str, nargs=1,
         help='concept type uri, e.g.: '
         'http://zbw.eu/namespaces/zbw-extensions/Descriptor')
     slc_group.add_argument(
         '--c-uri-prefix', type=str, nargs=1,
         help='concept uri prefix, e.g.: http://zbw.eu/stw/descriptor)')
-    slc_group.add_argument('--s-ids', type=str, nargs=1,
-                           help='subthesauri ids as comma-separated list, '
-                                'e.g.: v,b,n,w,p,g,a')
+    slc_group.add_argument('--subthesauri', type=str, nargs=1,
+                           help='subthesauri URIs as comma-separated list, '
+                                'e.g.: http://zbw.eu/stw/thsys/v,'
+                                'http://zbw.eu/stw/thsys/b,'
+                                'http://zbw.eu/stw/thsys/n')
 
     args = parser.parse_args()
 
