@@ -32,7 +32,9 @@ class Trainer:
         self._qe_p = QualityEstimationPipeline(
             recall_predictor=recall_predictor,
             label_calibrator=label_calibrator,
-            should_debug=should_debug
+            should_debug=should_debug,
+            # Can't use lambda because of pickle
+            features_data_mapper=features_data_mapper
         )
         self._train_data = train_data
 
@@ -40,3 +42,7 @@ class Trainer:
         self._qe_p.train(self._train_data)
 
         return self._qe_p
+
+
+def features_data_mapper(_, label_calibration_data):
+    return label_calibration_data
