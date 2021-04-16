@@ -41,9 +41,11 @@ def qp(mocker):
 def train_data():
     labels = [['c'] for _ in range(5)]
     return TrainData(
-        docs=[f'd{i}' for i in range(5)],
+        predict_data=PredictData(
+            docs=[f'd{i}' for i in range(5)],
+            predicted_labels=labels
+        ),
         true_labels=labels,
-        predicted_labels=labels
     )
 
 
@@ -57,7 +59,7 @@ def test_train(qp, train_data, mocker):
     actual_lc_docs = qp._label_calibrator.fit.call_args[0][0]
     actual_lc_true_labels = qp._label_calibrator.fit.call_args[0][1]
 
-    assert actual_lc_docs == train_data.docs
+    assert actual_lc_docs == train_data.predict_data.docs
     assert actual_lc_true_labels == train_data.true_labels
 
     actual_label_calibration_data = qp._recall_predictor.fit.call_args[0][0]
@@ -74,10 +76,7 @@ def test_train(qp, train_data, mocker):
 
 def test_predict(qp, train_data):
     qp._recall_predictor.predict.return_value = [1] * 5
-    p_data = PredictData(
-        docs=train_data.docs,
-        predicted_labels=train_data.predicted_labels
-    )
+    p_data = train_data.predict_data
 
     qp.train(train_data)
 

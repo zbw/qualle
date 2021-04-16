@@ -24,18 +24,16 @@ Documents = List[str]
 
 
 @dataclass
-class TrainData:
-
-    docs: Documents
-    predicted_labels: List[Labels]
-    true_labels: List[Labels]
-
-
-@dataclass
 class PredictData:
 
     docs: Documents
     predicted_labels: List[Labels]
+
+
+@dataclass
+class TrainData:
+    predict_data: PredictData
+    true_labels: List[Labels]
 
 
 @dataclass

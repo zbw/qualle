@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
-from qualle.models import TrainData
+from qualle.models import TrainData, PredictData
 from qualle.utils import recall, train_input_from_tsv, timeit
 
 
@@ -48,10 +48,12 @@ def test_train_input_from_tsv(mocker):
     mocker.patch('qualle.utils.open', m)
 
     assert train_input_from_tsv('dummypath') == TrainData(
-        docs=['title0', 'title1'],
-        predicted_labels=[
-            ['concept0', 'concept1'], ['concept2', 'concept3']
-        ],
+        predict_data=PredictData(
+            docs=['title0', 'title1'],
+            predicted_labels=[
+                ['concept0', 'concept1'], ['concept2', 'concept3']
+            ]
+        ),
         true_labels=[['concept1', 'concept3'], ['concept3']]
     )
 
@@ -64,10 +66,12 @@ def test_train_input_from_tsv_empty_labels__returns_empty_list(mocker):
     mocker.patch('qualle.utils.open', m)
 
     assert train_input_from_tsv('dummypath') == TrainData(
-        docs=['title0', 'title1'],
-        predicted_labels=[
-            [], ['concept2', 'concept3']
-        ],
+        predict_data=PredictData(
+            docs=['title0', 'title1'],
+            predicted_labels=[
+                [], ['concept2', 'concept3']
+            ]
+        ),
         true_labels=[['concept1', 'concept3'], []]
     )
 
