@@ -43,13 +43,14 @@ def train_data():
     return TrainData(
         predict_data=PredictData(
             docs=[f'd{i}' for i in range(5)],
-            predicted_labels=labels
+            predicted_labels=labels,
+            scores=[[0]] * 5
         ),
         true_labels=labels,
     )
 
 
-def test_train(qp, train_data, mocker):
+def test_train(qp, train_data):
 
     qp.train(train_data)
 

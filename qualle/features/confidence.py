@@ -19,7 +19,7 @@ from typing import List
 import numpy as np
 from sklearn.base import TransformerMixin, BaseEstimator
 
-Scores = List[float]
+from qualle.models import Scores
 
 
 class ConfidenceFeatures(BaseEstimator, TransformerMixin):

@@ -21,13 +21,14 @@ import numpy as np
 
 Labels = List[str]
 Documents = List[str]
+Scores = List[float]
 
 
 @dataclass
 class PredictData:
-
     docs: Documents
     predicted_labels: List[Labels]
+    scores: List[Scores]
 
 
 @dataclass

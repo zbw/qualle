@@ -19,7 +19,7 @@ from typing import List, Dict
 import numpy as np
 from sklearn.metrics import explained_variance_score, mean_squared_error
 
-from qualle.models import PredictData, TrainData
+from qualle.models import TrainData
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.utils import recall
 
