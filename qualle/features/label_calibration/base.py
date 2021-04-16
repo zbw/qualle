@@ -16,9 +16,9 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 from typing import List
 
-from sklearn.base import RegressorMixin, BaseEstimator, TransformerMixin
+from sklearn.base import RegressorMixin, BaseEstimator
 
-from qualle.models import LabelCalibrationData, Documents, Labels
+from qualle.models import Documents, Labels
 
 
 class AbstractLabelCalibrator(BaseEstimator, RegressorMixin):
@@ -27,13 +27,4 @@ class AbstractLabelCalibrator(BaseEstimator, RegressorMixin):
         pass  # pragma: no cover
 
     def predict(self, X: Documents):
-        pass  # pragma: no cover
-
-
-class AbstractLabelCalibrationFeatures(BaseEstimator, TransformerMixin):
-
-    def fit(self, X=None, y=None):
-        pass  # pragma: no cover
-
-    def transform(self, X: LabelCalibrationData):
         pass  # pragma: no cover

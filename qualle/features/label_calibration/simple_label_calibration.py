@@ -21,8 +21,8 @@ import numpy as np
 from sklearn.base import RegressorMixin
 from sklearn.utils.validation import check_is_fitted
 
-from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
-    AbstractLabelCalibrationFeatures
+from qualle.features.base import Features
+from qualle.features.label_calibration.base import AbstractLabelCalibrator
 from qualle.label_calibration.simple import LabelCalibrator
 from qualle.models import LabelCalibrationData, Documents, Labels
 
@@ -47,10 +47,7 @@ class SimpleLabelCalibrator(AbstractLabelCalibrator):
         return self.calibrator_.predict(X)
 
 
-class SimpleLabelCalibrationFeatures(AbstractLabelCalibrationFeatures):
-
-    def fit(self, X=None, y=None):
-        return self
+class SimpleLabelCalibrationFeatures(Features):
 
     def transform(self, X: LabelCalibrationData):
         no_of_pred_labels = transform_to_label_count(X.predicted_labels)

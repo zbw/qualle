@@ -112,7 +112,7 @@ def handle_train(args):
             recall_predictor=RecallPredictor(
                 regressor=GradientBoostingRegressor(
                     n_estimators=10, max_depth=8),
-                label_calibration_features=label_calibration_features
+                features=label_calibration_features
             ),
             should_debug=args.should_debug
         )
@@ -128,7 +128,7 @@ def handle_train(args):
             recall_predictor=RecallPredictor(
                 regressor=GradientBoostingRegressor(
                     n_estimators=10, max_depth=8),
-                label_calibration_features=label_calibration_features
+                features=label_calibration_features
             ),
             should_debug=args.should_debug
         )

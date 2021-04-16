@@ -47,7 +47,7 @@ def X():
 def predictor():
     return RecallPredictor(
         regressor=DummyRegressor(),
-        label_calibration_features=SimpleLabelCalibrationFeatures()
+        features=SimpleLabelCalibrationFeatures()
     )
 
 
@@ -61,9 +61,9 @@ def test_rp_predict(predictor, X):
     )
 
 
-def test_rp_fit_fits_regressor_with_label_features(predictor, X, mocker):
+def test_rp_fit_fits_regressor_with_features(predictor, X, mocker):
     y = np.array([0.8, 1., 4])
-    X_transformed = predictor.label_calibration_features.transform(X)
+    X_transformed = predictor.features.transform(X)
     spy = mocker.spy(predictor.regressor, 'fit')
     predictor.fit(X, y)
 

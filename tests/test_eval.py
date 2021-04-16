@@ -29,7 +29,7 @@ def evaluator(train_data):
     qe_p = QualityEstimationPipeline(
         recall_predictor=RecallPredictor(
             regressor=ExtraTreesRegressor(),
-            label_calibration_features=SimpleLabelCalibrationFeatures()
+            features=SimpleLabelCalibrationFeatures()
         ),
         label_calibrator=SimpleLabelCalibrator(ExtraTreesRegressor())
     )
