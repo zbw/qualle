@@ -23,8 +23,8 @@ from qualle.features.confidence import ConfidenceFeatures
 @pytest.fixture
 def data():
     return [
-        [0] * 3,
-        [1] * 3,
+        [0] * 2,
+        [1] * 5,
         list(range(3)),
         list(range(3))[::-1],
         [1, 2, 4]
@@ -41,4 +41,15 @@ def test_transform_computes_all_features(data):
         [0, 1, 1, 0],
         [0, 1, 1, 0],
         [1, 7 / 3, 2, 8]
+    ])).all()
+
+
+def test_transform_empty_row_gets_zero_value_as_default():
+    cf = ConfidenceFeatures()
+
+    features = cf.transform([[], [1] * 5])
+    assert type(features) == np.ndarray
+    assert (features == np.vstack([
+        [0] * 4,
+        [1] * 4,
     ])).all()

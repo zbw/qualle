@@ -29,8 +29,8 @@ class ConfidenceFeatures(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X: List[Scores]):
-        array = np.array(X)
-        return np.column_stack([
-            np.min(array, axis=1), np.mean(array, axis=1),
-            np.median(array, axis=1), np.prod(array, axis=1)
-        ])
+        _min = [np.min(row) if row else 0.0 for row in X]
+        _mean = [np.mean(row) if row else 0.0 for row in X]
+        _median = [np.median(row) if row else 0.0 for row in X]
+        _prod = [np.prod(row) if row else 0.0 for row in X]
+        return np.column_stack([_min, _mean, _median, _prod])
