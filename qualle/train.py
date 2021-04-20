@@ -26,6 +26,7 @@ from qualle.features.label_calibration.simple_label_calibration import \
     SimpleLabelCalibrationFeatures
 from qualle.features.label_calibration.thesauri_label_calibration import \
     ThesauriLabelCalibrationFeatures
+from qualle.features.text import TextFeatures
 from qualle.models import PredictData, LabelCalibrationData
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import RecallPredictor
@@ -73,6 +74,8 @@ class FeaturesDataMapper:
         for ftype in self._features_types:
             if ftype == ConfidenceFeatures:
                 features_data[ConfidenceFeatures] = p_data.scores
+            if ftype == TextFeatures:
+                features_data[TextFeatures] = p_data.docs
             if ftype in (
                     SimpleLabelCalibrationFeatures,
                     ThesauriLabelCalibrationFeatures
