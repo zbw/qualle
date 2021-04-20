@@ -14,31 +14,26 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
-from dataclasses import dataclass
-from typing import List
+from typing import List, Dict, Any, Type
 
 import numpy as np
 
-Labels = List[str]
-Documents = List[str]
-Scores = List[float]
+from qualle.features.base import Features
 
 
-@dataclass
-class PredictData:
-    docs: Documents
-    predicted_labels: List[Labels]
-    scores: List[Scores]
+CombinedFeaturesData = Dict[Type[Features], Any]
 
 
-@dataclass
-class TrainData:
-    predict_data: PredictData
-    true_labels: List[Labels]
+class CombinedFeatures(Features):
+    """Combine n features by horizontal stacking"""
+    def __init__(self, features: List[Features]):
+        self.features = features
 
+    def fit(self, X=None, y=None):
+        for f in self.features:
+            f.fit()
+        return self
 
-@dataclass
-class LabelCalibrationData:
-
-    predicted_no_of_labels: np.array
-    predicted_labels: List[Labels]
+    def transform(self, X: CombinedFeaturesData):
+        combined = [f.transform(X[f.__class__]) for f in self.features]
+        return np.hstack(combined)

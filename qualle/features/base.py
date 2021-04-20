@@ -14,31 +14,14 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
-from dataclasses import dataclass
-from typing import List
 
-import numpy as np
-
-Labels = List[str]
-Documents = List[str]
-Scores = List[float]
+from sklearn.base import BaseEstimator, TransformerMixin
 
 
-@dataclass
-class PredictData:
-    docs: Documents
-    predicted_labels: List[Labels]
-    scores: List[Scores]
+class Features(BaseEstimator, TransformerMixin):
 
+    def fit(self, X=None, y=None):
+        return self
 
-@dataclass
-class TrainData:
-    predict_data: PredictData
-    true_labels: List[Labels]
-
-
-@dataclass
-class LabelCalibrationData:
-
-    predicted_no_of_labels: np.array
-    predicted_labels: List[Labels]
+    def transform(self, X):
+        pass  # pragma: no cover

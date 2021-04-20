@@ -21,7 +21,7 @@ from time import perf_counter
 from typing import List
 
 
-from qualle.models import Labels, TrainData
+from qualle.models import Labels, TrainData, PredictData
 
 
 def recall(
@@ -39,20 +39,26 @@ def train_input_from_tsv(
     docs = []
     pred_labels = []
     true_labels = []
+    scores = []
 
     with open(path_to_tsv, newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter='\t')
         for row in reader:
             docs.append(row[0])
-            pred_labels.append(list(
-                    filter(bool, map(
-                        lambda s: s.split(':')[0], row[1].split(',')
-                    ))
-            ))
+            pred_labels_for_row = []
+            scores_for_row = []
+            label_score_pairs = row[1].split(',')
+            if len(label_score_pairs) > 0 and label_score_pairs[0]:
+                for label_score_pair in label_score_pairs:
+                    label, score = label_score_pair.split(':')
+                    pred_labels_for_row.append(label)
+                    scores_for_row.append(float(score))
+            pred_labels.append(pred_labels_for_row)
+            scores.append(scores_for_row)
             true_labels.append(list(filter(bool, row[2].split(','))))
 
     return TrainData(
-        docs=docs, predicted_labels=pred_labels,
+        PredictData(docs=docs, predicted_labels=pred_labels, scores=scores),
         true_labels=true_labels
     )
 

@@ -25,12 +25,12 @@ from rdflib import URIRef, Graph
 from sklearn.ensemble import GradientBoostingRegressor
 
 from qualle.evaluate import Evaluator
+from qualle.features.confidence import ConfidenceFeatures
 from qualle.features.label_calibration.simple_label_calibration import \
     SimpleLabelCalibrator, SimpleLabelCalibrationFeatures
 from qualle.features.label_calibration.thesauri_label_calibration import \
     ThesauriLabelCalibrator, ThesauriLabelCalibrationFeatures, \
     LabelCountForSubthesauriTransformer
-from qualle.quality_estimation import RecallPredictor
 from qualle.train import Trainer
 from qualle.utils import get_logger, train_input_from_tsv, timeit
 
@@ -63,6 +63,10 @@ def handle_train(args):
     path_to_train_tsv = args.train_data_file
     path_to_model_output_file = args.output
     train_data = train_input_from_tsv(path_to_train_tsv)
+
+    features = []
+    if args.confidence:
+        features.append(ConfidenceFeatures())
 
     if args.slc:
         if not all((args.thsys, args.s_type, args.c_type, args.c_uri_prefix)):
@@ -102,6 +106,7 @@ def handle_train(args):
         label_calibration_features = ThesauriLabelCalibrationFeatures(
             transformer=transformer
         )
+        features.append(label_calibration_features)
         t = Trainer(
             train_data=train_data,
             label_calibrator=ThesauriLabelCalibrator(
@@ -109,27 +114,24 @@ def handle_train(args):
                 regressor_params=dict(
                     min_samples_leaf=30, max_depth=5, n_estimators=10),
                 transformer=transformer),
-            recall_predictor=RecallPredictor(
-                regressor=GradientBoostingRegressor(
-                    n_estimators=10, max_depth=8),
-                label_calibration_features=label_calibration_features
-            ),
+            recall_predictor_regressor=GradientBoostingRegressor(
+                n_estimators=10, max_depth=8),
+            features=features,
             should_debug=args.should_debug
         )
     else:
         logger.info('Run training with Simple Label Calibration')
         label_calibration_features = SimpleLabelCalibrationFeatures()
+        features.append(label_calibration_features)
         t = Trainer(
             train_data=train_data,
             label_calibrator=SimpleLabelCalibrator(
                 GradientBoostingRegressor(
                     min_samples_leaf=30, max_depth=5, n_estimators=10)
             ),
-            recall_predictor=RecallPredictor(
-                regressor=GradientBoostingRegressor(
-                    n_estimators=10, max_depth=8),
-                label_calibration_features=label_calibration_features
-            ),
+            recall_predictor_regressor=GradientBoostingRegressor(
+                n_estimators=10, max_depth=8),
+            features=features,
             should_debug=args.should_debug
         )
 
@@ -169,6 +171,8 @@ if __name__ == '__main__':
                               help='Path to train data file in tsv format')
     train_parser.add_argument('output', type=str,
                               help='Path to output model file')
+    train_parser.add_argument('--confidence', action='store_true',
+                              help='Use confidence features')
     slc_group = train_parser.add_argument_group(
         'subthesauri-label-calibration',
         description='Run Label Calibration by distinguishing between label '
@@ -185,11 +189,11 @@ if __name__ == '__main__':
     slc_group.add_argument(
         '--s-type', type=str, nargs=1,
         help='subthesaurus type uri, e.g.:  '
-        'http://zbw.eu/namespaces/zbw-extensions/Thsys')
+             'http://zbw.eu/namespaces/zbw-extensions/Thsys')
     slc_group.add_argument(
         '--c-type', type=str, nargs=1,
         help='concept type uri, e.g.: '
-        'http://zbw.eu/namespaces/zbw-extensions/Descriptor')
+             'http://zbw.eu/namespaces/zbw-extensions/Descriptor')
     slc_group.add_argument(
         '--c-uri-prefix', type=str, nargs=1,
         help='concept uri prefix, e.g.: http://zbw.eu/stw/descriptor)')

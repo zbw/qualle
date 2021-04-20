@@ -27,8 +27,8 @@ from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
 from stwfsapy import thesaurus
 
-from qualle.features.label_calibration.base import AbstractLabelCalibrator, \
-    AbstractLabelCalibrationFeatures
+from qualle.features.base import Features
+from qualle.features.label_calibration.base import AbstractLabelCalibrator
 from qualle.label_calibration.category import MultiCategoryLabelCalibrator
 from qualle.models import Labels, Documents, LabelCalibrationData
 from qualle.utils import get_logger
@@ -141,13 +141,10 @@ class ThesauriLabelCalibrator(AbstractLabelCalibrator):
         return self.calibrator_.predict(X)
 
 
-class ThesauriLabelCalibrationFeatures(AbstractLabelCalibrationFeatures):
+class ThesauriLabelCalibrationFeatures(Features):
 
     def __init__(self, transformer: LabelCountForSubthesauriTransformer):
         self.transformer = transformer
-
-    def fit(self, X=None, y=None):
-        return self
 
     def transform(self, X: LabelCalibrationData):
         rows = len(X.predicted_no_of_labels)

@@ -19,11 +19,7 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_is_fitted
 
-from qualle.features.label_calibration.base import \
-    AbstractLabelCalibrationFeatures
-from qualle.features.label_calibration.simple_label_calibration import \
-    SimpleLabelCalibrationFeatures
-from qualle.models import LabelCalibrationData
+from qualle.features.base import Features
 
 
 class RecallPredictor(BaseEstimator, RegressorMixin):
@@ -31,20 +27,19 @@ class RecallPredictor(BaseEstimator, RegressorMixin):
     def __init__(
             self,
             regressor: RegressorMixin,
-            label_calibration_features: AbstractLabelCalibrationFeatures =
-            SimpleLabelCalibrationFeatures()
+            features: Features
     ):
         self.regressor = regressor
-        self.label_calibration_features = label_calibration_features
+        self.features = features
 
-    def fit(self, X: LabelCalibrationData, y):
+    def fit(self, X, y):
         self.pipeline_ = Pipeline([
-            ("features", self.label_calibration_features),
+            ("features", self.features),
             ("regressor", self.regressor)
         ])
         self.pipeline_.fit(X, y)
         return self
 
-    def predict(self, X: LabelCalibrationData):
+    def predict(self, X):
         check_is_fitted(self)
         return self.pipeline_.predict(X)

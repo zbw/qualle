@@ -14,31 +14,23 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
-from dataclasses import dataclass
 from typing import List
 
 import numpy as np
+from sklearn.base import TransformerMixin, BaseEstimator
 
-Labels = List[str]
-Documents = List[str]
-Scores = List[float]
-
-
-@dataclass
-class PredictData:
-    docs: Documents
-    predicted_labels: List[Labels]
-    scores: List[Scores]
+from qualle.models import Scores
 
 
-@dataclass
-class TrainData:
-    predict_data: PredictData
-    true_labels: List[Labels]
+class ConfidenceFeatures(BaseEstimator, TransformerMixin):
+    """Features based on aggregating concept level confidence scores."""
 
+    def fit(self, X=None, y=None):
+        return self
 
-@dataclass
-class LabelCalibrationData:
-
-    predicted_no_of_labels: np.array
-    predicted_labels: List[Labels]
+    def transform(self, X: List[Scores]):
+        _min = [np.min(row) if row else 0.0 for row in X]
+        _mean = [np.mean(row) if row else 0.0 for row in X]
+        _median = [np.median(row) if row else 0.0 for row in X]
+        _prod = [np.prod(row) if row else 0.0 for row in X]
+        return np.column_stack([_min, _mean, _median, _prod])

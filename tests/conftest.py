@@ -16,13 +16,17 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 import pytest
 
-from qualle.models import TrainData
+from qualle.models import TrainData, PredictData
 
 
 @pytest.fixture
 def train_data():
-    return TrainData(
+    p = PredictData(
         docs=['Title'] * 20,
         predicted_labels=[['concept']] * 20,
+        scores=[[0.0]] * 20
+    )
+    return TrainData(
+        predict_data=p,
         true_labels=[['concept']] * 20
     )

@@ -19,7 +19,7 @@ from typing import List, Dict
 import numpy as np
 from sklearn.metrics import explained_variance_score, mean_squared_error
 
-from qualle.models import PredictData, TrainData
+from qualle.models import TrainData
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.utils import recall
 
@@ -31,12 +31,10 @@ class Evaluator:
         self._qe_p = qe_p
 
     def evaluate(self) -> Dict:
-        pred_recall = self._qe_p.predict(
-            PredictData(docs=self._test_data.docs,
-                        predicted_labels=self._test_data.predicted_labels)
-        )
+        predict_data = self._test_data.predict_data
+        pred_recall = self._qe_p.predict(predict_data)
         true_recall = recall(self._test_data.true_labels,
-                             self._test_data.predicted_labels)
+                             predict_data.predicted_labels)
 
         return scores(true_recall, pred_recall)
 

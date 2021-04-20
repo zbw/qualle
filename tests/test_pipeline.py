@@ -18,22 +18,33 @@ import logging
 
 import numpy as np
 import pytest
+from sklearn.ensemble import ExtraTreesRegressor
 
+from qualle.features.combined import CombinedFeatures
+from qualle.features.label_calibration.simple_label_calibration import \
+    SimpleLabelCalibrator, SimpleLabelCalibrationFeatures
 from qualle.models import TrainData, PredictData
 from qualle.pipeline import QualityEstimationPipeline
+from qualle.quality_estimation import RecallPredictor
 
 
 @pytest.fixture
 def qp(mocker):
-    label_calibrator = mocker.Mock()
-    recall_predictor = mocker.Mock()
+    label_calibrator = SimpleLabelCalibrator(ExtraTreesRegressor())
+    recall_predictor = RecallPredictor(
+        regressor=ExtraTreesRegressor(),
+        features=CombinedFeatures([SimpleLabelCalibrationFeatures()])
+    )
     mocker.patch(
         'qualle.pipeline.cross_val_predict',
         mocker.Mock(return_value=[1] * 5)
     )
     return QualityEstimationPipeline(
         label_calibrator=label_calibrator,
-        recall_predictor=recall_predictor
+        recall_predictor=recall_predictor,
+        features_data_mapper=lambda _, l_data: {
+            SimpleLabelCalibrationFeatures: l_data
+        }
     )
 
 
@@ -41,28 +52,37 @@ def qp(mocker):
 def train_data():
     labels = [['c'] for _ in range(5)]
     return TrainData(
-        docs=[f'd{i}' for i in range(5)],
+        predict_data=PredictData(
+            docs=[f'd{i}' for i in range(5)],
+            predicted_labels=labels,
+            scores=[[0]] * 5
+        ),
         true_labels=labels,
-        predicted_labels=labels
     )
 
 
 def test_train(qp, train_data, mocker):
+    calibrator = qp._label_calibrator
+    mocker.spy(calibrator, 'fit')
+    mocker.spy(qp._recall_predictor, 'fit')
 
     qp.train(train_data)
 
-    qp._label_calibrator.fit.assert_called()
+    calibrator.fit.assert_called()
     qp._recall_predictor.fit.assert_called_once()
 
-    actual_lc_docs = qp._label_calibrator.fit.call_args[0][0]
-    actual_lc_true_labels = qp._label_calibrator.fit.call_args[0][1]
+    actual_lc_docs = calibrator.fit.call_args[0][0]
+    actual_lc_true_labels = calibrator.fit.call_args[0][1]
 
-    assert actual_lc_docs == train_data.docs
+    assert actual_lc_docs == train_data.predict_data.docs
     assert actual_lc_true_labels == train_data.true_labels
 
-    actual_label_calibration_data = qp._recall_predictor.fit.call_args[0][0]
+    features_data = qp._recall_predictor.fit.call_args[0][0]
     actual_true_recall = qp._recall_predictor.fit.call_args[0][1]
 
+    assert SimpleLabelCalibrationFeatures in features_data
+    actual_label_calibration_data = features_data[
+        SimpleLabelCalibrationFeatures]
     # Because of how our input data is designed,
     # we can make following assertions
     only_ones = [1] * 5
@@ -73,11 +93,7 @@ def test_train(qp, train_data, mocker):
 
 
 def test_predict(qp, train_data):
-    qp._recall_predictor.predict.return_value = [1] * 5
-    p_data = PredictData(
-        docs=train_data.docs,
-        predicted_labels=train_data.predicted_labels
-    )
+    p_data = train_data.predict_data
 
     qp.train(train_data)
 
