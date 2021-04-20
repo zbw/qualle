@@ -29,7 +29,7 @@ from qualle.features.label_calibration.thesauri_label_calibration import \
 from qualle.features.text import TextFeatures
 from qualle.models import PredictData, LabelCalibrationData
 from qualle.pipeline import QualityEstimationPipeline
-from qualle.quality_estimation import RecallPredictor
+from qualle.quality_estimation import QualityEstimator
 
 FeaturesTypes = Set[Type[Features]]
 
@@ -39,13 +39,13 @@ class Trainer:
     def __init__(
             self, train_data,
             label_calibrator: AbstractLabelCalibrator,
-            recall_predictor_regressor: RegressorMixin,
+            quality_regressor: RegressorMixin,
             features: List[Features],
             should_debug=False
     ):
         combined_features = CombinedFeatures(features)
-        rp = RecallPredictor(
-            regressor=recall_predictor_regressor, features=combined_features
+        rp = QualityEstimator(
+            regressor=quality_regressor, features=combined_features
         )
         self._qe_p = QualityEstimationPipeline(
             recall_predictor=rp,
@@ -68,8 +68,9 @@ class FeaturesDataMapper:
     def __init__(self, features_types: FeaturesTypes):
         self._features_types = features_types
 
-    def __call__(self, p_data: PredictData, l_data: LabelCalibrationData)\
-            -> CombinedFeaturesData:
+    def __call__(
+            self, p_data: PredictData, l_data: LabelCalibrationData
+    ) -> CombinedFeaturesData:
         features_data = dict()
         for ftype in self._features_types:
             if ftype == ConfidenceFeatures:

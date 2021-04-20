@@ -40,7 +40,7 @@ def test_train_trains_qe_pipeline(train_data, mocker):
     t = Trainer(
         train_data=train_data,
         label_calibrator=SimpleLabelCalibrator(ExtraTreesRegressor()),
-        recall_predictor_regressor=ExtraTreesRegressor(),
+        quality_regressor=ExtraTreesRegressor(),
         features=[SimpleLabelCalibrationFeatures()]
     )
     spy = mocker.spy(t._qe_p, 'train')

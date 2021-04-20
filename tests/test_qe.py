@@ -22,7 +22,7 @@ from sklearn.exceptions import NotFittedError
 from qualle.features.label_calibration.simple_label_calibration import \
     SimpleLabelCalibrationFeatures
 from qualle.models import LabelCalibrationData
-from qualle.quality_estimation import RecallPredictor
+from qualle.quality_estimation import QualityEstimator
 
 
 class DummyRegressor:
@@ -45,7 +45,7 @@ def X():
 
 @pytest.fixture
 def predictor():
-    return RecallPredictor(
+    return QualityEstimator(
         regressor=DummyRegressor(),
         features=SimpleLabelCalibrationFeatures()
     )

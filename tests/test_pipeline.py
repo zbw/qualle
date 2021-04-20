@@ -25,13 +25,13 @@ from qualle.features.label_calibration.simple_label_calibration import \
     SimpleLabelCalibrator, SimpleLabelCalibrationFeatures
 from qualle.models import TrainData, PredictData
 from qualle.pipeline import QualityEstimationPipeline
-from qualle.quality_estimation import RecallPredictor
+from qualle.quality_estimation import QualityEstimator
 
 
 @pytest.fixture
 def qp(mocker):
     label_calibrator = SimpleLabelCalibrator(ExtraTreesRegressor())
-    recall_predictor = RecallPredictor(
+    recall_predictor = QualityEstimator(
         regressor=ExtraTreesRegressor(),
         features=CombinedFeatures([SimpleLabelCalibrationFeatures()])
     )

@@ -21,7 +21,7 @@ from sklearn.model_selection import cross_val_predict
 
 from qualle.features.label_calibration.base import AbstractLabelCalibrator
 from qualle.models import TrainData, PredictData, LabelCalibrationData
-from qualle.quality_estimation import RecallPredictor
+from qualle.quality_estimation import QualityEstimator
 from qualle.utils import recall, get_logger, timeit
 
 
@@ -30,7 +30,7 @@ class QualityEstimationPipeline:
     def __init__(
             self,
             label_calibrator: AbstractLabelCalibrator,
-            recall_predictor: RecallPredictor,
+            recall_predictor: QualityEstimator,
             features_data_mapper: Callable[
                 [PredictData, LabelCalibrationData], Any
             ],

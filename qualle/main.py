@@ -121,7 +121,7 @@ def handle_train(args):
                 regressor_params=dict(
                     min_samples_leaf=30, max_depth=5, n_estimators=10),
                 transformer=transformer),
-            recall_predictor_regressor=GradientBoostingRegressor(
+            quality_regressor=GradientBoostingRegressor(
                 n_estimators=10, max_depth=8),
             features=features,
             should_debug=args.should_debug
@@ -136,7 +136,7 @@ def handle_train(args):
                 GradientBoostingRegressor(
                     min_samples_leaf=30, max_depth=5, n_estimators=10)
             ),
-            recall_predictor_regressor=GradientBoostingRegressor(
+            quality_regressor=GradientBoostingRegressor(
                 n_estimators=10, max_depth=8),
             features=features,
             should_debug=args.should_debug
