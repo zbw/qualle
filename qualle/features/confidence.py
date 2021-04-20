@@ -17,16 +17,13 @@
 from typing import List
 
 import numpy as np
-from sklearn.base import TransformerMixin, BaseEstimator
 
+from qualle.features.base import Features
 from qualle.models import Scores
 
 
-class ConfidenceFeatures(BaseEstimator, TransformerMixin):
+class ConfidenceFeatures(Features):
     """Features based on aggregating concept level confidence scores."""
-
-    def fit(self, X=None, y=None):
-        return self
 
     def transform(self, X: List[Scores]):
         _min = [np.min(row) if row else 0.0 for row in X]
