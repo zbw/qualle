@@ -18,6 +18,7 @@ from typing import List
 
 import numpy as np
 import pytest
+import scipy.sparse as sp
 from sklearn.exceptions import NotFittedError
 
 from qualle.features.base import Features
@@ -69,3 +70,20 @@ def test_transform_hstacks_result(combined_features, X):
     assert type(transformed) == np.ndarray
     assert transformed.shape == (2, 2)
     assert (transformed == [[2, 7], [1, 5]]).all()
+
+
+def test_transform_uses_sparse_hstack_if_any_feature_is_sparse(
+        combined_features, X
+):
+    class SparseFeature(Features):
+        def transform(self, X: List[List[float]]):
+            return sp.csr_matrix([[1, 0], [3, 5]])
+
+    combined_features.set_params(
+        features=[FeatureA(), FeatureB(), SparseFeature()]
+    )
+    X[SparseFeature] = [[0], [1]]
+    combined_features.fit(X)
+    transformed = combined_features.transform(X)
+    assert sp.issparse(transformed)
+    assert (transformed.toarray() == [[2, 7, 1, 0], [1, 5, 3, 5]]).all()
