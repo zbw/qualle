@@ -18,6 +18,7 @@ from typing import List
 
 import numpy as np
 import pytest
+from sklearn.exceptions import NotFittedError
 
 from qualle.features.base import Features
 from qualle.features.combined import CombinedFeatures
@@ -36,24 +37,34 @@ class FeatureB(Features):
 
 
 @pytest.fixture
+def X():
+    return {
+        FeatureA: [['x0', 'x1'], ['x2']],
+        FeatureB: [[3, 4], [5]]
+    }
+
+
+@pytest.fixture
 def combined_features():
     return CombinedFeatures([FeatureA(), FeatureB()])
 
 
-def test_combined_fit_combines_features(combined_features, mocker):
+def test_combined_fit_combines_features(combined_features, X, mocker):
     spies = []
     for f in combined_features.features:
         spies.append(mocker.spy(f, 'fit'))
-    combined_features.fit()
-    for spy in spies:
-        spy.assert_called_once()
+    combined_features.fit(X)
+    for i, spy in enumerate(spies):
+        spy.assert_called_once_with(X[combined_features.features[i].__class__])
 
 
-def test_transform_hstacks_result(combined_features):
-    X = {
-        FeatureA: [['x0', 'x1'], ['x2']],
-        FeatureB: [[3, 4], [5]]
-    }
+def test_transform_without_fit_raises_exc(combined_features, X):
+    with pytest.raises(NotFittedError):
+        combined_features.transform(X)
+
+
+def test_transform_hstacks_result(combined_features, X):
+    combined_features.fit(X)
     transformed = combined_features.transform(X)
     assert type(transformed) == np.ndarray
     assert transformed.shape == (2, 2)
