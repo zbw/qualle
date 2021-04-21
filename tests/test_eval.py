@@ -21,13 +21,13 @@ from qualle.evaluate import Evaluator, scores
 from qualle.features.label_calibration.simple_label_calibration import \
     SimpleLabelCalibrationFeatures, SimpleLabelCalibrator
 from qualle.pipeline import QualityEstimationPipeline
-from qualle.quality_estimation import RecallPredictor
+from qualle.quality_estimation import QualityEstimator
 
 
 @pytest.fixture
 def evaluator(train_data):
     qe_p = QualityEstimationPipeline(
-        recall_predictor=RecallPredictor(
+        recall_predictor=QualityEstimator(
             regressor=ExtraTreesRegressor(),
             features=SimpleLabelCalibrationFeatures()
         ),

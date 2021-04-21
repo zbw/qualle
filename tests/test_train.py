@@ -22,6 +22,7 @@ from sklearn.ensemble import ExtraTreesRegressor
 from qualle.features.confidence import ConfidenceFeatures
 from qualle.features.label_calibration.simple_label_calibration import \
     SimpleLabelCalibrator, SimpleLabelCalibrationFeatures
+from qualle.features.text import TextFeatures
 from qualle.models import LabelCalibrationData
 from qualle.train import Trainer, FeaturesDataMapper
 
@@ -39,7 +40,7 @@ def test_train_trains_qe_pipeline(train_data, mocker):
     t = Trainer(
         train_data=train_data,
         label_calibrator=SimpleLabelCalibrator(ExtraTreesRegressor()),
-        recall_predictor_regressor=ExtraTreesRegressor(),
+        quality_regressor=ExtraTreesRegressor(),
         features=[SimpleLabelCalibrationFeatures()]
     )
     spy = mocker.spy(t._qe_p, 'train')
@@ -71,3 +72,16 @@ def test_features_data_mapper_without_features(train_data, l_data):
     p_data = train_data.predict_data
     mapper = FeaturesDataMapper(set())
     assert mapper(p_data, l_data) == {}
+
+
+def test_features_data_mapper_for_each_feature(train_data, l_data):
+    p_data = train_data.predict_data
+
+    assert FeaturesDataMapper(
+        {SimpleLabelCalibrationFeatures})(p_data, l_data) == {
+               SimpleLabelCalibrationFeatures: l_data}
+    assert FeaturesDataMapper(
+        {ConfidenceFeatures})(p_data, l_data) == {
+               ConfidenceFeatures: p_data.scores}
+    assert FeaturesDataMapper(
+        {TextFeatures})(p_data, l_data) == {TextFeatures: p_data.docs}

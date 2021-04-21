@@ -31,6 +31,7 @@ from qualle.features.label_calibration.simple_label_calibration import \
 from qualle.features.label_calibration.thesauri_label_calibration import \
     ThesauriLabelCalibrator, ThesauriLabelCalibrationFeatures, \
     LabelCountForSubthesauriTransformer
+from qualle.features.text import TextFeatures
 from qualle.train import Trainer
 from qualle.utils import get_logger, train_input_from_tsv, timeit
 
@@ -65,9 +66,15 @@ def handle_train(args):
     train_data = train_input_from_tsv(path_to_train_tsv)
 
     features = []
-    if args.confidence:
-        features.append(ConfidenceFeatures())
-
+    if args.features:
+        cli_features = set(args.features)
+        if {'all', 'confidence'} & cli_features:
+            features.append(ConfidenceFeatures())
+        if {'all', 'text'} & cli_features:
+            features.append(TextFeatures())
+        logger.debug(
+            'Use features in addition to LabelCalibration: %s', features
+        )
     if args.slc:
         if not all((args.thsys, args.s_type, args.c_type, args.c_uri_prefix)):
             raise Exception(
@@ -114,7 +121,7 @@ def handle_train(args):
                 regressor_params=dict(
                     min_samples_leaf=30, max_depth=5, n_estimators=10),
                 transformer=transformer),
-            recall_predictor_regressor=GradientBoostingRegressor(
+            quality_regressor=GradientBoostingRegressor(
                 n_estimators=10, max_depth=8),
             features=features,
             should_debug=args.should_debug
@@ -129,7 +136,7 @@ def handle_train(args):
                 GradientBoostingRegressor(
                     min_samples_leaf=30, max_depth=5, n_estimators=10)
             ),
-            recall_predictor_regressor=GradientBoostingRegressor(
+            quality_regressor=GradientBoostingRegressor(
                 n_estimators=10, max_depth=8),
             features=features,
             should_debug=args.should_debug
@@ -171,8 +178,13 @@ if __name__ == '__main__':
                               help='Path to train data file in tsv format')
     train_parser.add_argument('output', type=str,
                               help='Path to output model file')
-    train_parser.add_argument('--confidence', action='store_true',
-                              help='Use confidence features')
+    train_parser.add_argument(
+        '--features', '-f', choices=['all', 'confidence', 'text'],
+        action='append', type=str,
+        help='Use features in addition to Label Calibration. '
+             'Can be passed multiple times. '
+             'If "all" is passed, all features will be used.'
+    )
     slc_group = train_parser.add_argument_group(
         'subthesauri-label-calibration',
         description='Run Label Calibration by distinguishing between label '

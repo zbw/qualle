@@ -22,7 +22,8 @@ from sklearn.utils.validation import check_is_fitted
 from qualle.features.base import Features
 
 
-class RecallPredictor(BaseEstimator, RegressorMixin):
+class QualityEstimator(BaseEstimator, RegressorMixin):
+    """Regressor which uses a pipeline with given features and regressor."""
 
     def __init__(
             self,

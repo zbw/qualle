@@ -17,6 +17,8 @@
 from typing import List, Dict, Any, Type
 
 import numpy as np
+import scipy.sparse as sp
+from sklearn.utils.validation import check_is_fitted
 
 from qualle.features.base import Features
 
@@ -29,11 +31,17 @@ class CombinedFeatures(Features):
     def __init__(self, features: List[Features]):
         self.features = features
 
-    def fit(self, X=None, y=None):
-        for f in self.features:
-            f.fit()
+    def fit(self, X: CombinedFeaturesData, y=None):
+        self.features_ = self.features
+        for f in self.features_:
+            f.fit(X[f.__class__])
         return self
 
     def transform(self, X: CombinedFeaturesData):
-        combined = [f.transform(X[f.__class__]) for f in self.features]
-        return np.hstack(combined)
+        check_is_fitted(self)
+        combined = [f.transform(X[f.__class__]) for f in self.features_]
+        issparse = any(map(sp.issparse, combined))
+        if issparse:
+            return sp.hstack(combined, format='csr')
+        else:
+            return np.hstack(combined)

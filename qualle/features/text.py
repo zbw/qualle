@@ -16,18 +16,20 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 from typing import List
 
-import numpy as np
+from sklearn.utils.validation import check_is_fitted
+from stwfsapy.text_features import mk_text_features
 
 from qualle.features.base import Features
-from qualle.models import Scores
 
 
-class ConfidenceFeatures(Features):
-    """Features based on aggregating concept level confidence scores."""
+class TextFeatures(Features):
+    """Features based on the text string of a document."""
 
-    def transform(self, X: List[Scores]):
-        _min = [np.min(row) if row else 0.0 for row in X]
-        _mean = [np.mean(row) if row else 0.0 for row in X]
-        _median = [np.median(row) if row else 0.0 for row in X]
-        _prod = [np.prod(row) if row else 0.0 for row in X]
-        return np.column_stack([_min, _mean, _median, _prod])
+    def fit(self, X: List[str], y=None):
+        self.features_ = mk_text_features()
+        self.features_.fit(X)
+        return self
+
+    def transform(self, X: List[str]):
+        check_is_fitted(self)
+        return self.features_.transform(X)
