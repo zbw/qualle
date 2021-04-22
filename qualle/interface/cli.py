@@ -16,7 +16,7 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 import argparse
 import logging
-
+import logging.config
 
 from qualle.interface.config import TrainSettings, \
     SubthesauriLabelCalibrationSettings, RegressorSettings, EvalSettings, \
@@ -25,14 +25,15 @@ from qualle.interface.internal import train, evaluate
 from qualle.utils import get_logger
 
 
-def config_logging(should_debug):
-    # TODO: add option to use log conf file
+def config_logging(config_file=None, debug=False):
     logger = get_logger()
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG if should_debug else logging.INFO)
-    logger.addHandler(ch)
-    logger.setLevel(logging.DEBUG if should_debug else logging.INFO)
-    return logger
+    if config_file:
+        logging.config.fileConfig(config_file)
+    else:
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG if debug else logging.INFO)
+        logger.addHandler(ch)
+        logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
 
 class CliValidationError(Exception):
@@ -119,6 +120,11 @@ def cli_entrypoint():
         '--debug', action='store_true', help='Set Log Level to Debug',
         dest='should_debug'
     )
+    parser.add_argument(
+        '--logging-conf', nargs=1, type=str,
+        help='Path to logging config file in configparser format. '
+             'The name of the logger which has to be configured is "qualle"'
+    )
     subparsers = parser.add_subparsers(title='Subcommands')
 
     eval_parser = subparsers.add_parser(
@@ -180,5 +186,5 @@ def cli_entrypoint():
 
     args = parser.parse_args()
 
-    config_logging(args.should_debug)
+    config_logging(config_file=args.logging_conf, debug=args.should_debug)
     args.func(args)
