@@ -1,0 +1,184 @@
+#  Copyright (c) 2021 ZBW  – Leibniz Information Centre for Economics
+#
+#  This file is part of qualle.
+#
+#  qualle is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  qualle is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
+import argparse
+import logging
+
+
+from qualle.interface.config import TrainSettings, \
+    SubthesauriLabelCalibrationSettings, RegressorSettings, EvalSettings, \
+    FeaturesEnum
+from qualle.interface.internal import train, evaluate
+from qualle.utils import get_logger
+
+
+def config_logging(should_debug):
+    # TODO: add option to use log conf file
+    logger = get_logger()
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG if should_debug else logging.INFO)
+    logger.addHandler(ch)
+    logger.setLevel(logging.DEBUG if should_debug else logging.INFO)
+    return logger
+
+
+class CliValidationError(Exception):
+    pass
+
+
+def handle_train(args: argparse.Namespace):
+    logger = get_logger()
+
+    if args.slc:
+        if not all((args.thsys, args.s_type, args.c_type, args.c_uri_prefix)):
+            raise CliValidationError(
+                'Not all required arguments for Subthesauri Label Calibration '
+                'have been passed. Please see usage.'
+            )
+        if args.subthesauri:
+            subthesauri = args.subthesauri[0].split(',')
+        else:
+            subthesauri = []
+
+        slc = SubthesauriLabelCalibrationSettings(
+            thesaurus_file=args.thsys[0],
+            subthesaurus_type=args.s_type[0],
+            concept_type=args.c_type[0],
+            concept_type_prefix=args.c_uri_prefix[0],
+            subthesauri=subthesauri
+        )
+    else:
+        slc = None
+
+    features = []
+    if args.features:
+        cli_features = set(args.features)
+        if {'all', 'confidence'} & cli_features:
+            features.append(FeaturesEnum.CONFIDENCE)
+        if {'all', 'text'} & cli_features:
+            features.append(FeaturesEnum.TEXT)
+        logger.debug(
+            'Use features in addition to LabelCalibration: %s', list(
+                map(lambda f: f.value, features)
+            )
+        )
+
+    # TODO allow to pass regressors per cli
+    lc_regressor = RegressorSettings(
+        regressor_class='sklearn.ensemble.GradientBoostingRegressor',
+        params=dict(min_samples_leaf=30, max_depth=5, n_estimators=10)
+    )
+
+    qe_regressor = RegressorSettings(
+        regressor_class='sklearn.ensemble.GradientBoostingRegressor',
+        params=dict(n_estimators=10, max_depth=8)
+    )
+
+    settings = TrainSettings(
+        label_calibrator_regressor=lc_regressor,
+        quality_estimator_regressor=qe_regressor,
+
+        train_data_file=args.train_data_file,
+        output_path=args.output,
+        features=features,
+
+        subthesauri_label_calibration=slc,
+        should_debug=args.should_debug
+    )
+
+    train(settings)
+
+
+def handle_eval(args: argparse.Namespace):
+    settings = EvalSettings(
+        test_data_file=args.test_data_file,
+        model_file=args.model
+    )
+    evaluate(settings)
+
+
+def cli_entrypoint():
+    parser = argparse.ArgumentParser(
+        description='Quality Estimation for Automatic Subject Indexing'
+    )
+
+    parser.add_argument(
+        '--debug', action='store_true', help='Set Log Level to Debug',
+        dest='should_debug'
+    )
+    subparsers = parser.add_subparsers(title='Subcommands')
+
+    eval_parser = subparsers.add_parser(
+        'eval',
+        description='Run evaluation on training data using different '
+                    'estimators.'
+    )
+    eval_parser.set_defaults(func=handle_eval)
+
+    eval_parser.add_argument('test_data_file', type=str,
+                             help='Path to test data file in tsv format')
+    eval_parser.add_argument('model', type=str, help='Path to model file')
+
+    train_parser = subparsers.add_parser(
+        'train',
+        description='Run training using default estimator.'
+    )
+    train_parser.set_defaults(func=handle_train)
+    train_parser.add_argument('train_data_file', type=str,
+                              help='Path to train data file in tsv format')
+    train_parser.add_argument('output', type=str,
+                              help='Path to output model file')
+    train_parser.add_argument(
+        '--features', '-f', choices=['all', 'confidence', 'text'],
+        action='append', type=str,
+        help='Use features in addition to Label Calibration. '
+             'Can be passed multiple times. '
+             'If "all" is passed, all features will be used.'
+    )
+    slc_group = train_parser.add_argument_group(
+        'subthesauri-label-calibration',
+        description='Run Label Calibration by distinguishing between label '
+                    'count for different subthesauri. '
+                    'All Arguments in this group ,'
+                    ' except --subthesauri , are required. '
+                    'If --subthesauri is not passed, subthesauri used '
+                    'are automatically detected by type.')
+    slc_group.add_argument('--slc', action='store_true',
+                           help='Activate Subthesauri Label Calibration.')
+    slc_group.add_argument(
+        '--thsys', type=str, nargs=1,
+        help='path to thesaurus file (must be in RDF format)')
+    slc_group.add_argument(
+        '--s-type', type=str, nargs=1,
+        help='subthesaurus type uri, e.g.:  '
+             'http://zbw.eu/namespaces/zbw-extensions/Thsys')
+    slc_group.add_argument(
+        '--c-type', type=str, nargs=1,
+        help='concept type uri, e.g.: '
+             'http://zbw.eu/namespaces/zbw-extensions/Descriptor')
+    slc_group.add_argument(
+        '--c-uri-prefix', type=str, nargs=1,
+        help='concept uri prefix, e.g.: http://zbw.eu/stw/descriptor)')
+    slc_group.add_argument('--subthesauri', type=str, nargs=1,
+                           help='subthesauri URIs as comma-separated list, '
+                                'e.g.: http://zbw.eu/stw/thsys/v,'
+                                'http://zbw.eu/stw/thsys/b,'
+                                'http://zbw.eu/stw/thsys/n')
+
+    args = parser.parse_args()
+
+    config_logging(args.should_debug)
+    args.func(args)

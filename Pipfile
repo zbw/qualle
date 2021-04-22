@@ -12,6 +12,7 @@ scikit-learn = "==0.24.*"
 stwfsapy = "==0.1.5"
 scipy = "==1.6.*"
 rdflib = "==4.2.*"
+pydantic = "==1.8.*"
 
 
 [requires]
