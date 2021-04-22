@@ -33,7 +33,14 @@ def train_args_dict():
         output='/tmp/output',
         slc=False,
         should_debug=False,
-        features=[]
+        features=[],
+        label_calibrator_regressor=[
+         '{"class": "sklearn.ensemble.GradientBoostingRegressor",'
+         '"min_samples_leaf": 30, "max_depth": 5, "n_estimators": 10}'
+        ],
+        quality_estimator_regressor=[
+            '{"class": "sklearn.ensemble.ExtraTreesRegressor"}'
+        ]
     )
 
 
@@ -150,7 +157,7 @@ def test_handle_train_no_features(train_args_dict):
     assert actual_settings.features == []
 
 
-def test_handle_train_creates_gradientboosting_regressors(train_args_dict):
+def test_handle_train_creates_regressors(train_args_dict):
     handle_train(Namespace(**train_args_dict))
 
     cli.train.assert_called_once()
@@ -162,8 +169,8 @@ def test_handle_train_creates_gradientboosting_regressors(train_args_dict):
         params=dict(min_samples_leaf=30, max_depth=5, n_estimators=10)
     )
     assert actual_settings.quality_estimator_regressor == RegressorSettings(
-        regressor_class='sklearn.ensemble.GradientBoostingRegressor',
-        params=dict(n_estimators=10, max_depth=8)
+        regressor_class='sklearn.ensemble.ExtraTreesRegressor',
+        params=dict()
     )
 
 

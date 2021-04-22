@@ -40,16 +40,27 @@ def train(settings: TrainSettings):
     slc_settings = settings.subthesauri_label_calibration
     features = list(map(lambda f: f.value(), settings.features))
 
+    lc_regressor_cls = _get_class_from_str(
+        settings.label_calibrator_regressor.regressor_class
+    )
+    lc_regressor_params = settings.label_calibrator_regressor.params
+    logger.debug(
+        'Use (%s %s) as Regressor for Label Calibration',
+        settings.label_calibrator_regressor.regressor_class,
+        settings.label_calibrator_regressor.params
+    )
+
     quality_estimator_cls = _get_class_from_str(
         settings.quality_estimator_regressor.regressor_class
     )
     quality_estimator = quality_estimator_cls(
         **settings.quality_estimator_regressor.params
     )
-    lc_regressor_cls = _get_class_from_str(
-        settings.label_calibrator_regressor.regressor_class
+    logger.debug(
+        'Use (%s %s) as Regressor for Quality Estimation',
+        settings.quality_estimator_regressor.regressor_class,
+        settings.quality_estimator_regressor.params
     )
-    lc_regressor_params = settings.label_calibrator_regressor.params
 
     if slc_settings:
         logger.info('Run training with Subthesauri Label Calibration')

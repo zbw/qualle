@@ -15,6 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 import argparse
+import json
 import logging
 import logging.config
 
@@ -77,16 +78,14 @@ def handle_train(args: argparse.Namespace):
             )
         )
 
-    # TODO allow to pass regressors per cli
+    lc_regressor_config = json.loads(args.label_calibrator_regressor[0])
     lc_regressor = RegressorSettings(
-        regressor_class='sklearn.ensemble.GradientBoostingRegressor',
-        params=dict(min_samples_leaf=30, max_depth=5, n_estimators=10)
-    )
-
+        regressor_class=lc_regressor_config['class'],
+        params={k: v for k, v in lc_regressor_config.items() if k != 'class'})
+    qe_regressor_config = json.loads(args.quality_estimator_regressor[0])
     qe_regressor = RegressorSettings(
-        regressor_class='sklearn.ensemble.GradientBoostingRegressor',
-        params=dict(n_estimators=10, max_depth=8)
-    )
+        regressor_class=qe_regressor_config['class'],
+        params={k: v for k, v in qe_regressor_config.items() if k != 'class'})
 
     settings = TrainSettings(
         label_calibrator_regressor=lc_regressor,
@@ -153,6 +152,26 @@ def cli_entrypoint():
         help='Use features in addition to Label Calibration. '
              'Can be passed multiple times. '
              'If "all" is passed, all features will be used.'
+    )
+    train_parser.add_argument(
+        '--label-calibrator-regressor', type=str, nargs=1,
+        help='Specifiy regressor to use for Label Calibration in JSON format.'
+             'Requires property "class" with fully qualified name of the '
+             'scikit-learn regressor class to use  for the Label Calibrator. '
+             'E.g.: {"class": "sklearn.ensemble.GradientBoostingRegressor",'
+             '"min_samples_leaf": 30, "max_depth": 5, "n_estimators": 10} ',
+        default=['{"class": "sklearn.ensemble.GradientBoostingRegressor",'
+                 '"min_samples_leaf": 30, "max_depth": 5, "n_estimators": 10}']
+    )
+    train_parser.add_argument(
+        '--quality-estimator-regressor', type=str, nargs=1,
+        help='Specifiy regressor to use for Label Calibration in JSON format.'
+             'Requires property "class" with fully qualified name of the '
+             'scikit-learn regressor class to use  for the Quality Estimator. '
+             'E.g.: {"class": "sklearn.ensemble.GradientBoostingRegressor",'
+             '"min_samples_leaf": 30, "max_depth": 5, "n_estimators": 10} ',
+        default=['{"class": "sklearn.ensemble.GradientBoostingRegressor",'
+                 '"n_estimators": 10, "max_depth": 8}']
     )
     slc_group = train_parser.add_argument_group(
         'subthesauri-label-calibration',
