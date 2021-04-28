@@ -61,3 +61,7 @@ class TrainSettings(BaseSettings):
 class EvalSettings(BaseSettings):
     test_data_file: Path
     model_file: Path
+
+
+class RestSettings(BaseSettings):
+    model_file: Path

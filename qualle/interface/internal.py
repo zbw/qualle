@@ -132,7 +132,7 @@ def evaluate(settings: EvalSettings):
     logger = get_logger()
     path_to_test_tsv = settings.test_data_file
     path_to_model_file = settings.model_file
-    model = load(path_to_model_file)
+    model = load_model(path_to_model_file)
     logger.info('Run evaluation with model:\n%s', model)
     test_input = train_input_from_tsv(str(path_to_test_tsv))
     ev = Evaluator(test_input, model)
@@ -140,3 +140,7 @@ def evaluate(settings: EvalSettings):
     logger.info('\nScores:')
     for metric, score in eval_data.items():
         logger.info(f'{metric}: {score}')
+
+
+def load_model(path_to_model_file: str):
+    return load(path_to_model_file)
