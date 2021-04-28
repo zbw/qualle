@@ -63,5 +63,7 @@ class EvalSettings(BaseSettings):
     model_file: Path
 
 
-class RestSettings(BaseSettings):
+class RESTSettings(BaseSettings):
     model_file: Path
+    port: int = 8000
+    host: str = '127.0.0.1'

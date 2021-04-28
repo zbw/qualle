@@ -20,10 +20,13 @@ import pytest
 
 import qualle.interface.cli as cli
 from qualle.interface.config import FeaturesEnum, RegressorSettings, \
-    SubthesauriLabelCalibrationSettings, TrainSettings, EvalSettings
+    SubthesauriLabelCalibrationSettings, TrainSettings, EvalSettings, \
+    RESTSettings
 from qualle.interface.cli import CliValidationError, handle_train, handle_eval
 
 import tests.interface.common as c
+
+DUMMY_MODEL_PATH = '/tmp/model'
 
 
 @pytest.fixture
@@ -176,10 +179,23 @@ def test_handle_train_creates_regressors(train_args_dict):
 
 def test_handle_eval():
     handle_eval(
-        Namespace(**dict(test_data_file='/tmp/test', model='/tmp/model')))
+        Namespace(**dict(test_data_file='/tmp/test', model=DUMMY_MODEL_PATH)))
     cli.evaluate.assert_called_once()
     actual_settings = cli.evaluate.call_args[0][0]
     assert actual_settings == EvalSettings(
         test_data_file='/tmp/test',
-        model_file='/tmp/model'
+        model_file=DUMMY_MODEL_PATH
+    )
+
+
+def test_handle_rest(mocker):
+    m_run = mocker.Mock()
+    mocker.patch('qualle.interface.cli.run', m_run)
+
+    cli.handle_rest(
+        Namespace(**dict(model=DUMMY_MODEL_PATH, port=[9000], host=['x']))
+    )
+
+    m_run.assert_called_once_with(
+        RESTSettings(model_file=DUMMY_MODEL_PATH, host='x', port=9000)
     )

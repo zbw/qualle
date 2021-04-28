@@ -14,6 +14,9 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
+
+"""Parse command line args and call respective interface."""
+
 import argparse
 import json
 import logging
@@ -21,8 +24,9 @@ import logging.config
 
 from qualle.interface.config import TrainSettings, \
     SubthesauriLabelCalibrationSettings, RegressorSettings, EvalSettings, \
-    FeaturesEnum
+    FeaturesEnum, RESTSettings
 from qualle.interface.internal import train, evaluate
+from qualle.interface.rest import run
 from qualle.utils import get_logger
 
 
@@ -108,6 +112,16 @@ def handle_eval(args: argparse.Namespace):
         model_file=args.model
     )
     evaluate(settings)
+
+
+def handle_rest(args: argparse.Namespace):
+    settings = RESTSettings(
+        model_file=args.model,
+        port=args.port[0],
+        host=args.host[0]
+
+    )
+    run(settings)
 
 
 def cli_entrypoint():
@@ -202,6 +216,21 @@ def cli_entrypoint():
                                 'e.g.: http://zbw.eu/stw/thsys/v,'
                                 'http://zbw.eu/stw/thsys/b,'
                                 'http://zbw.eu/stw/thsys/n')
+
+    rest_parser = subparsers.add_parser(
+        'rest',
+        description='Run Qualle as Webservice with REST interface'
+    )
+    rest_parser.add_argument('model', type=str, help='Path to model file')
+    rest_parser.add_argument(
+        '--port', '-p', type=int, nargs=1, help='Port to listen on',
+        default=[8000]
+    )
+    rest_parser.add_argument(
+        '--host', type=str, nargs=1, help='Host to listen on',
+        default=['127.0.0.1']
+    )
+    rest_parser.set_defaults(func=handle_rest)
 
     args = parser.parse_args()
 

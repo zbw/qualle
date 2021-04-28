@@ -15,6 +15,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Internal interface to access Qualle functionality"""
+
 from importlib import import_module
 from typing import Type
 

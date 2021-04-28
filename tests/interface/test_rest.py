@@ -20,10 +20,11 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from qualle.interface.config import RestSettings
+from qualle.interface.config import RESTSettings
 from qualle.interface.rest import Document, QualityScores, \
     QualityEstimation, Metric, \
-    _map_documents_to_predict_data, Documents, create_app, PREDICT_ENDPOINT
+    _map_documents_to_predict_data, Documents, create_app, PREDICT_ENDPOINT, \
+    run
 
 
 @pytest.fixture
@@ -39,7 +40,7 @@ def mocked_pipeline(mocker):
 
 @pytest.fixture
 def client(mocked_pipeline):
-    app = create_app(RestSettings(model_file='/tmp/dummy'))
+    app = create_app(RESTSettings(model_file='/tmp/dummy'))
     client = TestClient(app)
     return client
 
@@ -71,6 +72,23 @@ def test_return_scores_for_get_quality_estimation(client, documents):
         )]
     )
     assert resp.json() == json.loads(expected_scores.json())
+
+
+def test_run(mocker):
+    m_app = mocker.Mock()
+    m_create_app = mocker.Mock(return_value=m_app)
+    mocker.patch('qualle.interface.rest.create_app', m_create_app)
+    m_uvicorn_run = mocker.Mock()
+    mocker.patch('qualle.interface.rest.uvicorn.run', m_uvicorn_run)
+
+    settings = RESTSettings(model_file='/tmp/model')
+
+    run(settings)
+
+    m_create_app.assert_called_once_with(settings)
+    m_uvicorn_run.assert_called_once_with(
+        m_app, host=settings.host, port=settings.port
+    )
 
 
 def test_map_documents_to_predict_data(documents, train_data):

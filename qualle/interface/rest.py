@@ -19,10 +19,11 @@ from enum import Enum
 from functools import lru_cache
 from typing import List, Optional
 
+import uvicorn
 from fastapi import status, FastAPI, Depends, APIRouter
 from pydantic.main import BaseModel
 
-from qualle.interface.config import RestSettings
+from qualle.interface.config import RESTSettings
 from qualle.interface.internal import load_model as internal_load_model
 from qualle.models import PredictData
 from qualle.pipeline import QualityEstimationPipeline
@@ -59,7 +60,7 @@ router = APIRouter()
 
 @lru_cache
 def load_model() -> QualityEstimationPipeline:
-    settings = RestSettings()
+    settings = RESTSettings()
     return internal_load_model(str(settings.model_file))
 
 
@@ -89,11 +90,16 @@ def _map_documents_to_predict_data(documents: Documents) -> PredictData:
     )
 
 
-def create_app(settings: Optional[RestSettings] = None):
-    settings = settings or RestSettings()
+def create_app(settings: Optional[RESTSettings] = None):
+    settings = settings or RESTSettings()
     app = FastAPI()
     app.include_router(router)
     m = internal_load_model(str(settings.model_file))
     app.dependency_overrides[load_model] = lambda: m
 
     return app
+
+
+def run(settings: Optional[RESTSettings] = None):
+    app = create_app(settings)
+    uvicorn.run(app, host=settings.host, port=settings.port)
