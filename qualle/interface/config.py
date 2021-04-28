@@ -18,18 +18,18 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from pydantic.main import BaseModel
+from pydantic import BaseSettings
 from pydantic.networks import AnyUrl
 from qualle.features.confidence import ConfidenceFeatures
 from qualle.features.text import TextFeatures
 
 
-class RegressorSettings(BaseModel):
+class RegressorSettings(BaseSettings):
     regressor_class: str
     params: Dict
 
 
-class SubthesauriLabelCalibrationSettings(BaseModel):
+class SubthesauriLabelCalibrationSettings(BaseSettings):
     thesaurus_file: Path
     subthesaurus_type: AnyUrl
     concept_type: AnyUrl
@@ -42,7 +42,7 @@ class FeaturesEnum(Enum):
     TEXT = TextFeatures
 
 
-class TrainSettings(BaseModel):
+class TrainSettings(BaseSettings):
 
     label_calibrator_regressor: RegressorSettings
     quality_estimator_regressor: RegressorSettings
@@ -58,6 +58,6 @@ class TrainSettings(BaseModel):
     should_debug: bool = False
 
 
-class EvalSettings(BaseModel):
+class EvalSettings(BaseSettings):
     test_data_file: Path
     model_file: Path
