@@ -41,6 +41,7 @@ def load_train_input(pth_to_data: str) -> TrainData:
     else:
         return train_input_from_tsv(pth_to_data)
 
+
 def train_input_from_tsv(
         path_to_tsv: str
 ) -> TrainData:
@@ -76,7 +77,7 @@ def train_input_from_annif(path_to_folder: str) -> TrainData:
     pred_labels = []
     true_labels = []
     scores = []
-    for pred_pth in glob((os.path.join(path_to_folder,'*.annif'))):
+    for pred_pth in glob((os.path.join(path_to_folder, '*.annif'))):
         with open(pred_pth) as fp:
             scores_for_doc = []
             pred_labels_for_doc = []
@@ -110,7 +111,6 @@ def extract_concept_id_from_annif_label(uri):
     split = uri.split('/')
     # remove '>' at end of URI
     return split[-1][:-1]
-
 
 
 def get_logger():

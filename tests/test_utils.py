@@ -115,10 +115,10 @@ def annif_data_without_true_labels(tmpdir):
     doc0.write('title0\ncontent0')
     doc1 = tmpdir.join('doc1.txt')
     doc1.write('title1\ncontent1')
-    scores0=tmpdir.join('doc0.annif')
+    scores0 = tmpdir.join('doc0.annif')
     scores0.write(
         f'<{_URI_PREFIX}concept0>\tlabel0\t1\n'
-        f'<{_URI_PREFIX}concept1>\tlabel1\t0.5',mode='w+')
+        f'<{_URI_PREFIX}concept1>\tlabel1\t0.5')
     scores1 = tmpdir.join('doc1.annif')
     scores1.write(
         f'<{_URI_PREFIX}concept2>\tlabel2\t0\n'
@@ -150,11 +150,12 @@ def test_train_input_from_annif(
         ),
         true_labels=[['concept1', 'concept3'], ['concept3']]
     )
-    
+
 
 def test_train_input_from_annif_without_labels_returns_empty_list(
         annif_data_without_true_labels):
-    assert train_input_from_annif(str(annif_data_without_true_labels)) == TrainData(
+    assert train_input_from_annif(
+            str(annif_data_without_true_labels)) == TrainData(
         predict_data=PredictData(
             docs=['title0\ncontent0', 'title1\ncontent1'],
             predicted_labels=[
@@ -170,6 +171,7 @@ def test_extract_concept_id():
     assert 'concept_0' == extract_concept_id_from_annif_label(
         f'<{_URI_PREFIX}concept_0>'
     )
+
 
 def test_timeit(mocker):
     m = mocker.Mock(side_effect=[1, 3])
