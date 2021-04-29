@@ -219,7 +219,7 @@ def cli_entrypoint():
 
     rest_parser = subparsers.add_parser(
         'rest',
-        description='Run Qualle as Webservice with REST interface'
+        description='Run Qualle as REST Webservice with predict endpoint'
     )
     rest_parser.add_argument('model', type=str, help='Path to model file')
     rest_parser.add_argument(
