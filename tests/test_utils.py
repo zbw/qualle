@@ -16,7 +16,12 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
 from qualle.models import TrainData, PredictData
-from qualle.utils import recall, train_input_from_tsv, timeit
+from qualle.utils import recall, load_train_input, train_input_from_tsv, \
+    train_input_from_annif, timeit, extract_concept_id_from_annif_label
+import pytest
+
+
+_URI_PREFIX = 'http://uri.tld/'
 
 
 def test_recall():
@@ -38,6 +43,30 @@ def test_recall_empty_pred_labels_return_zero():
 
 def test_recall_empty_input():
     assert recall(true_labels=[], predicted_labels=[]) == []
+
+
+def test_load_train_input_selects_annif(mocker, tmpdir):
+    ret = TrainData(
+        predict_data=PredictData(
+            docs=[],
+            predicted_labels=[],
+            scores=[]),
+        true_labels=[])
+    mocker.patch(
+        'qualle.utils.train_input_from_annif', return_value=ret)
+    assert load_train_input(str(tmpdir)) == ret
+
+
+def test_load_train_input_selects_tsv(mocker, tmpdir):
+    ret = TrainData(
+        predict_data=PredictData(
+            docs=[],
+            predicted_labels=[],
+            scores=[]),
+        true_labels=[])
+    mocker.patch(
+        'qualle.utils.train_input_from_tsv', return_value=ret)
+    assert load_train_input(str(tmpdir.join('empty.tsv'))) == ret
 
 
 def test_train_input_from_tsv(mocker):
@@ -79,6 +108,68 @@ def test_train_input_from_tsv_empty_labels__returns_empty_list(mocker):
         true_labels=[['concept1', 'concept3'], []]
     )
 
+
+@pytest.fixture
+def annif_data_without_true_labels(tmpdir):
+    doc0 = tmpdir.join('doc0.txt')
+    doc0.write('title0\ncontent0')
+    doc1 = tmpdir.join('doc1.txt')
+    doc1.write('title1\ncontent1')
+    scores0=tmpdir.join('doc0.annif')
+    scores0.write(
+        f'<{_URI_PREFIX}concept0>\tlabel0\t1\n'
+        f'<{_URI_PREFIX}concept1>\tlabel1\t0.5',mode='w+')
+    scores1 = tmpdir.join('doc1.annif')
+    scores1.write(
+        f'<{_URI_PREFIX}concept2>\tlabel2\t0\n'
+        f'<{_URI_PREFIX}concept3>\tlabel3\t0.5')
+    return tmpdir
+
+
+@pytest.fixture
+def annif_data_with_labels(
+        annif_data_without_true_labels):
+    labels0 = annif_data_without_true_labels.join('doc0.tsv')
+    labels0.write(
+        f'<{_URI_PREFIX}concept1>\tlabel1\n'
+        f'<{_URI_PREFIX}concept3>\tlabel3')
+    labels1 = annif_data_without_true_labels.join('doc1.tsv')
+    labels1.write(f'{_URI_PREFIX}concept3>\tlabel3')
+    return annif_data_without_true_labels
+
+
+def test_train_input_from_annif(
+        annif_data_with_labels):
+    assert train_input_from_annif(str(annif_data_with_labels)) == TrainData(
+        predict_data=PredictData(
+            docs=['title0\ncontent0', 'title1\ncontent1'],
+            predicted_labels=[
+                ['concept0', 'concept1'], ['concept2', 'concept3']
+            ],
+            scores=[[1, .5], [0, .5]]
+        ),
+        true_labels=[['concept1', 'concept3'], ['concept3']]
+    )
+    
+
+def test_train_input_from_annif_without_labels_returns_empty_list(
+        annif_data_without_true_labels):
+    assert train_input_from_annif(str(annif_data_without_true_labels)) == TrainData(
+        predict_data=PredictData(
+            docs=['title0\ncontent0', 'title1\ncontent1'],
+            predicted_labels=[
+                ['concept0', 'concept1'], ['concept2', 'concept3']
+            ],
+            scores=[[1, .5], [0, .5]]
+        ),
+        true_labels=[]
+    )
+
+
+def test_extract_concept_id():
+    assert 'concept_0' == extract_concept_id_from_annif_label(
+        f'<{_URI_PREFIX}concept_0>'
+    )
 
 def test_timeit(mocker):
     m = mocker.Mock(side_effect=[1, 3])
