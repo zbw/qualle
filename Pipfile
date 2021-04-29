@@ -6,13 +6,16 @@ verify_ssl = true
 [dev-packages]
 pytest = "==6.2.*"
 pytest-mock = "==3.5.*"
+requests = "==2.25.*"
 
 [packages]
 scikit-learn = "==0.24.*"
 stwfsapy = "==0.1.5"
 scipy = "==1.6.*"
 rdflib = "==4.2.*"
-
+pydantic = "==1.8.*"
+fastapi = "==0.63.*"
+uvicorn = "==0.13.*"
 
 [requires]
 python_version = "3.8"

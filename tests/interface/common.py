@@ -15,8 +15,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 
-from qualle.interface.cli import cli_entrypoint
-
-
-if __name__ == '__main__':
-    cli_entrypoint()
+DUMMY_SUBTHESAURUS_B = 'http://subB'
+DUMMY_SUBTHESAURUS_A = 'http://subA'
+DUMMY_CONCEPT_TYPE = 'http://ctype'
+DUMMY_CONCEPT_TYPE_PREFIX = 'http://prefix'
+DUMMY_SUBTHESAURUS_TYPE = 'http://stype'
+DUMMY_THESAURUS_FILE = '/tmp/thesaurus'
