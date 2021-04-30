@@ -31,14 +31,14 @@ from qualle.features.label_calibration.thesauri_label_calibration import \
     LabelCountForSubthesauriTransformer
 from qualle.interface.config import TrainSettings, EvalSettings
 from qualle.train import Trainer
-from qualle.utils import get_logger, train_input_from_tsv, timeit
+from qualle.utils import get_logger, load_train_input, timeit
 
 
 def train(settings: TrainSettings):
     logger = get_logger()
     path_to_train_tsv = settings.train_data_file
     path_to_model_output_file = settings.output_path
-    train_data = train_input_from_tsv(str(path_to_train_tsv))
+    train_data = load_train_input(str(path_to_train_tsv))
     slc_settings = settings.subthesauri_label_calibration
     features = list(map(lambda f: f.value(), settings.features))
 
@@ -136,7 +136,7 @@ def evaluate(settings: EvalSettings):
     path_to_model_file = settings.model_file
     model = load_model(path_to_model_file)
     logger.info('Run evaluation with model:\n%s', model)
-    test_input = train_input_from_tsv(str(path_to_test_tsv))
+    test_input = load_train_input(str(path_to_test_tsv))
     ev = Evaluator(test_input, model)
     eval_data = ev.evaluate()
     logger.info('\nScores:')
