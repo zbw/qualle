@@ -110,31 +110,32 @@ def test_train_input_from_tsv_empty_labels__returns_empty_list(mocker):
 
 
 @pytest.fixture
-def annif_data_without_true_labels(tmpdir):
-    doc0 = tmpdir.join('doc0.txt')
-    doc0.write('title0\ncontent0')
-    doc1 = tmpdir.join('doc1.txt')
-    doc1.write('title1\ncontent1')
-    scores0 = tmpdir.join('doc0.annif')
-    scores0.write(
+def annif_data_without_true_labels(tmp_path):
+    doc0 = tmp_path / 'doc0.txt'
+    doc0.write_text('title0\ncontent0')
+    doc1 = tmp_path /'doc1.txt'
+    doc1.write_text('title1\ncontent1')
+    scores0 = tmp_path / 'doc0.annif'
+    scores0.write_text(
         f'<{_URI_PREFIX}concept0>\tlabel0\t1\n'
         f'<{_URI_PREFIX}concept1>\tlabel1\t0.5')
-    scores1 = tmpdir.join('doc1.annif')
-    scores1.write(
+    scores1 = tmp_path / 'doc1.annif'
+    scores1.write_text(
         f'<{_URI_PREFIX}concept2>\tlabel2\t0\n'
         f'<{_URI_PREFIX}concept3>\tlabel3\t0.5')
-    return tmpdir
+    return tmp_path
 
 
 @pytest.fixture
+@pytest.fixture
 def annif_data_with_labels(
         annif_data_without_true_labels):
-    labels0 = annif_data_without_true_labels.join('doc0.tsv')
-    labels0.write(
+    labels0 = annif_data_without_true_labels / 'doc0.tsv'
+    labels0.write_text(
         f'<{_URI_PREFIX}concept1>\tlabel1\n'
         f'<{_URI_PREFIX}concept3>\tlabel3')
-    labels1 = annif_data_without_true_labels.join('doc1.tsv')
-    labels1.write(f'{_URI_PREFIX}concept3>\tlabel3')
+    labels1 = annif_data_without_true_labels / 'doc1.tsv'
+    labels1.write_text(f'{_URI_PREFIX}concept3>\tlabel3')
     return annif_data_without_true_labels
 
 
