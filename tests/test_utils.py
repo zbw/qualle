@@ -45,28 +45,34 @@ def test_recall_empty_input():
     assert recall(true_labels=[], predicted_labels=[]) == []
 
 
-def test_load_train_input_selects_annif(mocker, tmpdir):
-    ret = TrainData(
-        predict_data=PredictData(
-            docs=[],
-            predicted_labels=[],
-            scores=[]),
-        true_labels=[])
+def test_load_train_input_selects_annif(mocker, tmp_path):
+    m_train_input_from_annif = mocker.Mock()
     mocker.patch(
-        'qualle.utils.train_input_from_annif', return_value=ret)
-    assert load_train_input(str(tmpdir)) == ret
+        'qualle.utils.train_input_from_annif', m_train_input_from_annif
+    )
+    m_train_input_from_tsv = mocker.Mock()
+    mocker.patch(
+        'qualle.utils.train_input_from_tsv', m_train_input_from_tsv
+    )
+    load_train_input(str(tmp_path))
+
+    m_train_input_from_tsv.assert_not_called()
+    m_train_input_from_annif.assert_called_once_with(str(tmp_path))
 
 
-def test_load_train_input_selects_tsv(mocker, tmpdir):
-    ret = TrainData(
-        predict_data=PredictData(
-            docs=[],
-            predicted_labels=[],
-            scores=[]),
-        true_labels=[])
+def test_load_train_input_selects_tsv(mocker, tmp_path):
+    m_train_input_from_annif = mocker.Mock()
     mocker.patch(
-        'qualle.utils.train_input_from_tsv', return_value=ret)
-    assert load_train_input(str(tmpdir.join('empty.tsv'))) == ret
+        'qualle.utils.train_input_from_annif', m_train_input_from_annif
+    )
+    m_train_input_from_tsv = mocker.Mock()
+    mocker.patch(
+        'qualle.utils.train_input_from_tsv', m_train_input_from_tsv
+    )
+    load_train_input(str(tmp_path / 'empty.tsv'))
+
+    m_train_input_from_annif.assert_not_called()
+    m_train_input_from_tsv.assert_called_once_with(str(tmp_path / 'empty.tsv'))
 
 
 def test_train_input_from_tsv(mocker):
