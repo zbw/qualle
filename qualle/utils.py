@@ -82,7 +82,7 @@ def train_input_from_annif(path_to_folder: str) -> TrainData:
             scores_for_doc = []
             pred_labels_for_doc = []
             for line in fp.readlines():
-                split = line.rstrip('\t').split('\t')
+                split = line.rstrip('\n').split('\t')
                 concept_id = extract_concept_id_from_annif_label(split[0])
                 pred_labels_for_doc.append(concept_id)
                 score = float(split[2])
