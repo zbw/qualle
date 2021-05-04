@@ -119,7 +119,7 @@ def test_train_input_from_tsv_empty_labels__returns_empty_list(mocker):
 def annif_data_without_true_labels(tmp_path):
     doc0 = tmp_path / 'doc0.txt'
     doc0.write_text('title0\ncontent0')
-    doc1 = tmp_path /'doc1.txt'
+    doc1 = tmp_path / 'doc1.txt'
     doc1.write_text('title1\ncontent1')
     scores0 = tmp_path / 'doc0.annif'
     scores0.write_text(
@@ -132,7 +132,6 @@ def annif_data_without_true_labels(tmp_path):
     return tmp_path
 
 
-@pytest.fixture
 @pytest.fixture
 def annif_data_with_labels(
         annif_data_without_true_labels):
