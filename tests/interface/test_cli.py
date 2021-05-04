@@ -32,7 +32,7 @@ DUMMY_MODEL_PATH = '/tmp/model'
 @pytest.fixture
 def train_args_dict():
     return dict(
-        train_data_file='/tmp/train',
+        train_data_path='/tmp/train',
         output='/tmp/output',
         slc=False,
         should_debug=False,
@@ -179,11 +179,11 @@ def test_handle_train_creates_regressors(train_args_dict):
 
 def test_handle_eval():
     handle_eval(
-        Namespace(**dict(test_data_file='/tmp/test', model=DUMMY_MODEL_PATH)))
+        Namespace(**dict(test_data_path='/tmp/test', model=DUMMY_MODEL_PATH)))
     cli.evaluate.assert_called_once()
     actual_settings = cli.evaluate.call_args[0][0]
     assert actual_settings == EvalSettings(
-        test_data_file='/tmp/test',
+        test_data_path='/tmp/test',
         model_file=DUMMY_MODEL_PATH
     )
 

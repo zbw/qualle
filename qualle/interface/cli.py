@@ -95,7 +95,7 @@ def handle_train(args: argparse.Namespace):
         label_calibrator_regressor=lc_regressor,
         quality_estimator_regressor=qe_regressor,
 
-        train_data_file=args.train_data_file,
+        train_data_path=args.train_data_path,
         output_path=args.output,
         features=features,
 
@@ -108,7 +108,7 @@ def handle_train(args: argparse.Namespace):
 
 def handle_eval(args: argparse.Namespace):
     settings = EvalSettings(
-        test_data_file=args.test_data_file,
+        test_data_path=args.test_data_path,
         model_file=args.model
     )
     evaluate(settings)
@@ -147,8 +147,10 @@ def cli_entrypoint():
     )
     eval_parser.set_defaults(func=handle_eval)
 
-    eval_parser.add_argument('test_data_file', type=str,
-                             help='Path to test data file in tsv format')
+    eval_parser.add_argument('test_data_path', type=str,
+                             help='Path to test data.'
+                             'Accepted are either a tsv file or '
+                             'a folder in annif format.')
     eval_parser.add_argument('model', type=str, help='Path to model file')
 
     train_parser = subparsers.add_parser(
@@ -156,8 +158,10 @@ def cli_entrypoint():
         description='Run training using default estimator.'
     )
     train_parser.set_defaults(func=handle_train)
-    train_parser.add_argument('train_data_file', type=str,
-                              help='Path to train data file in tsv format')
+    train_parser.add_argument('train_data_path', type=str,
+                              help='Path to train data.'
+                              'Accepted are either a tsv file or '
+                              'a folder in annif format.')
     train_parser.add_argument('output', type=str,
                               help='Path to output model file')
     train_parser.add_argument(

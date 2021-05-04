@@ -36,9 +36,9 @@ from qualle.utils import get_logger, load_train_input, timeit
 
 def train(settings: TrainSettings):
     logger = get_logger()
-    path_to_train_tsv = settings.train_data_file
+    path_to_train_data = settings.train_data_path
     path_to_model_output_file = settings.output_path
-    train_data = load_train_input(str(path_to_train_tsv))
+    train_data = load_train_input(str(path_to_train_data))
     slc_settings = settings.subthesauri_label_calibration
     features = list(map(lambda f: f.value(), settings.features))
 
@@ -132,11 +132,11 @@ def _get_class_from_str(fully_qualified_path: str) -> Type:
 
 def evaluate(settings: EvalSettings):
     logger = get_logger()
-    path_to_test_tsv = settings.test_data_file
+    path_to_test_data = settings.test_data_path
     path_to_model_file = settings.model_file
     model = load_model(path_to_model_file)
     logger.info('Run evaluation with model:\n%s', model)
-    test_input = load_train_input(str(path_to_test_tsv))
+    test_input = load_train_input(str(path_to_test_data))
     ev = Evaluator(test_input, model)
     eval_data = ev.evaluate()
     logger.info('\nScores:')

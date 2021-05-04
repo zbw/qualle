@@ -46,7 +46,7 @@ def mock_io(mocker, train_data):
 @pytest.fixture
 def train_settings():
     return TrainSettings(
-        train_data_file='/tmp/train',
+        train_data_path='/tmp/train',
         output_path='/tmp/output',
         should_debug=False,
         features=[FeaturesEnum.TEXT],
@@ -161,7 +161,7 @@ def test_evaluate(mocker, train_data):
     internal.load.return_value = 'testmodel'
 
     settings = EvalSettings(
-        test_data_file='/tmp/test',
+        test_data_path='/tmp/test',
         model_file='/tmp/model'
     )
     internal.evaluate(settings)

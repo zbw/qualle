@@ -47,7 +47,7 @@ class TrainSettings(BaseSettings):
     label_calibrator_regressor: RegressorSettings
     quality_estimator_regressor: RegressorSettings
 
-    train_data_file: Path
+    train_data_path: Path
     output_path: Path
 
     features: List[FeaturesEnum]
@@ -59,7 +59,7 @@ class TrainSettings(BaseSettings):
 
 
 class EvalSettings(BaseSettings):
-    test_data_file: Path
+    test_data_path: Path
     model_file: Path
 
 
