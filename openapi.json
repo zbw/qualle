@@ -24,7 +24,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/QualityEstimation"
+                }
               }
             }
           },
@@ -98,6 +100,49 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "Metric": {
+        "title": "Metric",
+        "enum": [
+          "recall"
+        ],
+        "description": "An enumeration."
+      },
+      "QualityEstimation": {
+        "title": "QualityEstimation",
+        "required": [
+          "scores"
+        ],
+        "type": "object",
+        "properties": {
+          "scores": {
+            "title": "Scores",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityScores"
+            }
+          }
+        }
+      },
+      "QualityScores": {
+        "title": "QualityScores",
+        "required": [
+          "name",
+          "scores"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/Metric"
+          },
+          "scores": {
+            "title": "Scores",
+            "type": "array",
+            "items": {
+              "type": "number"
             }
           }
         }

@@ -64,7 +64,10 @@ def load_model() -> QualityEstimationPipeline:
     return internal_load_model(str(settings.model_file))
 
 
-@router.post(PREDICT_ENDPOINT, status_code=status.HTTP_200_OK)
+@router.post(
+    PREDICT_ENDPOINT, status_code=status.HTTP_200_OK,
+    response_model=QualityEstimation
+)
 def predict(
         documents: Documents,
         qe_pipeline: QualityEstimationPipeline = Depends(load_model)
