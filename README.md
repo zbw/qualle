@@ -64,3 +64,16 @@ MODEL_FILE with the path to the model (see ``qualle.interface.config.RESTSetting
 The REST Endpoint expects a HTTP POST with the result of a MLC for a list of documents
 as body. The format is JSON as specified in ``qualle/openapi.json``. You can also use
 the Swagger UI accessible at ``http://address_of_server/docs`` to play a bit around.
+
+### Deployment with Docker
+You can use the Dockerfile included in this project to build a Docker Image. E.g.:
+
+ ``docker build -t qualle .``
+
+Per default, gunicorn is used to run the REST interface on ``0.0.0.0:8000``
+You need to pass the required settings per environment variable. E.g.:
+
+``docker run --rm -it --env model_file=/model -v /path/to/model:/model -p 8000:8000 qualle-test``
+
+Of course you can also use the docker image to train or evaluate by using a 
+different command as input to [docker run](https://docs.docker.com/engine/reference/run/#general-form).
