@@ -38,7 +38,7 @@ def mock_io(mocker, train_data):
     mocker.patch('qualle.interface.internal.dump')
     mocker.patch('qualle.interface.internal.load')
     mocker.patch(
-        'qualle.interface.internal.train_input_from_tsv',
+        'qualle.interface.internal.load_train_input',
         mocker.Mock(return_value=train_data)
     )
 
@@ -46,7 +46,7 @@ def mock_io(mocker, train_data):
 @pytest.fixture
 def train_settings():
     return TrainSettings(
-        train_data_file='/tmp/train',
+        train_data_path='/tmp/train',
         output_path='/tmp/output',
         should_debug=False,
         features=[FeaturesEnum.TEXT],
@@ -161,12 +161,12 @@ def test_evaluate(mocker, train_data):
     internal.load.return_value = 'testmodel'
 
     settings = EvalSettings(
-        test_data_file='/tmp/test',
+        test_data_path='/tmp/test',
         model_file='/tmp/model'
     )
     internal.evaluate(settings)
 
-    internal.train_input_from_tsv.assert_called_once_with('/tmp/test')
+    internal.load_train_input.assert_called_once_with('/tmp/test')
 
     m_eval_cls.assert_called_once_with(
         train_data,

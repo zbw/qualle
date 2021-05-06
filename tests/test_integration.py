@@ -49,7 +49,7 @@ def test_eval_prints_scores(train_data_file, model_path, caplog):
     train(train_data_file, model_path)
 
     settings = EvalSettings(
-        test_data_file=train_data_file,
+        test_data_path=train_data_file,
         model_file=model_path
     )
     internal.evaluate(settings)
@@ -96,7 +96,7 @@ def train(train_data_file, output_path):
             regressor_class='sklearn.ensemble.GradientBoostingRegressor',
             params={}
         ),
-        train_data_file=train_data_file,
+        train_data_path=train_data_file,
         output_path=output_path,
         features=[FeaturesEnum.TEXT],
     )
