@@ -22,6 +22,20 @@ test:
     - flake8
     - pytest --cov=qualle
 
+
+test_safety:
+  stage: test
+  image: python:3.8-slim
+  script:
+    - pip install pipenv safety==1.10.*
+    - pipenv install --system --dev
+    - safety check --full-report
+  rules:
+    - changes:
+      - Pipfile*
+  allow_failure: true
+
+
 build:
   stage: build
   image:
