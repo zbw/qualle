@@ -79,6 +79,11 @@ def predict(
     ])
 
 
+@router.get('/_up')
+def up():
+    return True
+
+
 def _map_documents_to_predict_data(documents: Documents) -> PredictData:
     docs = []
     p_labels = []
