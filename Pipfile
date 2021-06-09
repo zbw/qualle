@@ -15,7 +15,7 @@ stwfsapy = "==0.1.5"
 scipy = "==1.6.*"
 rdflib = "==4.2.*"
 pydantic = "==1.8.*"
-fastapi = ">=0.65.1"
+fastapi = ">=0.65.2"
 uvicorn = "==0.13.*"
 
 [requires]
