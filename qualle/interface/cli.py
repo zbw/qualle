@@ -138,7 +138,9 @@ def cli_entrypoint():
         help='Path to logging config file in configparser format. '
              'The name of the logger which has to be configured is "qualle"'
     )
-    subparsers = parser.add_subparsers(title='Subcommands')
+    subparsers = parser.add_subparsers(
+        title='Subcommands', required=True, dest='command'
+    )
 
     eval_parser = subparsers.add_parser(
         'eval',
