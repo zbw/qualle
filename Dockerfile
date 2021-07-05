@@ -5,7 +5,7 @@ ARG PIP_INDEX_URL
 ARG PIPENV_PYPI_MIRROR
 
 RUN pip install --upgrade pip --no-cache-dir
-RUN pip install pipenv gunicorn==20.1.* uvicorn[standard]==0.13.* --no-cache-dir
+RUN pip install pipenv gunicorn==20.1.* "uvicorn[standard]>=0.14.*,<0.15" --no-cache-dir
 
 COPY Pipfile Pipfile.lock /app/
 

@@ -16,7 +16,7 @@ scipy = "==1.6.*"
 rdflib = "==4.2.*"
 pydantic = "==1.8.*"
 fastapi = "==0.66.*"
-uvicorn = "==0.13.*"
+uvicorn = ">=0.14,<0.15"
 
 [requires]
 python_version = "3.8"
