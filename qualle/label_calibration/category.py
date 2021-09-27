@@ -54,7 +54,8 @@ class MultiCategoryLabelCalibrator(BaseEstimator, RegressorMixin):
         ]
 
         for i, c in enumerate(self.calibrators_):
-            c.fit(X, y[:, i])
+            a = y.getcol(i).toarray().flatten()
+            c.fit(X, a)
         return self
 
     def predict(self, X: List[str]):

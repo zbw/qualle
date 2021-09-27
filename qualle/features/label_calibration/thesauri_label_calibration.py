@@ -22,6 +22,7 @@ from typing import List, Set, Optional
 import numpy as np
 from rdflib import URIRef, Graph
 from rdflib.namespace import SKOS, RDF
+from scipy.sparse import coo_matrix
 from sklearn.base import TransformerMixin
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
@@ -83,8 +84,12 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
         in the same order as in the list passed to the constructor.
         """
         check_is_fitted(self)
-        count_matrix = np.zeros((len(X), len(self.subthesauri_)))
+        values = []
+        row_inds = []
+        col_inds = []
+
         for row_idx, row in enumerate(X):
+            row_vals = [0] * len(self.subthesauri_)
             for concept in row:
                 subthesauri_counts = self.mapping_.get(concept)
                 if not subthesauri_counts:
@@ -93,10 +98,18 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
                         'Seems to be invalid for this thesaurus.', concept)
                 else:
                     for j, is_in_subthesauri in enumerate(subthesauri_counts):
-                        count_matrix[
-                            row_idx, j] = count_matrix[row_idx, j] + int(
-                            is_in_subthesauri)
-        return count_matrix
+                        if is_in_subthesauri:
+                            row_vals[j] = row_vals[j] + 1
+                for j, v in enumerate(row_vals):
+                    if v:
+                        values.append(v)
+                        row_inds.append(row_idx)
+                        col_inds.append(j)
+
+            return coo_matrix(
+                (values, (row_inds, col_inds)),
+                shape=(len(X), len(self.subthesauri_))
+            )
 
     @lru_cache(maxsize=1000)
     def _get_concepts_for_thesaurus(self, thesaurus: URIRef) -> Set:
