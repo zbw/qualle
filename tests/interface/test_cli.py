@@ -47,6 +47,19 @@ def train_args_dict():
     )
 
 
+@pytest.fixture
+def train_args_dict_with_slc(train_args_dict):
+    train_args_dict['slc'] = True
+    train_args_dict['thsys'] = [c.DUMMY_THESAURUS_FILE]
+    train_args_dict['s_type'] = [c.DUMMY_SUBTHESAURUS_TYPE]
+    train_args_dict['c_uri_prefix'] = [c.DUMMY_CONCEPT_TYPE_PREFIX]
+    train_args_dict['c_type'] = [c.DUMMY_CONCEPT_TYPE]
+    train_args_dict['subthesauri'] = []
+    train_args_dict['use_sparse_count_matrix'] = False
+
+    return train_args_dict
+
+
 @pytest.fixture(autouse=True)
 def mock_internal_interface(mocker):
     mocker.patch('qualle.interface.cli.train')
@@ -65,16 +78,11 @@ def test_handle_train_slc_without_all_required_args_raises_exc(
         handle_train(Namespace(**train_args_dict))
 
 
-def test_handle_train_slc_with_subthesauri(train_args_dict):
-    train_args_dict['slc'] = True
-    train_args_dict['thsys'] = [c.DUMMY_THESAURUS_FILE]
-    train_args_dict['s_type'] = [c.DUMMY_SUBTHESAURUS_TYPE]
-    train_args_dict['c_uri_prefix'] = [c.DUMMY_CONCEPT_TYPE_PREFIX]
-    train_args_dict['c_type'] = [c.DUMMY_CONCEPT_TYPE]
-    train_args_dict['subthesauri'] = [
+def test_handle_train_slc_with_subthesauri(train_args_dict_with_slc):
+    train_args_dict_with_slc['subthesauri'] = [
         ','.join((c.DUMMY_SUBTHESAURUS_A, c.DUMMY_SUBTHESAURUS_B))]
 
-    handle_train(Namespace(**train_args_dict))
+    handle_train(Namespace(**train_args_dict_with_slc))
 
     cli.train.assert_called_once()
     actual_settings = cli.train.call_args[0][0]
@@ -90,15 +98,8 @@ def test_handle_train_slc_with_subthesauri(train_args_dict):
             )
 
 
-def test_handle_train_slc_without_subthesauri(train_args_dict):
-    train_args_dict['slc'] = True
-    train_args_dict['thsys'] = [c.DUMMY_THESAURUS_FILE]
-    train_args_dict['s_type'] = [c.DUMMY_SUBTHESAURUS_TYPE]
-    train_args_dict['c_uri_prefix'] = [c.DUMMY_CONCEPT_TYPE_PREFIX]
-    train_args_dict['c_type'] = [c.DUMMY_CONCEPT_TYPE]
-    train_args_dict['subthesauri'] = []
-
-    handle_train(Namespace(**train_args_dict))
+def test_handle_train_slc_without_subthesauri(train_args_dict_with_slc):
+    handle_train(Namespace(**train_args_dict_with_slc))
 
     cli.train.assert_called_once()
     actual_settings = cli.train.call_args[0][0]
@@ -111,6 +112,26 @@ def test_handle_train_slc_without_subthesauri(train_args_dict):
                 concept_type=c.DUMMY_CONCEPT_TYPE,
                 concept_type_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
                 subthesauri=[]
+            )
+
+
+def test_handle_train_slc_with_sparse_count_matrix(train_args_dict_with_slc):
+    train_args_dict_with_slc['use_sparse_count_matrix'] = True
+
+    handle_train(Namespace(**train_args_dict_with_slc))
+
+    cli.train.assert_called_once()
+    actual_settings = cli.train.call_args[0][0]
+
+    assert isinstance(actual_settings, TrainSettings)
+    assert actual_settings.subthesauri_label_calibration ==\
+           SubthesauriLabelCalibrationSettings(
+                thesaurus_file=c.DUMMY_THESAURUS_FILE,
+                subthesaurus_type=c.DUMMY_SUBTHESAURUS_TYPE,
+                concept_type=c.DUMMY_CONCEPT_TYPE,
+                concept_type_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
+                subthesauri=[],
+                use_sparse_count_matrix=True
             )
 
 

@@ -15,13 +15,15 @@
 #  You should have received a copy of the GNU General Public License
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 import numpy as np
+from scipy.sparse import spmatrix
 
 Labels = List[str]
 Documents = List[str]
 Scores = List[float]
+Matrix = Union[np.ndarray, spmatrix]
 
 
 @dataclass

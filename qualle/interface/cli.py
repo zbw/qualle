@@ -64,7 +64,8 @@ def handle_train(args: argparse.Namespace):
             subthesaurus_type=args.s_type[0],
             concept_type=args.c_type[0],
             concept_type_prefix=args.c_uri_prefix[0],
-            subthesauri=subthesauri
+            subthesauri=subthesauri,
+            use_sparse_count_matrix=args.use_sparse_count_matrix
         )
     else:
         slc = None
@@ -222,6 +223,15 @@ def cli_entrypoint():
                                 'e.g.: http://zbw.eu/stw/thsys/v,'
                                 'http://zbw.eu/stw/thsys/b,'
                                 'http://zbw.eu/stw/thsys/n')
+    slc_group.add_argument(
+        '--use-sparse-count-matrix', action='store_true',
+        help='Use matrix in SciPy Sparse format to store count of labels per'
+             ' Subthesauri in memory. Useful to reduce memory usage when'
+             ' mapping labels to subthesauri '
+             ' (used for label calibration training and'
+             '  for calculating the input of the recall predictor)'
+             ' if the distribution of labels over Subthesauri is sparse.'
+    )
 
     rest_parser = subparsers.add_parser(
         'rest',

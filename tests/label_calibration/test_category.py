@@ -16,6 +16,7 @@
 #  along with qualle.  If not, see <http://www.gnu.org/licenses/>.
 import pytest
 import numpy as np
+from scipy.sparse import coo_matrix
 from sklearn.exceptions import NotFittedError
 
 from qualle.label_calibration.category import MultiCategoryLabelCalibrator
@@ -47,6 +48,23 @@ def test_mclc_fit_fits_calibrators(calibrator, X):
     y = np.array([[3, 5], [1, 2]])
 
     calibrator.fit(X, y)
+
+    for i, clbtr in enumerate(calibrator.calibrators_):
+        X_actual = clbtr.regressor.X
+        y_actual = clbtr.regressor.y
+
+        assert X_actual.shape[0] == len(X)
+        assert type(y_actual) == np.ndarray
+        assert (y_actual == y[:, i]).all()
+
+
+def test_mlc_fit_with_sparse_matrix_fits_calibrators_with_nparray(
+        calibrator, X
+):
+    y = np.array([[3, 0], [0, 2]])
+    y_coo = coo_matrix(y)
+
+    calibrator.fit(X, y_coo)
 
     for i, clbtr in enumerate(calibrator.calibrators_):
         X_actual = clbtr.regressor.X
