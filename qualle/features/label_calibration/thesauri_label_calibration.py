@@ -93,25 +93,15 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
         else:
             count_matrix = np.zeros((len(X), len(self.subthesauri_)))
         for row_idx, row in enumerate(X):
-            row_vals = [0] * len(self.subthesauri_)
-            for concept in row:
-                subthesauri_counts = self.mapping_.get(concept)
-                if not subthesauri_counts:
-                    self.logger_.warning(
-                        'Concept "%s" not found in concept map. '
-                        'Seems to be invalid for this thesaurus.', concept)
-                else:
-                    for j, is_in_subthesauri in enumerate(subthesauri_counts):
-                        if is_in_subthesauri:
-                            row_vals[j] = row_vals[j] + 1
+            subthesauri_counts = self._extract_subthesauri_counts(row)
             if self.use_sparse_count_matrix:
-                for j, v in enumerate(row_vals):
-                    if v:
-                        values.append(v)
+                for col_idx, count in enumerate(subthesauri_counts):
+                    if count:
+                        values.append(count)
                         row_inds.append(row_idx)
-                        col_inds.append(j)
+                        col_inds.append(col_idx)
             else:
-                count_matrix[row_idx] = row_vals
+                count_matrix[row_idx] = subthesauri_counts
 
         if self.use_sparse_count_matrix:
             return coo_matrix(
@@ -120,6 +110,22 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
             )
         else:
             return count_matrix
+
+    def _extract_subthesauri_counts(self, labels: Labels):
+        subthesauri_counts = [0] * len(self.subthesauri_)
+        for concept in labels:
+            subthesauri_membership = self.mapping_.get(concept)
+            if not subthesauri_membership:
+                self.logger_.warning(
+                    'Concept "%s" not found in concept map. '
+                    'Seems to be invalid for this thesaurus.',
+                    concept
+                )
+            else:
+                for j, is_in_subthesauri in enumerate(subthesauri_membership):
+                    if is_in_subthesauri:
+                        subthesauri_counts[j] = subthesauri_counts[j] + 1
+        return subthesauri_counts
 
     @lru_cache(maxsize=1000)
     def _get_concepts_for_thesaurus(self, thesaurus: URIRef) -> Set:
