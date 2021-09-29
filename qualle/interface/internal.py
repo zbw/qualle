@@ -38,7 +38,6 @@ def train(settings: TrainSettings):
     logger = get_logger()
     path_to_train_data = settings.train_data_path
     path_to_model_output_file = settings.output_path
-    train_data = load_train_input(str(path_to_train_data))
     slc_settings = settings.subthesauri_label_calibration
     features = list(map(lambda f: f.value(), settings.features))
 
@@ -63,6 +62,10 @@ def train(settings: TrainSettings):
         settings.quality_estimator_regressor.regressor_class,
         settings.quality_estimator_regressor.params
     )
+
+    with timeit() as t:
+        train_data = load_train_input(str(path_to_train_data))
+    logger.debug('Loaded train data in %.4f seconds', t())
 
     if slc_settings:
         logger.info('Run training with Subthesauri Label Calibration')
