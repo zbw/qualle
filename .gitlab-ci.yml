@@ -36,6 +36,18 @@ test_safety:
   allow_failure: true
 
 
+test_bandit:
+  stage: test
+  image: python:3.8-slim
+  script:
+    - pip install bandit==1.*
+    - bandit -r qualle
+  rules:
+    - changes:
+      - qualle/**/*
+  allow_failure: true
+
+
 build:
   stage: build
   image:
