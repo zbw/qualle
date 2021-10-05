@@ -18,6 +18,7 @@
 import numpy as np
 import pytest
 from rdflib import URIRef
+from scipy.sparse import issparse
 from sklearn.exceptions import NotFittedError
 
 from qualle.features.label_calibration.thesauri_label_calibration import \
@@ -42,7 +43,8 @@ def test_fit_uses_all_subthesauri_if_no_subthesauri_passed(graph):
         graph=graph,
         subthesaurus_type_uri=c.DUMMY_SUBTHESAURUS_TYPE,
         concept_type_uri=c.DUMMY_CONCEPT_TYPE,
-        concept_uri_prefix=c.CONCEPT_URI_PREFIX
+        concept_uri_prefix=c.CONCEPT_URI_PREFIX,
+        use_sparse_count_matrix=False
     )
     transformer.fit()
     assert hasattr(transformer, 'mapping_')
@@ -82,6 +84,16 @@ def test_transform_returns_count_matrix(transformer):
             ])
             == np.array([[1, 0], [2, 1]])
     ).all()
+
+
+def test_transform_returns_sparse_count_matrix(transformer):
+    transformer.use_sparse_count_matrix = True
+    transformer.fit()
+    count_matrix = transformer.transform([
+                [c.CONCEPT_x0, c.CONCEPT_INVALID], [c.CONCEPT_x0, c.CONCEPT_x2]
+            ])
+    assert issparse(count_matrix)
+    assert (count_matrix.toarray() == np.array([[1, 0], [2, 1]])).all()
 
 
 def test_get_concepts_for_thesaurus(transformer):

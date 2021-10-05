@@ -38,7 +38,6 @@ def train(settings: TrainSettings):
     logger = get_logger()
     path_to_train_data = settings.train_data_path
     path_to_model_output_file = settings.output_path
-    train_data = load_train_input(str(path_to_train_data))
     slc_settings = settings.subthesauri_label_calibration
     features = list(map(lambda f: f.value(), settings.features))
 
@@ -64,6 +63,10 @@ def train(settings: TrainSettings):
         settings.quality_estimator_regressor.params
     )
 
+    with timeit() as t:
+        train_data = load_train_input(str(path_to_train_data))
+    logger.debug('Loaded train data in %.4f seconds', t())
+
     if slc_settings:
         logger.info('Run training with Subthesauri Label Calibration')
         path_to_graph = slc_settings.thesaurus_file
@@ -76,6 +79,11 @@ def train(settings: TrainSettings):
             logger.info(
                 'No subthesauri passed, will extract subthesauri by type'
             )
+        if slc_settings.use_sparse_count_matrix:
+            logger.info(
+                'Will use Sparse Count Matrix for '
+                'Subthesauri Label Calibration'
+            )
         transformer = LabelCountForSubthesauriTransformer(
             graph=g,
             subthesaurus_type_uri=URIRef(slc_settings.subthesaurus_type),
@@ -83,7 +91,8 @@ def train(settings: TrainSettings):
             subthesauri=list(map(
                 lambda s: URIRef(s), slc_settings.subthesauri
             )),
-            concept_uri_prefix=slc_settings.concept_type_prefix
+            concept_uri_prefix=slc_settings.concept_type_prefix,
+            use_sparse_count_matrix=slc_settings.use_sparse_count_matrix
         )
         with timeit() as t:
             transformer.fit()

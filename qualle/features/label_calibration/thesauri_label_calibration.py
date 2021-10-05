@@ -22,6 +22,7 @@ from typing import List, Set, Optional
 import numpy as np
 from rdflib import URIRef, Graph
 from rdflib.namespace import SKOS, RDF
+from scipy.sparse import coo_matrix
 from sklearn.base import TransformerMixin
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
@@ -30,7 +31,7 @@ from stwfsapy import thesaurus
 from qualle.features.base import Features
 from qualle.features.label_calibration.base import AbstractLabelCalibrator
 from qualle.label_calibration.category import MultiCategoryLabelCalibrator
-from qualle.models import Labels, Documents, LabelCalibrationData
+from qualle.models import Labels, Documents, LabelCalibrationData, Matrix
 from qualle.utils import get_logger
 
 
@@ -44,12 +45,14 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
             subthesaurus_type_uri: URIRef,
             concept_type_uri: URIRef,
             concept_uri_prefix: str,
+            use_sparse_count_matrix: bool,
             subthesauri: Optional[List[URIRef]] = None
     ):
         self.graph = graph
         self.subthesaurus_type_uri = subthesaurus_type_uri
         self.concept_type_uri = concept_type_uri
         self.subthesauri = subthesauri
+        self.use_sparse_count_matrix = use_sparse_count_matrix
         self.concept_uri_prefix = concept_uri_prefix
 
     def fit(self, X=None, y=None):
@@ -75,28 +78,54 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
                 self.mapping_[c][idx] = True
         return self
 
-    def transform(self, X: List[Labels]) -> np.array:
+    def transform(self, X: List[Labels]) -> Matrix:
         """Transform rows of concepts to 2-dimensional count array
 
-        Each row in the result array  contains in each column the total
+        Each row in the result matrix contains in each column the total
         amount of labels per subthesauri. The subthesauri are given
         in the same order as in the list passed to the constructor.
         """
         check_is_fitted(self)
-        count_matrix = np.zeros((len(X), len(self.subthesauri_)))
+        if self.use_sparse_count_matrix:
+            values = []
+            row_inds = []
+            col_inds = []
+        else:
+            count_matrix = np.zeros((len(X), len(self.subthesauri_)))
         for row_idx, row in enumerate(X):
-            for concept in row:
-                subthesauri_counts = self.mapping_.get(concept)
-                if not subthesauri_counts:
-                    self.logger_.warning(
-                        'Concept "%s" not found in concept map. '
-                        'Seems to be invalid for this thesaurus.', concept)
-                else:
-                    for j, is_in_subthesauri in enumerate(subthesauri_counts):
-                        count_matrix[
-                            row_idx, j] = count_matrix[row_idx, j] + int(
-                            is_in_subthesauri)
-        return count_matrix
+            subthesauri_counts = self._extract_subthesauri_counts(row)
+            if self.use_sparse_count_matrix:
+                for col_idx, count in enumerate(subthesauri_counts):
+                    if count:
+                        values.append(count)
+                        row_inds.append(row_idx)
+                        col_inds.append(col_idx)
+            else:
+                count_matrix[row_idx] = subthesauri_counts
+
+        if self.use_sparse_count_matrix:
+            return coo_matrix(
+                (values, (row_inds, col_inds)),
+                shape=(len(X), len(self.subthesauri_))
+            )
+        else:
+            return count_matrix
+
+    def _extract_subthesauri_counts(self, labels: Labels):
+        subthesauri_counts = [0] * len(self.subthesauri_)
+        for concept in labels:
+            subthesauri_membership = self.mapping_.get(concept)
+            if not subthesauri_membership:
+                self.logger_.warning(
+                    'Concept "%s" not found in concept map. '
+                    'Seems to be invalid for this thesaurus.',
+                    concept
+                )
+            else:
+                for j, is_in_subthesauri in enumerate(subthesauri_membership):
+                    if is_in_subthesauri:
+                        subthesauri_counts[j] = subthesauri_counts[j] + 1
+        return subthesauri_counts
 
     @lru_cache(maxsize=1000)
     def _get_concepts_for_thesaurus(self, thesaurus: URIRef) -> Set:

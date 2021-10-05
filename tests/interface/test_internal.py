@@ -32,6 +32,8 @@ from qualle.interface.internal import train
 
 import tests.interface.common as c
 
+TRAINER_CLS_FULL_PATH = 'qualle.interface.internal.Trainer'
+
 
 @pytest.fixture(autouse=True)
 def mock_io(mocker, train_data):
@@ -106,7 +108,7 @@ def test_train_with_slc_creates_respective_trainer(
         'qualle.interface.internal.LabelCountForSubthesauriTransformer',
         m_lcfst_cls
     )
-    mocker.patch('qualle.interface.internal.Trainer')
+    mocker.patch(TRAINER_CLS_FULL_PATH)
 
     train_settings.subthesauri_label_calibration = \
         SubthesauriLabelCalibrationSettings(
@@ -114,7 +116,8 @@ def test_train_with_slc_creates_respective_trainer(
             subthesaurus_type=c.DUMMY_SUBTHESAURUS_TYPE,
             concept_type=c.DUMMY_CONCEPT_TYPE,
             concept_type_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
-            subthesauri=[c.DUMMY_SUBTHESAURUS_A, c.DUMMY_SUBTHESAURUS_B]
+            subthesauri=[c.DUMMY_SUBTHESAURUS_A, c.DUMMY_SUBTHESAURUS_B],
+            use_sparse_count_matrix=True
         )
 
     train(train_settings)
@@ -131,7 +134,8 @@ def test_train_with_slc_creates_respective_trainer(
         subthesauri=[
             URIRef(c.DUMMY_SUBTHESAURUS_A),
             URIRef(c.DUMMY_SUBTHESAURUS_B)],
-        concept_uri_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX
+        concept_uri_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
+        use_sparse_count_matrix=True
     )
     m_lcfst.fit.assert_called_once()
 

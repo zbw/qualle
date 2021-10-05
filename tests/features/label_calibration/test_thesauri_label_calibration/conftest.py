@@ -83,5 +83,6 @@ def transformer(graph):
         subthesaurus_type_uri=c.DUMMY_SUBTHESAURUS_TYPE,
         concept_type_uri=c.DUMMY_CONCEPT_TYPE,
         subthesauri=[c.SUBTHESAURUS_A, c.SUBTHESAURUS_B],
-        concept_uri_prefix=c.CONCEPT_URI_PREFIX
+        concept_uri_prefix=c.CONCEPT_URI_PREFIX,
+        use_sparse_count_matrix=False
     )

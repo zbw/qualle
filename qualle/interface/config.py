@@ -35,6 +35,7 @@ class SubthesauriLabelCalibrationSettings(BaseSettings):
     concept_type: AnyUrl
     concept_type_prefix: AnyUrl
     subthesauri: List[AnyUrl]
+    use_sparse_count_matrix: bool = False
 
 
 class FeaturesEnum(Enum):

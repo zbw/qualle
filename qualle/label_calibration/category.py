@@ -17,11 +17,13 @@
 from typing import List
 
 import numpy as np
+from scipy.sparse import issparse
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
 
 from qualle.label_calibration.simple import LabelCalibrator
+from qualle.models import Matrix
 
 
 class MultiCategoryLabelCalibrator(BaseEstimator, RegressorMixin):
@@ -36,10 +38,10 @@ class MultiCategoryLabelCalibrator(BaseEstimator, RegressorMixin):
         self.regressor_class = regressor_class
         self.regressor_params = regressor_params or {}
 
-    def fit(self, X: List[str], y: np.array):
+    def fit(self, X: List[str], y: Matrix):
         """
         :param X: list of content, e.g. doc titles
-        :param y: 2-dim array where each column corresponds to no of labels for
+        :param y: matrix where each column corresponds to no of labels for
             respective category
         :return: self
         """
@@ -53,8 +55,13 @@ class MultiCategoryLabelCalibrator(BaseEstimator, RegressorMixin):
             for _ in range(no_categories)
         ]
 
+        y_is_sparse = issparse(y)
         for i, c in enumerate(self.calibrators_):
-            c.fit(X, y[:, i])
+            if y_is_sparse:
+                col = y.getcol(i).toarray().flatten()
+            else:
+                col = y[:, i]
+            c.fit(X, col)
         return self
 
     def predict(self, X: List[str]):
