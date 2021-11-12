@@ -2,7 +2,8 @@
 
 Implementation of Qualle Framework as proposed in the paper
 [``Content-Based Quality Estimation for Automatic Subject Indexing of Short Texts
-under Precision and Recall Constraints``](https://doi.org/10.1007/978-3-030-00066-0_1) from M. Toepfer.
+under Precision and Recall Constraints``](https://doi.org/10.1007/978-3-030-00066-0_1) 
+and accompanying source code by Martin Toepfer and Christin Seifert.
 
 The framework allows to train a model which can be used to predict
 the quality of the result of the application of a multi-label classification (MLC) 
