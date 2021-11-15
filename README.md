@@ -1,9 +1,7 @@
 # Qualle
 
 Implementation of Qualle Framework as proposed in the paper
-[``Content-Based Quality Estimation for Automatic Subject Indexing of Short Texts
-under Precision and Recall Constraints``](https://doi.org/10.1007/978-3-030-00066-0_1) 
-and accompanying source code by Martin Toepfer and Christin Seifert.
+[1] and accompanying source code.
 
 The framework allows to train a model which can be used to predict
 the quality of the result of the application of a multi-label classification (MLC) 
@@ -78,3 +76,6 @@ You need to pass the required settings per environment variable. E.g.:
 
 Of course you can also use the docker image to train or evaluate by using a 
 different command as input to [docker run](https://docs.docker.com/engine/reference/run/#general-form).
+
+## References
+[1] [Toepfer, Martin, and Christin Seifert. "Content-based quality estimation for automatic subject indexing of short texts under precision and recall constraints." International Conference on Theory and Practice of Digital Libraries. Springer, Cham, 2018., DOI 10.1007/978-3-030-00066-0_1](https://arxiv.org/abs/1806.02743)
