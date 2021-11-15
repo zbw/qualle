@@ -1,4 +1,6 @@
 # Qualle
+![CI](https://github.com/zbw/qualle/actions/workflows/main.yml/badge.svg)
+[![codecov](https://codecov.io/gh/zbw/qualle/branch/master/graph/badge.svg?token=ZE7OWKA83Q)](https://codecov.io/gh/zbw/qualle)
 
 This is an implementation of the Qualle framework as proposed in the paper
 [1] and accompanying source code.
