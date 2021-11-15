@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from itertools import zip_longest
 
 from qualle.models import TrainData, PredictData
 from qualle.utils import recall, load_train_input, train_input_from_tsv, \
@@ -143,31 +144,36 @@ def annif_data_with_labels(
 
 def test_train_input_from_annif(
         annif_data_with_labels):
-    assert train_input_from_annif(str(annif_data_with_labels)) == TrainData(
-        predict_data=PredictData(
-            docs=['title0\ncontent0', 'title1\ncontent1'],
-            predicted_labels=[
-                ['concept0', 'concept1'], ['concept2', 'concept3']
-            ],
-            scores=[[1, .5], [0, .5]]
-        ),
-        true_labels=[['concept1', 'concept3'], ['concept3']]
+    parsed_input = train_input_from_annif(str(annif_data_with_labels))
+    assert isinstance(parsed_input, TrainData)
+    parsed_input_tpls = zip(
+        parsed_input.predict_data.docs,
+        parsed_input.predict_data.predicted_labels,
+        parsed_input.predict_data.scores,
+        parsed_input.true_labels
     )
+    assert sorted(parsed_input_tpls, key=lambda t: t[0]) == [
+        ('title0\ncontent0', ['concept0', 'concept1'], [1, .5],
+         ['concept1', 'concept3']),
+        ('title1\ncontent1', ['concept2', 'concept3'], [0, .5],
+         ['concept3']),
+    ]
 
 
 def test_train_input_from_annif_without_labels_returns_empty_list(
         annif_data_without_true_labels):
-    assert train_input_from_annif(
-            str(annif_data_without_true_labels)) == TrainData(
-        predict_data=PredictData(
-            docs=['title0\ncontent0', 'title1\ncontent1'],
-            predicted_labels=[
-                ['concept0', 'concept1'], ['concept2', 'concept3']
-            ],
-            scores=[[1, .5], [0, .5]]
-        ),
-        true_labels=[]
+    parsed_input = train_input_from_annif(str(annif_data_without_true_labels))
+    assert isinstance(parsed_input, TrainData)
+    parsed_input_tpls = zip_longest(
+        parsed_input.predict_data.docs,
+        parsed_input.predict_data.predicted_labels,
+        parsed_input.predict_data.scores,
+        parsed_input.true_labels
     )
+    assert sorted(parsed_input_tpls, key=lambda t: t[0]) == [
+        ('title0\ncontent0', ['concept0', 'concept1'], [1, .5], None),
+        ('title1\ncontent1', ['concept2', 'concept3'], [0, .5], None),
+    ]
 
 
 def test_extract_concept_id():
