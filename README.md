@@ -16,7 +16,7 @@ and evaluate models. In addition, a REST webservice for predicting
 the recall of a MLC result is provided.
 
 ### Command line interface (CLI)
-In order to run the CLI, you must install the packages from the pipfile.
+In order to run the CLI, you must install the packages from the Pipfile.
 The interface is then accessible from the module ``qualle.main``. To
 see the help message, run (inside the Qualle directory)
 
