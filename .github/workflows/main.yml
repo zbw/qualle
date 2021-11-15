@@ -25,3 +25,6 @@ jobs:
 
       - name: Test Code
         run: pipenv run pytest --cov=qualle --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v2
