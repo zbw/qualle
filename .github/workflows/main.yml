@@ -18,9 +18,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pipenv
-          pipenv install --dev
+          pipenv install --dev safety==1.10.* bandit==1.*
 
-      - name: Lint Code
+      - name: Test Code Style
         run: pipenv run flake8
 
       - name: Test Code
@@ -28,3 +28,11 @@ jobs:
 
       - name: Upload coverage
         uses: codecov/codecov-action@v2
+
+      - name: Look for security vulnerabilities in dependencies
+        run: pipenv run safety check --full-report
+        continue-on-error: true
+
+      - name: Look for security issues in code
+        run: pipenv run bandit -r qualle
+        continue-on-error: true
