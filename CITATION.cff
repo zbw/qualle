@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Bartz
+    given-names: Christopher
+    affiliation: "ZBW - Leibniz Information Centre for Economics"
+  - family-names: Fürneisen
+    given-names: Moritz
+    affiliation: "ZBW - Leibniz Information Centre for Economics"
+title: "qualle (a framework to predict the quality of a multi-label classification result)"
+abstract: "This framework allows to train a model which can be used to predict the quality of the result of applying a multi-label classification (MLC) method on a document. In this implementation, only the recall is predicted for a document, but in principle any document-level quality estimation (such as the prediction of precision) can be implemented analogously."
+version: 0.1.0
+license: Apache-2.0
+date-released: 2021-11-19
+repository-code: "https://github.com/zbw/qualle"
+contact:
+  - name: "Automatization of subject indexing using methods from artificial intelligence (AutoSE)"
+  - website: "https://www.zbw.eu/en/about-us/key-activities/automated-subject-indexing"
+  - email: autose@zbw.eu
+  - affiliation: "ZBW - Leibniz Information Centre for Economics"
+keywords:
+  - "automated subject indexing"
+  - "controlled vocabularies"
+  - "machine learning"
+references:
+  - authors:
+      - family-names: Toepfer
+        given-names: Martin
+      - family-names: Seifert
+        given-names: Christin
+    title: "Content-Based Quality Estimation for Automatic Subject Indexing of Short Texts under Precision and Recall Constraints"
+    type: conference-paper
+    doi: 10.1007/978-3-030-00066-0_1
