@@ -74,7 +74,7 @@ You can use the Dockerfile included in this project to build a Docker image. E.g
 Per default, gunicorn is used to run the REST interface on ``0.0.0.0:8000``
 You need to pass the required settings per environment variable. E.g.:
 
-``docker run --rm -it --env model_file=/model -v /path/to/model:/model -p 8000:8000 qualle-test``
+``docker run --rm -it --env model_file=/model -v /path/to/model:/model -p 8000:8000 qualle``
 
 Of course you can also use the Docker image to train or evaluate by using a 
 different command as input to [docker run](https://docs.docker.com/engine/reference/run/#general-form).
