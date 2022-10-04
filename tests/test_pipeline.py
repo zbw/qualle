@@ -58,6 +58,20 @@ def train_data():
     )
 
 
+@pytest.fixture
+def train_data_with_some_empty_labels(train_data):
+    train_data.predict_data.predicted_labels = [['c'], [], ['c'], [], ['c']]
+
+    return train_data
+
+
+@pytest.fixture
+def train_data_with_all_empty_labels(train_data):
+    train_data.predict_data.predicted_labels = [[]] * 5
+
+    return train_data
+
+
 def test_train(qp, train_data, mocker):
     calibrator = qp._label_calibrator
     mocker.spy(calibrator, 'fit')
@@ -97,6 +111,24 @@ def test_predict(qp, train_data):
     # Because of how our input data is designed,
     # we can make following assertion
     assert np.array_equal(qp.predict(p_data), [1] * 5)
+
+
+def test_predict_with_some_empty_labels_returns_zero_recall(
+        qp, train_data_with_some_empty_labels):
+    p_data = train_data_with_some_empty_labels.predict_data
+
+    qp.train(train_data_with_some_empty_labels)
+
+    assert np.array_equal(qp.predict(p_data), [1, 0, 1, 0, 1])
+
+
+def test_predict_with_all_empty_labels_returns_only_zero_recall(
+        qp, train_data_with_all_empty_labels):
+    p_data = train_data_with_all_empty_labels.predict_data
+
+    qp.train(train_data_with_all_empty_labels)
+
+    assert np.array_equal(qp.predict(p_data), [0] * 5)
 
 
 def test_debug_prints_time_if_activated(qp, caplog):

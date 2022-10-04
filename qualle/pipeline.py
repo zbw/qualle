@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 from contextlib import contextmanager
-from typing import List, Callable, Any
+from typing import List, Callable, Any, Collection
 
 from sklearn.model_selection import cross_val_predict
 
@@ -65,15 +65,67 @@ class QualityEstimationPipeline:
             self._recall_predictor.fit(features_data, true_recall)
 
     def predict(self, data: PredictData) -> List[float]:
-        predicted_no_of_labels = self._label_calibrator.predict(data.docs)
-        label_calibration_data = LabelCalibrationData(
-            predicted_labels=data.predicted_labels,
-            predicted_no_of_labels=predicted_no_of_labels
+        zero_idxs = self._get_pdata_idxs_with_zero_labels(data)
+        data_with_labels = self._get_pdata_with_labels(data, zero_idxs)
+        if data_with_labels.docs:
+            predicted_no_of_labels = self._label_calibrator.predict(
+                data_with_labels.docs
+            )
+            label_calibration_data = LabelCalibrationData(
+                predicted_labels=data_with_labels.predicted_labels,
+                predicted_no_of_labels=predicted_no_of_labels,
+            )
+            features_data = self._features_data_mapper(
+                data_with_labels, label_calibration_data
+            )
+            predicted_recall = self._recall_predictor.predict(
+                features_data
+            )
+            recall_scores = self._merge_zero_recall_with_predicted_recall(
+                predicted_recall=predicted_recall,
+                zero_labels_idx=zero_idxs,
+            )
+        else:
+            recall_scores = [0] * len(data.predicted_labels)
+        return recall_scores
+
+    @staticmethod
+    def _get_pdata_idxs_with_zero_labels(data: PredictData) -> Collection[int]:
+        return [
+            i for i in range(len(data.predicted_labels))
+            if not data.predicted_labels[i]
+        ]
+
+    @staticmethod
+    def _get_pdata_with_labels(
+        data: PredictData, zero_labels_idxs: Collection[int]
+    ) -> PredictData:
+        non_zero_idxs = [
+            i for i in range(len(data.predicted_labels))
+            if i not in zero_labels_idxs
+        ]
+        return PredictData(
+            docs=[data.docs[i] for i in non_zero_idxs],
+            predicted_labels=[data.predicted_labels[i] for i in non_zero_idxs],
+            scores=[data.scores[i] for i in non_zero_idxs],
         )
-        features_data = self._features_data_mapper(
-            data, label_calibration_data
-        )
-        return self._recall_predictor.predict(features_data)
+
+    @staticmethod
+    def _merge_zero_recall_with_predicted_recall(
+        predicted_recall: List[float],
+        zero_labels_idx: Collection[int],
+    ):
+        recall_scores = []
+        j = 0
+        for i in range(
+                len(zero_labels_idx) +
+                len(predicted_recall)):
+            if i in zero_labels_idx:
+                recall_scores.append(0)
+            else:
+                recall_scores.append(predicted_recall[j])
+                j += 1
+        return recall_scores
 
     @contextmanager
     def _debug(self, method_name):
