@@ -1,4 +1,4 @@
-#  Copyright 2021 ZBW – Leibniz Information Centre for Economics
+#  Copyright 2021-2022 ZBW – Leibniz Information Centre for Economics
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
