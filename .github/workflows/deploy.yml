@@ -28,11 +28,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pipenv
-          pipenv install --dev
+          pip install poetry
+          poetry install
 
       - name: Test Code
-        run: pipenv run pytest
+        run: poetry run pytest
 
       - name: Log in to the Container registry
         uses: docker/login-action@v1.10.0

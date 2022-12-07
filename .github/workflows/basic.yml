@@ -20,11 +20,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pipenv
-          pipenv install --dev
+          pip install poetry
+          poetry install
 
       - name: Test Code Style
-        run: pipenv run flake8
+        run: poetry run flake8
 
       - name: Test Code
-        run: pipenv run pytest
+        run: poetry run pytest
