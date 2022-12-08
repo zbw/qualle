@@ -44,15 +44,14 @@ jobs:
 
       - name: Build and upload to PyPI
         env:
-          POETRY_PYPI_TOKEN_TESTPYPI: ${{ secrets.TESTPYPI_API_TOKEN }}
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          poetry config repositories.testpypi https://test.pypi.org/legacy/
           if [ $(poetry version -s) != ${{ github.ref_name }} ]; then
             echo "The version specified in pyproject.toml and the tag name are not the same"
             echo "Will use the tag name as version name"
             poetry version ${{ github.ref_name }}
           fi
-          poetry publish --build -r testpypi
+          poetry publish --build
 
   publish-docker:
     runs-on: ubuntu-latest
