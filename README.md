@@ -17,11 +17,14 @@ Qualle provides a command-line interface to train
 and evaluate models. In addition, a REST webservice for predicting
 the recall of a MLC result is provided.
 
-## Installation
 
-### Requirements
+## Requirements
 
 Python 3.8 or 3.9 is required.
+
+## Installation
+
+Choose one of these installation methods:
 
 ### With pip
 Qualle is available on [PyPI](pypi.org) . You can install Qualle using pip:
@@ -31,11 +34,11 @@ Qualle is available on [PyPI](pypi.org) . You can install Qualle using pip:
 This will install a command line tool called `qualle` . You can call `qualle -h` to see the help message which will
 display the available modes and options.
 
-Note that it is in general recommended to use a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to avoid 
+Note that it is generally recommended to use a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to avoid 
  conflicting behaviour with the system package manager.
 
 ### From source
-You have also the option to checkout the repository and install the packages from source. You need
+You also have the option to checkout the repository and install the packages from source. You need
 [poetry](https://python-poetry.org) to perform the task:
 
 ```shell
@@ -54,13 +57,13 @@ Alternatively, you can use the Dockerfile included in this project to build a Do
 
 By default, a container built from this image launches a REST interface listening on ``0.0.0.0:8000``
 
-You need to pass the model file per bind mount or volume to the docker container.
+You need to pass the model file (see below the section REST interface) per bind mount or volume to the docker container.
 Beyond that, you need to specify the location of the model file with an 
 environment variable named `MODEL_FILE`:
 
 ``docker run --rm -it --env MODEL_FILE=/model -v /path/to/model:/model -p 8000:8000 ghcr.io/zbw/qualle``
 
-Of course you can also use the Docker image to train or evaluate by using the Qualle command line tool:
+You can also use the Docker image to train or evaluate by using the Qualle command line tool:
 
 ```shell
 docker run --rm -it -v \
@@ -96,8 +99,10 @@ For example, a row in the data file could look like this:
 
 ``Optimal investment policy of the regulated firm\tConcept0:0.5,Concept1:1\tConcept0,Concept3``
 
-Alternatively, you can specify an [Annif](https://github.com/NatLibFi/annif) (tested with version 0.58)
-full-text document corpus combined with the result of the Annif index method applied on the corpus.
+For those who use an MLC method via the toolkit [Annif](https://github.com/NatLibFi/annif) for automated subject indexing: 
+You can alternatively specify a 
+[full-text document corpus](https://github.com/NatLibFi/Annif/wiki/Document-corpus-formats/70a8f079313e872ed513a4bff1747c604b5781a7) 
+ combined with the result of the Annif index method (tested with Annif version 0.59) applied on the corpus.
 This is a  folder with three files per document:
 
 * ``doc.annif`` : result of Annif index method
@@ -109,7 +114,7 @@ To train a model, use the ``train`` mode, e.g.:
 
 ``qualle train /path/to/train_data_file /path/to/output/model``
 
-It is also possible to use label calibration using the subthesauri of a thesaurus (such as the [STW](http://zbw.eu/stw/version/latest/about))
+It is also possible to use label calibration (comparison of predicted vs actual labels) using the subthesauri of a thesaurus (such as the [STW](http://zbw.eu/stw/version/latest/about))
 as categories (please read the paper for more explanations). Consult the help (see above) for the required options.
 
 ### Evaluate
