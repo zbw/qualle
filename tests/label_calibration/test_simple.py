@@ -15,8 +15,8 @@
 import numpy as np
 import pytest
 from sklearn.exceptions import NotFittedError
-from stwfsapy.text_features import mk_text_features
 
+from qualle.features.text import TextFeatures
 from qualle.label_calibration.simple import LabelCalibrator
 from tests.common import DummyRegressor
 
@@ -38,7 +38,7 @@ def test_lc_predict_without_fit_raises_exc(calibrator, X):
 
 def test_lc_fit_fits_regressor_with_txt_features(calibrator, X, mocker):
     y = [3, 5]
-    txt_features = mk_text_features().fit(X)
+    txt_features = TextFeatures().fit(X)
     X_transformed = txt_features.transform(X)
 
     spy = mocker.spy(calibrator.regressor, 'fit')
