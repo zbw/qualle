@@ -63,6 +63,11 @@ environment variable named `MODEL_FILE`:
 
 ``docker run --rm -it --env MODEL_FILE=/model -v /path/to/model:/model -p 8000:8000 ghcr.io/zbw/qualle``
 
+[Gunicorn](https://gunicorn.org/) is used as HTTP Server. You can use the environment variable ``GUNICORN_CMD_ARGS`` to customize
+Gunicorn settings, such as the number of worker processes to use:
+
+``docker run --rm -it --env MODEL_FILE=/model --env GUNICORN_CMD_ARGS="--workers 4" -v /path/to/model:/model -p 8000:8000 ghcr.io/zbw/qualle``
+
 You can also use the Docker image to train or evaluate by using the Qualle command line tool:
 
 ```shell
