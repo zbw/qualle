@@ -23,7 +23,6 @@ from scipy.sparse import coo_matrix
 from sklearn.base import TransformerMixin
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
-from stwfsapy import thesaurus
 
 from qualle.features.base import Features
 from qualle.features.label_calibration.base import AbstractLabelCalibrator
@@ -61,10 +60,8 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
         if self.subthesauri:
             self.subthesauri_ = self.subthesauri
         else:
-            self.subthesauri_ = list(thesaurus.extract_by_type_uri(
-                self.graph,
-                self.subthesaurus_type_uri,
-            ))
+            self.subthesauri_ = self._get_all_subthesauri()
+
         subthesauri_len = len(self.subthesauri_)
 
         for idx, s in enumerate(self.subthesauri_):
@@ -107,6 +104,9 @@ class LabelCountForSubthesauriTransformer(TransformerMixin):
             )
         else:
             return count_matrix
+
+    def _get_all_subthesauri(self) -> List[URIRef]:
+        return list(self.graph[:RDF.type:self.subthesaurus_type_uri])
 
     def _extract_subthesauri_counts(self, labels: Labels):
         subthesauri_counts = [0] * len(self.subthesauri_)
