@@ -12,27 +12,27 @@ classifiers = [
 homepage = "https://github.com/zbw/qualle"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.10"
-scikit-learn = "~0.24"
+python = ">=3.8"
+scikit-learn = "~1.2"
 stwfsapy = "==0.1.5"
-scipy = "~1.6"
-rdflib = "~4.2"
-pydantic = ">=1.8.2,<1.9"
-fastapi = "~0.66"
-uvicorn = ">=0.14,<0.15"
+scipy = "~1.9"
+rdflib = "~5"
+pydantic = "~1.10"
+fastapi = "~0.88"
+uvicorn = "~0.20"
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "~6.2"
-pytest-mock = "~3.5"
-pytest-cov = "~3.0"
-requests = "~2.25"
-flake8 = "~3.8"
+pytest = "~7.2"
+pytest-mock = "~3.10"
+pytest-cov = "~4.0"
+httpx = "*"
 
 
 [tool.poetry.group.ci.dependencies]
-safety = "~1.10"
-bandit = "~1"
+safety = "~2.3"
+bandit = "~1.7"
+flake8 = "~5"
 
 
 [build-system]
