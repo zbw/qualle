@@ -69,7 +69,7 @@ def train(settings: TrainSettings):
         path_to_graph = slc_settings.thesaurus_file
         g = Graph()
         with timeit() as t:
-            g.parse(str(path_to_graph))
+            g.parse(path_to_graph)
         logger.debug('Parsed RDF Graph in %.4f seconds', t())
 
         if not slc_settings.subthesauri:
