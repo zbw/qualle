@@ -16,7 +16,7 @@ from rdflib import Graph, RDF, URIRef
 from rdflib.namespace import SKOS
 
 from qualle.features.label_calibration.thesauri_label_calibration import \
-    LabelCountForSubthesauriTransformer
+    LabelCountForSubthesauriTransformer, Thesaurus
 from tests.features.label_calibration.test_thesauri_label_calibration import \
     common as c
 
@@ -74,12 +74,27 @@ def graph():
 
 
 @pytest.fixture
-def transformer(graph):
-    return LabelCountForSubthesauriTransformer(
+def thesaurus(graph):
+    return Thesaurus(
         graph=graph,
         subthesaurus_type_uri=c.DUMMY_SUBTHESAURUS_TYPE,
         concept_type_uri=c.DUMMY_CONCEPT_TYPE,
-        subthesauri=[c.SUBTHESAURUS_A, c.SUBTHESAURUS_B],
-        concept_uri_prefix=c.CONCEPT_URI_PREFIX,
+        concept_uri_prefix=c.CONCEPT_URI_PREFIX
+    )
+
+
+@pytest.fixture
+def transformer(thesaurus):
+    transformer = LabelCountForSubthesauriTransformer(
         use_sparse_count_matrix=False
     )
+    transformer.init(
+        thesaurus=thesaurus,
+        subthesauri=[c.SUBTHESAURUS_A, c.SUBTHESAURUS_B]
+    )
+    return transformer
+
+
+@pytest.fixture
+def uninitialized_transformer():
+    return LabelCountForSubthesauriTransformer(use_sparse_count_matrix=False)

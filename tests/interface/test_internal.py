@@ -64,7 +64,7 @@ def test_train_trains_trainer(train_settings, mocker):
     m_trainer = mocker.Mock()
     m_trainer_cls = mocker.Mock(return_value=m_trainer)
     m_trainer.train = mocker.Mock(return_value='testmodel')
-    mocker.patch('qualle.interface.internal.Trainer', m_trainer_cls)
+    mocker.patch(TRAINER_CLS_FULL_PATH, m_trainer_cls)
     train(train_settings)
 
     m_trainer.train.assert_called_once()
@@ -73,7 +73,7 @@ def test_train_trains_trainer(train_settings, mocker):
 
 def test_train_without_slc_creates_respective_trainer(train_settings, mocker,
                                                       train_data):
-    mocker.patch('qualle.interface.internal.Trainer')
+    mocker.patch(TRAINER_CLS_FULL_PATH)
 
     train(train_settings)
 
@@ -99,6 +99,9 @@ def test_train_with_slc_creates_respective_trainer(
     m_graph = mocker.Mock()
     m_graph_cls = mocker.Mock(return_value=m_graph)
     mocker.patch('qualle.interface.internal.Graph', m_graph_cls)
+    m_thesaurus = mocker.Mock()
+    m_thesaurus_cls = mocker.Mock(return_value=m_thesaurus)
+    mocker.patch('qualle.interface.internal.Thesaurus', m_thesaurus_cls)
     m_lcfst = mocker.Mock()
     m_lcfst_cls = mocker.Mock(return_value=m_lcfst)
     mocker.patch(
@@ -122,19 +125,24 @@ def test_train_with_slc_creates_respective_trainer(
     m_graph_cls.assert_called_once()
     m_graph.parse.assert_called_once_with(c.DUMMY_THESAURUS_FILE)
 
-    m_lcfst_cls.assert_called_once_with(
+    m_thesaurus_cls.assert_called_once_with(
         graph=m_graph,
         subthesaurus_type_uri=URIRef(
             c.DUMMY_SUBTHESAURUS_TYPE),
         concept_type_uri=URIRef(
             c.DUMMY_CONCEPT_TYPE),
+        concept_uri_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
+    )
+
+    m_lcfst_cls.assert_called_once_with(
+        use_sparse_count_matrix=True
+    )
+    m_lcfst.init.assert_called_once_with(
+        thesaurus=m_thesaurus,
         subthesauri=[
             URIRef(c.DUMMY_SUBTHESAURUS_A),
             URIRef(c.DUMMY_SUBTHESAURUS_B)],
-        concept_uri_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
-        use_sparse_count_matrix=True
     )
-    m_lcfst.fit.assert_called_once()
 
     internal.Trainer.assert_called_once()
 
@@ -152,6 +160,46 @@ def test_train_with_slc_creates_respective_trainer(
         lambda f: f.__class__, call_args.get('features'))) == [
                TextFeatures, ThesauriLabelCalibrationFeatures]
     assert call_args.get('should_debug') is False
+
+
+def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
+        train_settings, mocker
+):
+    m_graph = mocker.Mock()
+    m_graph_cls = mocker.Mock(return_value=m_graph)
+    mocker.patch('qualle.interface.internal.Graph', m_graph_cls)
+    m_thesaurus = mocker.Mock()
+    m_thesaurus.get_all_subthesauri.return_value = [
+        URIRef(c.DUMMY_SUBTHESAURUS_B)
+    ]
+    m_thesaurus_cls = mocker.Mock(return_value=m_thesaurus)
+    mocker.patch('qualle.interface.internal.Thesaurus', m_thesaurus_cls)
+    m_lcfst = mocker.Mock()
+    m_lcfst_cls = mocker.Mock(return_value=m_lcfst)
+    mocker.patch(
+        'qualle.interface.internal.LabelCountForSubthesauriTransformer',
+        m_lcfst_cls
+    )
+    mocker.patch(TRAINER_CLS_FULL_PATH)
+
+    train_settings.subthesauri_label_calibration = \
+        SubthesauriLabelCalibrationSettings(
+            thesaurus_file=c.DUMMY_THESAURUS_FILE,
+            subthesaurus_type=c.DUMMY_SUBTHESAURUS_TYPE,
+            concept_type=c.DUMMY_CONCEPT_TYPE,
+            concept_type_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
+            subthesauri=[],
+            use_sparse_count_matrix=True
+        )
+
+    train(train_settings)
+
+    m_lcfst.init.assert_called_once_with(
+        thesaurus=m_thesaurus,
+        subthesauri=[
+            URIRef(c.DUMMY_SUBTHESAURUS_B)
+        ],
+    )
 
 
 def test_evaluate(mocker, train_data):

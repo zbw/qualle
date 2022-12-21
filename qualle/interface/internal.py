@@ -25,7 +25,7 @@ from qualle.features.label_calibration.simple_label_calibration import \
     SimpleLabelCalibrator, SimpleLabelCalibrationFeatures
 from qualle.features.label_calibration.thesauri_label_calibration import \
     ThesauriLabelCalibrator, ThesauriLabelCalibrationFeatures, \
-    LabelCountForSubthesauriTransformer
+    LabelCountForSubthesauriTransformer, Thesaurus
 from qualle.interface.config import TrainSettings, EvalSettings
 from qualle.train import Trainer
 from qualle.utils import get_logger, load_train_input, timeit
@@ -72,30 +72,31 @@ def train(settings: TrainSettings):
             g.parse(path_to_graph)
         logger.debug('Parsed RDF Graph in %.4f seconds', t())
 
-        if not slc_settings.subthesauri:
+        thesaurus = Thesaurus(
+            graph=g,
+            subthesaurus_type_uri=URIRef(slc_settings.subthesaurus_type),
+            concept_type_uri=URIRef(slc_settings.concept_type),
+            concept_uri_prefix=slc_settings.concept_type_prefix,
+        )
+        subthesauri = list(map(
+            lambda s: URIRef(s), slc_settings.subthesauri
+        ))
+        if not subthesauri:
             logger.info(
                 'No subthesauri passed, will extract subthesauri by type'
             )
+            subthesauri = thesaurus.get_all_subthesauri()
+            logger.debug("Extracted %d subthesauri", len(subthesauri))
         if slc_settings.use_sparse_count_matrix:
             logger.info(
                 'Will use Sparse Count Matrix for '
                 'Subthesauri Label Calibration'
             )
         transformer = LabelCountForSubthesauriTransformer(
-            graph=g,
-            subthesaurus_type_uri=URIRef(slc_settings.subthesaurus_type),
-            concept_type_uri=URIRef(slc_settings.concept_type),
-            subthesauri=list(map(
-                lambda s: URIRef(s), slc_settings.subthesauri
-            )),
-            concept_uri_prefix=slc_settings.concept_type_prefix,
             use_sparse_count_matrix=slc_settings.use_sparse_count_matrix
         )
-        with timeit() as t:
-            transformer.fit()
-        logger.debug(
-            'Ran Subthesauri Transformer fit in %.4f seconds', t()
-        )
+        transformer.init(thesaurus=thesaurus, subthesauri=subthesauri)
+
         label_calibration_features = ThesauriLabelCalibrationFeatures(
             transformer=transformer
         )
