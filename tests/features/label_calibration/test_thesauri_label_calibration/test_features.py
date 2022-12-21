@@ -14,10 +14,9 @@
 
 import numpy as np
 import pytest
-from sklearn.exceptions import NotFittedError
 
 from qualle.features.label_calibration.thesauri_label_calibration import \
-    ThesauriLabelCalibrationFeatures
+    ThesauriLabelCalibrationFeatures, NotInitializedException
 from qualle.models import LabelCalibrationData
 
 import tests.features.label_calibration.test_thesauri_label_calibration.common\
@@ -26,7 +25,6 @@ import tests.features.label_calibration.test_thesauri_label_calibration.common\
 
 @pytest.fixture
 def features(transformer):
-    transformer.fit()
     return ThesauriLabelCalibrationFeatures(transformer)
 
 
@@ -40,9 +38,11 @@ def test_transform(features):
     ]).all()
 
 
-def test_transform_with_unfitted_underlying_tranformer_raises_exc(transformer):
-    with pytest.raises(NotFittedError):
-        ThesauriLabelCalibrationFeatures(transformer).transform(
+def test_transform_with_uninitialized_underlying_tranformer_raises_exc(
+        uninitialized_transformer
+):
+    with pytest.raises(NotInitializedException):
+        ThesauriLabelCalibrationFeatures(uninitialized_transformer).transform(
             LabelCalibrationData(
                 predicted_labels=[c.CONCEPT_x0],
                 predicted_no_of_labels=np.array([[1]])

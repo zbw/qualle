@@ -18,7 +18,7 @@ from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_is_fitted
 
-from stwfsapy.text_features import mk_text_features
+from qualle.features.text import TextFeatures
 
 
 class LabelCalibrator(BaseEstimator, RegressorMixin):
@@ -27,7 +27,7 @@ class LabelCalibrator(BaseEstimator, RegressorMixin):
         self.regressor = regressor
 
     def fit(self, X: List[str], y):
-        features = mk_text_features()
+        features = TextFeatures()
         self.pipeline_ = Pipeline(
             [("features", features), ("regressor", self.regressor)]
         )

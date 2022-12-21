@@ -11,10 +11,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from pathlib import Path
 
 DUMMY_SUBTHESAURUS_B = 'http://subB'
 DUMMY_SUBTHESAURUS_A = 'http://subA'
 DUMMY_CONCEPT_TYPE = 'http://ctype'
 DUMMY_CONCEPT_TYPE_PREFIX = 'http://prefix'
 DUMMY_SUBTHESAURUS_TYPE = 'http://stype'
-DUMMY_THESAURUS_FILE = '/tmp/thesaurus'
+DUMMY_THESAURUS_FILE = Path('/tmp/thesaurus')

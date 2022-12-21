@@ -29,17 +29,6 @@ def data():
     ]
 
 
-def test_fit_fits_underlying_features(data, mocker):
-    f_mock = mocker.Mock()
-    m = mocker.Mock(return_value=f_mock)
-    mocker.patch('qualle.features.text.mk_text_features', m)
-    cf = TextFeatures()
-    cf.fit(data)
-    assert hasattr(cf, 'features_')
-    assert cf.features_ == f_mock
-    f_mock.fit.assert_called_once_with(data)
-
-
 def test_transform_without_fit_raises_exc(data):
     with pytest.raises(NotFittedError):
         TextFeatures().transform(data)
