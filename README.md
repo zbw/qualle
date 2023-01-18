@@ -1,5 +1,5 @@
 # Qualle
-![CI](https://github.com/zbw/qualle/actions/workflows/main.yml/badge.svg)
+[![Extended Tests](https://github.com/zbw/qualle/actions/workflows/extended.yml/badge.svg)](https://github.com/zbw/qualle/actions/workflows/extended.yml)
 [![codecov](https://codecov.io/gh/zbw/qualle/branch/master/graph/badge.svg?token=ZE7OWKA83Q)](https://codecov.io/gh/zbw/qualle)
 
 This is an implementation of the Qualle framework as proposed in the paper
