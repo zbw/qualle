@@ -15,6 +15,7 @@
 """Internal interface to access Qualle functionality"""
 
 from importlib import import_module
+from pathlib import Path
 from typing import Type
 
 from joblib import dump, load
@@ -28,7 +29,9 @@ from qualle.features.label_calibration.thesauri_label_calibration import \
     LabelCountForSubthesauriTransformer, Thesaurus
 from qualle.interface.config import TrainSettings, EvalSettings
 from qualle.train import Trainer
-from qualle.utils import get_logger, load_train_input, timeit
+from qualle.utils import get_logger, timeit
+from qualle.interface.io.annif import AnnifHandler
+from qualle.interface.io.tsv import load_train_input as load_tsv_train_input
 
 
 def train(settings: TrainSettings):
@@ -61,7 +64,8 @@ def train(settings: TrainSettings):
     )
 
     with timeit() as t:
-        train_data = load_train_input(str(path_to_train_data))
+        train_data = _load_train_input(path_to_train_data)
+
     logger.debug('Loaded train data in %.4f seconds', t())
 
     if slc_settings:
@@ -141,9 +145,9 @@ def evaluate(settings: EvalSettings):
     logger = get_logger()
     path_to_test_data = settings.test_data_path
     path_to_model_file = settings.model_file
-    model = load_model(path_to_model_file)
+    model = load_model(str(path_to_model_file))
     logger.info('Run evaluation with model:\n%s', model)
-    test_input = load_train_input(str(path_to_test_data))
+    test_input = _load_train_input(path_to_test_data)
     ev = Evaluator(test_input, model)
     eval_data = ev.evaluate()
     logger.info('\nScores:')
@@ -153,3 +157,11 @@ def evaluate(settings: EvalSettings):
 
 def load_model(path_to_model_file: str):
     return load(path_to_model_file)
+
+
+def _load_train_input(p: Path):
+    if p.is_dir():
+        train_input = AnnifHandler(dir=p).load_train_input()
+    else:
+        train_input = load_tsv_train_input(p)
+    return train_input
