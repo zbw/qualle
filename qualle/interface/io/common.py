@@ -22,10 +22,14 @@ Data = namedtuple(
 
 def map_to_train_data(data: Data) -> TrainData:
     return TrainData(
-        predict_data=PredictData(
-            docs=data.docs,
-            predicted_labels=data.predicted_labels,
-            scores=data.scores
-        ),
+        predict_data=map_to_predict_data(data),
         true_labels=data.true_labels
+    )
+
+
+def map_to_predict_data(data: Data) -> PredictData:
+    return PredictData(
+        docs=data.docs,
+        predicted_labels=data.predicted_labels,
+        scores=data.scores
     )

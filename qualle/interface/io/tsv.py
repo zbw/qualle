@@ -14,16 +14,22 @@
 import csv
 from pathlib import Path
 
-from qualle.interface.io.common import Data, map_to_train_data
+from qualle.interface.io.common import Data, \
+    map_to_train_data, map_to_predict_data
 from qualle.models import TrainData
 
 
-def load_train_input(pth_to_data: Path) -> TrainData:
-    return map_to_train_data(_load_input(pth_to_data))
+def load_train_input(p: Path) -> TrainData:
+    return map_to_train_data(_load_input(p))
+
+
+def load_predict_input(p: Path):
+    return map_to_predict_data(_load_input(p, include_true_labels=False))
 
 
 def _load_input(
-        path_to_tsv: Path
+        path_to_tsv: Path,
+        include_true_labels=True
 ) -> Data:
     docs = []
     pred_labels = []
@@ -45,7 +51,7 @@ def _load_input(
             pred_labels.append(pred_labels_for_row)
             scores.append(scores_for_row)
 
-            if len(row) > 2:
+            if include_true_labels and len(row) > 2:
                 true_labels.append(list(filter(bool, row[2].split(','))))
 
     return Data(

@@ -15,8 +15,9 @@ import os
 from glob import glob
 from pathlib import Path
 
-from qualle.interface.io.common import Data, map_to_train_data
-from qualle.models import TrainData
+from qualle.interface.io.common import Data, \
+    map_to_train_data, map_to_predict_data
+from qualle.models import TrainData, PredictData
 
 
 class AnnifHandler:
@@ -27,7 +28,12 @@ class AnnifHandler:
     def load_train_input(self) -> TrainData:
         return map_to_train_data(self._input_from_annif())
 
-    def _input_from_annif(self) -> Data:
+    def load_predict_input(self) -> PredictData:
+        return map_to_predict_data(self._input_from_annif(
+            include_true_labels=False)
+        )
+
+    def _input_from_annif(self, include_true_labels=True) -> Data:
         docs = []
         pred_labels = []
         true_labels = []
@@ -49,7 +55,7 @@ class AnnifHandler:
             with open(doc_pth) as fp:
                 docs.append(''.join(list(fp.readlines())))
             label_pth = pred_pth.replace('.annif', '.tsv')
-            if os.path.exists(label_pth):
+            if include_true_labels and os.path.exists(label_pth):
                 with open(label_pth) as fp:
                     true_labels_for_doc = []
                     for line in fp.readlines():

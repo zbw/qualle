@@ -13,7 +13,7 @@
 #   limitations under the License.
 from pydantic import ValidationError
 
-from qualle.interface.io.tsv import load_train_input
+from qualle.interface.io.tsv import load_train_input, load_predict_input
 from qualle.models import TrainData, PredictData
 
 import pytest
@@ -85,3 +85,27 @@ def test_load_train_input_without_true_labels_raises_exc(
         data_without_true_labels):
     with pytest.raises(ValidationError):
         load_train_input(data_without_true_labels)
+
+
+def test_load_predict_data(data_with_labels):
+    assert load_predict_input(data_with_labels) == PredictData(
+        docs=['title0', 'title1'],
+        predicted_labels=[
+            ['concept0', 'concept1'], ['concept2', 'concept3']
+        ],
+        scores=[[1, .5], [0, .5]]
+    )
+
+
+def test_load_predict_input_from_tsv_empty_labels_returns_empty_list(
+        data_with_empty_labels
+):
+    assert load_predict_input(data_with_empty_labels) == PredictData(
+        docs=['title0', 'title1'],
+        predicted_labels=[
+            ['concept0', 'concept1'], []
+        ],
+        scores=[
+            [1, 0.5], []
+        ]
+    )

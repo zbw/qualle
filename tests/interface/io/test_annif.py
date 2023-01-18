@@ -15,7 +15,7 @@ import pytest
 from pydantic import ValidationError
 
 from qualle.interface.io.annif import AnnifHandler
-from qualle.models import TrainData
+from qualle.models import TrainData, PredictData
 
 DOC_0_CONTENT = 'title0\ncontent0'
 DOC_1_CONTENT = 'title1\ncontent1'
@@ -116,6 +116,38 @@ def test_load_train_input_with_empty_labels_return_empty_list(
          ['concept1', 'concept3']),
         (DOC_1_CONTENT, ['concept2', 'concept3'], [0, .5],
          []),
+    ]
+
+
+def test_load_predict_input(data):
+    handler = AnnifHandler(dir=data)
+    parsed_input = handler.load_predict_input()
+    assert isinstance(parsed_input, PredictData)
+    parsed_input_tpls = zip(
+        parsed_input.docs,
+        parsed_input.predicted_labels,
+        parsed_input.scores,
+    )
+    assert sorted(parsed_input_tpls, key=lambda t: t[0]) == [
+        (DOC_0_CONTENT, ['concept0', 'concept1'], [1, .5],),
+        (DOC_1_CONTENT, ['concept2', 'concept3'], [0., .5],),
+    ]
+
+
+def test_load_predict_input_with_empty_labels_return_empty_list(
+        data_with_empty_labels
+):
+    handler = AnnifHandler(dir=data_with_empty_labels)
+    parsed_input = handler.load_predict_input()
+    assert isinstance(parsed_input, PredictData)
+    parsed_input_tpls = zip(
+        parsed_input.docs,
+        parsed_input.predicted_labels,
+        parsed_input.scores,
+    )
+    assert sorted(parsed_input_tpls, key=lambda t: t[0]) == [
+        (DOC_0_CONTENT, [], [],),
+        (DOC_1_CONTENT, ['concept2', 'concept3'], [0, .5],),
     ]
 
 
