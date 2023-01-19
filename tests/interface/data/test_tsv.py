@@ -13,7 +13,7 @@
 #   limitations under the License.
 from pydantic import ValidationError
 
-from qualle.interface.io.tsv import load_train_input, load_predict_input
+from qualle.interface.data.tsv import load_train_input, load_predict_input
 from qualle.models import TrainData, PredictData
 
 import pytest

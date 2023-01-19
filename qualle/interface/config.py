@@ -61,6 +61,12 @@ class EvalSettings(BaseSettings):
     model_file: Path
 
 
+class PredictSettings(BaseSettings):
+    predict_data_path: Path
+    model_file: Path
+    output_path: Optional[Path]
+
+
 class RESTSettings(BaseSettings):
     model_file: Path
     port: int = 8000
