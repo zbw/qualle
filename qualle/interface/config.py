@@ -15,7 +15,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, root_validator
 from pydantic.networks import AnyUrl
 from qualle.features.confidence import ConfidenceFeatures
 from qualle.features.text import TextFeatures
@@ -65,6 +65,17 @@ class PredictSettings(BaseSettings):
     predict_data_path: Path
     model_file: Path
     output_path: Optional[Path]
+
+    @root_validator
+    def check_output_path_specified_for_input_file(cls, values):
+        predict_data_path = values.get("predict_data_path")
+        output_path = values.get("output_path")
+        if predict_data_path.is_file() and not output_path:
+            raise ValueError(
+                "output_path has to be specified if predict_data_path "
+                "refers to a file"
+            )
+        return values
 
 
 class RESTSettings(BaseSettings):
