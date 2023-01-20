@@ -88,7 +88,9 @@ docker run --rm -it -v \
 ## Usage
 
 ### Input data 
-In order to train or evaluate a model you have to provide data. 
+In order to train a model, evaluate a model or predict the quality you have to 
+provide data. 
+
 This can be a tabular-separated file (tsv) in the format (tabular is marked with ``\t``)
 
 ```document-content\tpredicted_labels_with_scores\ttrue_labels```
@@ -99,6 +101,8 @@ where
 - ``predicted_labels_with_scores`` is a comma-separated list of pairs ``predicted_label:confidence-score``
 (this is basically the output of the MLC method)
 - ``true_labels`` is a comma-separated list of true labels (ground truth)
+
+Note that you can omit the ``true_labels`` section if you only want to predict the quality of the data.
 
 For example, a row in the data file could look like this:
 
@@ -113,6 +117,9 @@ This is a  folder with three files per document:
 * ``doc.annif`` : result of Annif index method
 * ``doc.tsv`` : ground truth
 * ``doc.txt`` : document content
+
+As above, you may omit the ``doc.tsv`` if you just want to
+predict the quality of the data.
 
 ### Train
 To train a model, use the ``train`` mode, e.g.:

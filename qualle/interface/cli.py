@@ -18,13 +18,16 @@ import argparse
 import json
 import logging
 import logging.config
+from pathlib import Path
 
 from qualle.interface.config import TrainSettings, \
     SubthesauriLabelCalibrationSettings, RegressorSettings, EvalSettings, \
-    FeaturesEnum, RESTSettings
-from qualle.interface.internal import train, evaluate
+    FeaturesEnum, RESTSettings, PredictSettings
+from qualle.interface.internal import train, evaluate, predict
 from qualle.interface.rest import run
 from qualle.utils import get_logger
+
+PATH_TO_MODEL_FILE_STR = 'Path to model file'
 
 
 def config_logging(config_file=None, debug=False):
@@ -122,6 +125,22 @@ def handle_rest(args: argparse.Namespace):
     run(settings)
 
 
+def handle_predict(args: argparse.Namespace):
+    predict_data_path = args.predict_data_path
+    output_path = args.output[0] if args.output else None
+
+    if predict_data_path.is_file() and not output_path:
+        raise CliValidationError(
+            "output file has to be specified if tsv file has been specified"
+        )
+    settings = PredictSettings(
+        predict_data_path=predict_data_path,
+        model_file=args.model,
+        output_path=output_path
+    )
+    predict(settings)
+
+
 def cli_entrypoint():
     parser = argparse.ArgumentParser(
         description='Quality Estimation for Automatic Subject Indexing'
@@ -142,16 +161,15 @@ def cli_entrypoint():
 
     eval_parser = subparsers.add_parser(
         'eval',
-        description='Run evaluation on training data using different '
-                    'estimators.'
+        description='Run evaluation on training data.'
     )
     eval_parser.set_defaults(func=handle_eval)
 
     eval_parser.add_argument('test_data_path', type=str,
-                             help='Path to test data.'
+                             help='Path to test data. '
                              'Accepted are either a tsv file or '
-                             'a folder in annif format.')
-    eval_parser.add_argument('model', type=str, help='Path to model file')
+                             'a folder in Annif format.')
+    eval_parser.add_argument('model', type=str, help=PATH_TO_MODEL_FILE_STR)
 
     train_parser = subparsers.add_parser(
         'train',
@@ -159,9 +177,9 @@ def cli_entrypoint():
     )
     train_parser.set_defaults(func=handle_train)
     train_parser.add_argument('train_data_path', type=str,
-                              help='Path to train data.'
+                              help='Path to train data. '
                               'Accepted are either a tsv file or '
-                              'a folder in annif format.')
+                              'a folder in Annif format.')
     train_parser.add_argument('output', type=str,
                               help='Path to output model file')
     train_parser.add_argument(
@@ -234,7 +252,7 @@ def cli_entrypoint():
         'rest',
         description='Run Qualle as REST Webservice with predict endpoint'
     )
-    rest_parser.add_argument('model', type=str, help='Path to model file')
+    rest_parser.add_argument('model', type=str, help=PATH_TO_MODEL_FILE_STR)
     rest_parser.add_argument(
         '--port', '-p', type=int, nargs=1, help='Port to listen on',
         default=[8000]
@@ -244,6 +262,32 @@ def cli_entrypoint():
         default=['127.0.0.1']
     )
     rest_parser.set_defaults(func=handle_rest)
+
+    predict_parser = subparsers.add_parser(
+        'predict',
+        description='Predict the quality for a a collection of automated '
+                    'subject indexing (MLC) results.'
+    )
+    predict_parser.set_defaults(func=handle_predict)
+
+    predict_parser.add_argument(
+        'predict_data_path', type=Path,
+        help='Path to data. '
+             'Accepted are either a tsv file or a folder in annif format. '
+             'If a tsv file is provided, the flag --output must be specified. '
+             'If a folder is provided, the predicted quality is written into '
+             'files using the ".qualle" prefix inside the folder.  '
+    )
+    predict_parser.add_argument(
+        'model', type=str, help=PATH_TO_MODEL_FILE_STR
+    )
+    predict_parser.add_argument(
+        '--output', type=Path, nargs=1,
+        help='Output file to write the quality estimation. Only used if a tsv '
+             'file is specified as input. The quality estimation for each '
+             'line of the tsv file is written to the output on a separate '
+             'line, preserving the order in the tsv file.'
+    )
 
     args = parser.parse_args()
 

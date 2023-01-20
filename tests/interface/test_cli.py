@@ -18,7 +18,7 @@ import pytest
 import qualle.interface.cli as cli
 from qualle.interface.config import FeaturesEnum, RegressorSettings, \
     SubthesauriLabelCalibrationSettings, TrainSettings, EvalSettings, \
-    RESTSettings
+    RESTSettings, PredictSettings
 from qualle.interface.cli import CliValidationError, handle_train, handle_eval
 
 import tests.interface.common as c
@@ -61,6 +61,14 @@ def train_args_dict_with_slc(train_args_dict):
 def mock_internal_interface(mocker):
     mocker.patch('qualle.interface.cli.train')
     mocker.patch('qualle.interface.cli.evaluate')
+    mocker.patch('qualle.interface.cli.predict')
+
+
+@pytest.fixture
+def tsv_file(tmp_path):
+    fp = tmp_path / 'doc.tsv'
+    fp.write_text("t\tc:0\tc")
+    return fp
 
 
 def test_handle_train_slc_without_all_required_args_raises_exc(
@@ -217,3 +225,41 @@ def test_handle_rest(mocker):
     m_run.assert_called_once_with(
         RESTSettings(model_file=DUMMY_MODEL_PATH, host='x', port=9000)
     )
+
+
+def test_handle_predict_with_dir(tmp_path):
+    cli.handle_predict(
+        Namespace(
+            **dict(
+                predict_data_path=tmp_path, model=DUMMY_MODEL_PATH,
+                output=None)
+            )
+    )
+    cli.predict.assert_called_once()
+    actual_settings = cli.predict.call_args[0][0]
+    assert actual_settings == PredictSettings(
+        predict_data_path=tmp_path,
+        model_file=DUMMY_MODEL_PATH
+    )
+
+
+def test_handle_predict_with_file(tsv_file, tmp_path):
+    output_path = tmp_path / 'output.txt'
+    cli.handle_predict(
+        Namespace(**dict(predict_data_path=tsv_file, model=DUMMY_MODEL_PATH,
+                         output=[output_path])))
+    cli.predict.assert_called_once()
+    actual_settings = cli.predict.call_args[0][0]
+    assert actual_settings == PredictSettings(
+        predict_data_path=tsv_file,
+        model_file=DUMMY_MODEL_PATH,
+        output_path=output_path
+    )
+
+
+def test_handle_predict_with_file_raises_exc_if_no_output_file(tsv_file):
+    with pytest.raises(CliValidationError):
+        cli.handle_predict(
+            Namespace(**dict(
+                predict_data_path=tsv_file, model=DUMMY_MODEL_PATH, output=None
+            )))
