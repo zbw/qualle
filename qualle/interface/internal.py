@@ -33,7 +33,8 @@ from qualle.models import TrainData, PredictData
 from qualle.train import Trainer
 from qualle.utils import get_logger, timeit
 from qualle.interface.data.annif import AnnifHandler
-from qualle.interface.data.tsv import load_train_input as load_tsv_train_input, load_predict_input
+from qualle.interface.data.tsv import \
+    load_train_input as load_tsv_train_input, load_predict_input
 
 
 def train(settings: TrainSettings):

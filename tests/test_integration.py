@@ -20,19 +20,28 @@ from fastapi.testclient import TestClient
 
 from qualle.interface import internal
 from qualle.interface.config import TrainSettings, FeaturesEnum, \
-    RegressorSettings, EvalSettings, RESTSettings
+    RegressorSettings, EvalSettings, RESTSettings, PredictSettings
 from qualle.interface.rest import create_app, PREDICT_ENDPOINT, Documents, \
     Document, QualityEstimation, QualityScores, Metric
 
 
 @pytest.fixture
 def train_data_file(tmp_path):
-    return tmp_path / 'test_data.tsv'
+    fp = tmp_path / 'test_data.tsv'
+    fp.write_text(
+        'doc\tconcept0:0.5,concept1:1\tconcept0\n' * 100
+    )
+    return fp
 
 
 @pytest.fixture
 def model_path(tmp_path):
     return tmp_path / 'output.model'
+
+
+@pytest.fixture
+def predict_output_path(tmp_path):
+    return tmp_path / 'output.txt'
 
 
 def test_train_stores_model(train_data_file, model_path):
@@ -79,11 +88,26 @@ def test_rest(train_data_file, model_path):
         QualityScores(name=Metric.RECALL, scores=[1])]).json())
 
 
+def test_predict_stores_quality_estimation(
+        train_data_file, model_path, predict_output_path
+):
+    train(train_data_file, model_path)
+
+    settings = PredictSettings(
+        predict_data_path=train_data_file,
+        model_file=model_path,
+        output_path=predict_output_path
+    )
+    internal.predict(settings)
+
+    assert predict_output_path.exists()
+    # We can make following assumption due to the construction of train data
+    assert predict_output_path.read_text().rstrip("\n") == "\n".join(
+        ["1.0"] * 100
+    )
+
+
 def train(train_data_file, output_path):
-    with train_data_file.open('w') as f:
-        f.write(
-            'doc\tconcept0:0.5,concept1:1\tconcept0\n' * 100
-        )
     settings = TrainSettings(
         label_calibrator_regressor=RegressorSettings(
             regressor_class='sklearn.ensemble.GradientBoostingRegressor',

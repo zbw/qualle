@@ -286,12 +286,14 @@ def test_predict_stores_scores_from_model(tsv_data_path, tmp_path, model_path):
         output_path=output_path
     )
     mock_model = internal.load.return_value
-    scores = [x / 20 for x in range(20)]
-    mock_model.predict.return_value = scores
+    mock_model.predict.side_effect = lambda p_data: map(
+        lambda s: s[0], p_data.scores)
 
     internal.predict(settings)
 
-    assert output_path.read_text().rstrip("\n") == "\n".join(map(str, scores))
+    assert output_path.read_text().rstrip("\n") == "\n".join(
+        [str(x / 20) for x in range(20)]
+    )
 
 
 def test_predict_with_annif_data_stores_scores_from_model(
