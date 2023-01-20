@@ -128,7 +128,7 @@ def test_train_without_slc_creates_respective_trainer(train_settings, mocker,
 
 
 def test_train_with_slc_creates_respective_trainer(
-        train_settings, mocker, train_data
+        train_settings, mocker, train_data, thsys_file_path
 ):
     m_graph = mocker.Mock()
     m_graph_cls = mocker.Mock(return_value=m_graph)
@@ -146,7 +146,7 @@ def test_train_with_slc_creates_respective_trainer(
 
     train_settings.subthesauri_label_calibration = \
         SubthesauriLabelCalibrationSettings(
-            thesaurus_file=c.DUMMY_THESAURUS_FILE,
+            thesaurus_file=thsys_file_path,
             subthesaurus_type=c.DUMMY_SUBTHESAURUS_TYPE,
             concept_type=c.DUMMY_CONCEPT_TYPE,
             concept_type_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
@@ -157,7 +157,7 @@ def test_train_with_slc_creates_respective_trainer(
     train(train_settings)
 
     m_graph_cls.assert_called_once()
-    m_graph.parse.assert_called_once_with(c.DUMMY_THESAURUS_FILE)
+    m_graph.parse.assert_called_once_with(thsys_file_path)
 
     m_thesaurus_cls.assert_called_once_with(
         graph=m_graph,
@@ -197,7 +197,7 @@ def test_train_with_slc_creates_respective_trainer(
 
 
 def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
-        train_settings, mocker
+        train_settings, mocker, thsys_file_path
 ):
     m_graph = mocker.Mock()
     m_graph_cls = mocker.Mock(return_value=m_graph)
@@ -218,7 +218,7 @@ def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
 
     train_settings.subthesauri_label_calibration = \
         SubthesauriLabelCalibrationSettings(
-            thesaurus_file=c.DUMMY_THESAURUS_FILE,
+            thesaurus_file=thsys_file_path,
             subthesaurus_type=c.DUMMY_SUBTHESAURUS_TYPE,
             concept_type=c.DUMMY_CONCEPT_TYPE,
             concept_type_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
@@ -236,7 +236,7 @@ def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
     )
 
 
-def test_evaluate(mocker, tsv_data_path, train_data):
+def test_evaluate(mocker, tsv_data_path, train_data, model_path):
     m_eval = mocker.Mock()
     m_eval.evaluate.return_value = {}
     m_eval_cls = mocker.Mock(return_value=m_eval)
@@ -245,7 +245,7 @@ def test_evaluate(mocker, tsv_data_path, train_data):
 
     settings = EvalSettings(
         test_data_path=tsv_data_path,
-        model_file='/tmp/model'
+        model_file=model_path
     )
     internal.evaluate(settings)
 
@@ -278,11 +278,11 @@ def test_load_train_input_from_tsv(tsv_data_path, train_data):
     assert internal._load_train_input(tsv_data_path) == train_data
 
 
-def test_predict_stores_scores_from_model(tsv_data_path, tmp_path):
+def test_predict_stores_scores_from_model(tsv_data_path, tmp_path, model_path):
     output_path = tmp_path / 'qualle.txt'
     settings = PredictSettings(
         predict_data_path=tsv_data_path,
-        model_file='/tmp/model',
+        model_file=model_path,
         output_path=output_path
     )
     mock_model = internal.load.return_value
@@ -295,10 +295,10 @@ def test_predict_stores_scores_from_model(tsv_data_path, tmp_path):
 
 
 def test_predict_with_annif_data_stores_scores_from_model(
-        annif_data_dir, tmp_path):
+        annif_data_dir, tmp_path, model_path):
     settings = PredictSettings(
         predict_data_path=annif_data_dir,
-        model_file='/tmp/model',
+        model_file=model_path,
     )
     mock_model = internal.load.return_value
     mock_model.predict.side_effect = lambda p_data: map(
