@@ -14,10 +14,8 @@
 
 from rdflib import URIRef, Graph
 
-from qualle.features.label_calibration.thesauri_label_calibration import \
-    Thesaurus
-from tests.features.label_calibration.test_thesauri_label_calibration import \
-    common as c
+from qualle.features.label_calibration.thesauri_label_calibration import Thesaurus
+from tests.features.label_calibration.test_thesauri_label_calibration import common as c
 
 
 def test_get_concepts_for_thesaurus(thesaurus):
@@ -32,13 +30,19 @@ def test_get_concepts_for_thesaurus(thesaurus):
 
 
 def test_get_concepts_for_thesaurus_not_found_returns_empty(thesaurus):
-    assert thesaurus.get_concepts_for_subthesaurus(
-        URIRef(c.CONCEPT_URI_PREFIX + '/' + c.CONCEPT_INVALID)) == set()
+    assert (
+        thesaurus.get_concepts_for_subthesaurus(
+            URIRef(c.CONCEPT_URI_PREFIX + "/" + c.CONCEPT_INVALID)
+        )
+        == set()
+    )
 
 
 def test_get_all_subthesauri(thesaurus):
     assert set(thesaurus.get_all_subthesauri()) == {
-        c.SUBTHESAURUS_A, c.SUBTHESAURUS_B, c.SUBTHESAURUS_C
+        c.SUBTHESAURUS_A,
+        c.SUBTHESAURUS_B,
+        c.SUBTHESAURUS_C,
     }
 
 
@@ -47,11 +51,15 @@ def test_get_all_subthesauri_with_empty_thesaurus_returns_empty():
         graph=Graph(),
         subthesaurus_type_uri=c.DUMMY_SUBTHESAURUS_TYPE,
         concept_type_uri=c.DUMMY_CONCEPT_TYPE,
-        concept_uri_prefix=c.CONCEPT_URI_PREFIX
+        concept_uri_prefix=c.CONCEPT_URI_PREFIX,
     )
     assert not t.get_all_subthesauri()
 
 
 def test_extract_concept_from_uri_ref(thesaurus):
-    assert thesaurus.extract_concept_id_from_uri_ref(
-        URIRef(c.CONCEPT_URI_PREFIX + '/' + c.CONCEPT_x0)) == c.CONCEPT_x0
+    assert (
+        thesaurus.extract_concept_id_from_uri_ref(
+            URIRef(c.CONCEPT_URI_PREFIX + "/" + c.CONCEPT_x0)
+        )
+        == c.CONCEPT_x0
+    )

@@ -19,11 +19,6 @@ from qualle.models import TrainData, PredictData
 @pytest.fixture
 def train_data():
     p = PredictData(
-        docs=['Title'] * 20,
-        predicted_labels=[['concept']] * 20,
-        scores=[[0.0]] * 20
+        docs=["Title"] * 20, predicted_labels=[["concept"]] * 20, scores=[[0.0]] * 20
     )
-    return TrainData(
-        predict_data=p,
-        true_labels=[['concept']] * 20
-    )
+    return TrainData(predict_data=p, true_labels=[["concept"]] * 20)

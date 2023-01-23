@@ -19,11 +19,8 @@ from qualle.interface.config import PredictSettings
 
 
 def test_predict_settings_input_file_but_no_output_raises_exc(tmp_path):
-    fp = tmp_path / 'fp.tsv'
-    fp.write_text('t\tc:0\tc')
+    fp = tmp_path / "fp.tsv"
+    fp.write_text("t\tc:0\tc")
 
     with pytest.raises(ValidationError):
-        PredictSettings(
-            predict_data_path=fp,
-            model=tmp_path / 'model'
-        )
+        PredictSettings(predict_data_path=fp, model=tmp_path / "model")

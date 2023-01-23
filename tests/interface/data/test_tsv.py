@@ -18,15 +18,15 @@ from qualle.models import TrainData, PredictData
 
 import pytest
 
-DOC_TSV = 'doc.tsv'
+DOC_TSV = "doc.tsv"
 
 
 @pytest.fixture
 def data_with_labels(tmp_path):
     tsv_file = tmp_path / DOC_TSV
     tsv_file.write_text(
-        'title0\tconcept0:1,concept1:0.5\tconcept1,concept3\n'
-        'title1\tconcept2:0,concept3:0.5\tconcept3'
+        "title0\tconcept0:1,concept1:0.5\tconcept1,concept3\n"
+        "title1\tconcept2:0,concept3:0.5\tconcept3"
     )
     return tsv_file
 
@@ -35,8 +35,7 @@ def data_with_labels(tmp_path):
 def data_with_empty_labels(tmp_path):
     tsv_file = tmp_path / DOC_TSV
     tsv_file.write_text(
-        'title0\tconcept0:1,concept1:0.5\t\n'
-        'title1\t\tconcept2,concept3'
+        "title0\tconcept0:1,concept1:0.5\t\n" "title1\t\tconcept2,concept3"
     )
     return tsv_file
 
@@ -45,8 +44,7 @@ def data_with_empty_labels(tmp_path):
 def data_without_true_labels(tmp_path):
     tsv_file = tmp_path / DOC_TSV
     tsv_file.write_text(
-        'title0\tconcept0:1,concept1:0.5\n'
-        'title1\tconcept2:0,concept3:0.5'
+        "title0\tconcept0:1,concept1:0.5\n" "title1\tconcept2:0,concept3:0.5"
     )
     return tsv_file
 
@@ -54,58 +52,45 @@ def data_without_true_labels(tmp_path):
 def test_load_train_input(data_with_labels):
     assert load_train_input(data_with_labels) == TrainData(
         predict_data=PredictData(
-            docs=['title0', 'title1'],
-            predicted_labels=[
-                ['concept0', 'concept1'], ['concept2', 'concept3']
-            ],
-            scores=[[1, .5], [0, .5]]
+            docs=["title0", "title1"],
+            predicted_labels=[["concept0", "concept1"], ["concept2", "concept3"]],
+            scores=[[1, 0.5], [0, 0.5]],
         ),
-        true_labels=[['concept1', 'concept3'], ['concept3']]
+        true_labels=[["concept1", "concept3"], ["concept3"]],
     )
 
 
 def test_load_train_input_from_tsv_empty_labels_returns_empty_list(
-        data_with_empty_labels
+    data_with_empty_labels,
 ):
     assert load_train_input(data_with_empty_labels) == TrainData(
         predict_data=PredictData(
-            docs=['title0', 'title1'],
-            predicted_labels=[
-                ['concept0', 'concept1'], []
-            ],
-            scores=[
-                [1, 0.5], []
-            ]
+            docs=["title0", "title1"],
+            predicted_labels=[["concept0", "concept1"], []],
+            scores=[[1, 0.5], []],
         ),
-        true_labels=[[], ['concept2', 'concept3']]
+        true_labels=[[], ["concept2", "concept3"]],
     )
 
 
-def test_load_train_input_without_true_labels_raises_exc(
-        data_without_true_labels):
+def test_load_train_input_without_true_labels_raises_exc(data_without_true_labels):
     with pytest.raises(ValidationError):
         load_train_input(data_without_true_labels)
 
 
 def test_load_predict_data(data_with_labels):
     assert load_predict_input(data_with_labels) == PredictData(
-        docs=['title0', 'title1'],
-        predicted_labels=[
-            ['concept0', 'concept1'], ['concept2', 'concept3']
-        ],
-        scores=[[1, .5], [0, .5]]
+        docs=["title0", "title1"],
+        predicted_labels=[["concept0", "concept1"], ["concept2", "concept3"]],
+        scores=[[1, 0.5], [0, 0.5]],
     )
 
 
 def test_load_predict_input_from_tsv_empty_labels_returns_empty_list(
-        data_with_empty_labels
+    data_with_empty_labels,
 ):
     assert load_predict_input(data_with_empty_labels) == PredictData(
-        docs=['title0', 'title1'],
-        predicted_labels=[
-            ['concept0', 'concept1'], []
-        ],
-        scores=[
-            [1, 0.5], []
-        ]
+        docs=["title0", "title1"],
+        predicted_labels=[["concept0", "concept1"], []],
+        scores=[[1, 0.5], []],
     )

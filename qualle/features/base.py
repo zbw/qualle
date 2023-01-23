@@ -16,7 +16,6 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class Features(BaseEstimator, TransformerMixin):
-
     def fit(self, X=None, y=None):
         return self
 

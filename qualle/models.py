@@ -54,9 +54,7 @@ class TrainData(BaseModel):
         p_data = values.get("predict_data")
         t_labels = values.get("true_labels")
         if len(p_data.predicted_labels) != len(t_labels):
-            raise ValueError(
-                'length of true labels and predicted labels do not match'
-            )
+            raise ValueError("length of true labels and predicted labels do not match")
         return values
 
 

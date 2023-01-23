@@ -22,7 +22,6 @@ from qualle.features.text import TextFeatures
 
 
 class LabelCalibrator(BaseEstimator, RegressorMixin):
-
     def __init__(self, regressor=ExtraTreesRegressor()):
         self.regressor = regressor
 

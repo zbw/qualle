@@ -15,12 +15,13 @@
 import numpy as np
 import pytest
 
-from qualle.features.label_calibration.thesauri_label_calibration import \
-    ThesauriLabelCalibrationFeatures, NotInitializedException
+from qualle.features.label_calibration.thesauri_label_calibration import (
+    ThesauriLabelCalibrationFeatures,
+    NotInitializedException,
+)
 from qualle.models import LabelCalibrationData
 
-import tests.features.label_calibration.test_thesauri_label_calibration.common\
-    as c
+import tests.features.label_calibration.test_thesauri_label_calibration.common as c
 
 
 @pytest.fixture
@@ -31,20 +32,17 @@ def features(transformer):
 def test_transform(features):
     data = LabelCalibrationData(
         predicted_labels=[[c.CONCEPT_x0], [c.CONCEPT_x1, c.CONCEPT_x2]],
-        predicted_no_of_labels=np.array([[1, 2], [0, 3]])
+        predicted_no_of_labels=np.array([[1, 2], [0, 3]]),
     )
-    assert (features.transform(data) == [
-        [1, 2, 0, 2], [0, 3, -2, 1]
-    ]).all()
+    assert (features.transform(data) == [[1, 2, 0, 2], [0, 3, -2, 1]]).all()
 
 
 def test_transform_with_uninitialized_underlying_tranformer_raises_exc(
-        uninitialized_transformer
+    uninitialized_transformer,
 ):
     with pytest.raises(NotInitializedException):
         ThesauriLabelCalibrationFeatures(uninitialized_transformer).transform(
             LabelCalibrationData(
-                predicted_labels=[c.CONCEPT_x0],
-                predicted_no_of_labels=np.array([[1]])
+                predicted_labels=[c.CONCEPT_x0], predicted_no_of_labels=np.array([[1]])
             )
         )

@@ -53,8 +53,7 @@ class TrainSettings(BaseSettings):
 
     features: List[FeaturesEnum]
 
-    subthesauri_label_calibration: Optional[
-        SubthesauriLabelCalibrationSettings] = None
+    subthesauri_label_calibration: Optional[SubthesauriLabelCalibrationSettings] = None
 
     should_debug: bool = False
 
@@ -84,4 +83,4 @@ class PredictSettings(BaseSettings):
 class RESTSettings(BaseSettings):
     model_file: FilePath
     port: int = 8000
-    host: str = '127.0.0.1'
+    host: str = "127.0.0.1"

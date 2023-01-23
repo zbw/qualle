@@ -15,8 +15,13 @@
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import FeatureUnion
 
-from qualle.features.text.count import CountCharsFeature, CountWordsFeature, \
-    CountSpecialCharsFeature, CountUpperCharsFeature, CountDigitsFeature
+from qualle.features.text.count import (
+    CountCharsFeature,
+    CountWordsFeature,
+    CountSpecialCharsFeature,
+    CountUpperCharsFeature,
+    CountDigitsFeature,
+)
 
 _NAME_VECTOR_FEATURE = "vectorizer"
 _NAME_CHAR_FEATURE = "n_chars"
@@ -28,12 +33,15 @@ _NAME_DIGIT_FEATURE = "n_digits"
 
 class TextFeatures(FeatureUnion):
     """Features based on the text of a document"""
+
     def __init__(self):
-        super().__init__([
-            (_NAME_VECTOR_FEATURE, CountVectorizer(lowercase=False)),
-            (_NAME_CHAR_FEATURE, CountCharsFeature()),
-            (_NAME_WORD_FEATURE, CountWordsFeature()),
-            (_NAME_SPECIAL_CHARS_FEATURE, CountSpecialCharsFeature()),
-            (_NAME_UPPER_FEATURE, CountUpperCharsFeature()),
-            (_NAME_DIGIT_FEATURE, CountDigitsFeature()),
-        ])
+        super().__init__(
+            [
+                (_NAME_VECTOR_FEATURE, CountVectorizer(lowercase=False)),
+                (_NAME_CHAR_FEATURE, CountCharsFeature()),
+                (_NAME_WORD_FEATURE, CountWordsFeature()),
+                (_NAME_SPECIAL_CHARS_FEATURE, CountSpecialCharsFeature()),
+                (_NAME_UPPER_FEATURE, CountUpperCharsFeature()),
+                (_NAME_DIGIT_FEATURE, CountDigitsFeature()),
+            ]
+        )

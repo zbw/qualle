@@ -22,19 +22,14 @@ from qualle.features.base import Features
 class QualityEstimator(BaseEstimator, RegressorMixin):
     """Regressor which uses a pipeline with given features and regressor."""
 
-    def __init__(
-            self,
-            regressor: RegressorMixin,
-            features: Features
-    ):
+    def __init__(self, regressor: RegressorMixin, features: Features):
         self.regressor = regressor
         self.features = features
 
     def fit(self, X, y):
-        self.pipeline_ = Pipeline([
-            ("features", self.features),
-            ("regressor", self.regressor)
-        ])
+        self.pipeline_ = Pipeline(
+            [("features", self.features), ("regressor", self.regressor)]
+        )
         self.pipeline_.fit(X, y)
         return self
 

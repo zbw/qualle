@@ -22,7 +22,6 @@ from qualle.utils import recall
 
 
 class Evaluator:
-
     def __init__(self, test_data: TrainData, qe_p: QualityEstimationPipeline):
         self._test_data = test_data
         self._qe_p = qe_p
@@ -30,20 +29,17 @@ class Evaluator:
     def evaluate(self) -> Dict:
         predict_data = self._test_data.predict_data
         pred_recall = self._qe_p.predict(predict_data)
-        true_recall = recall(self._test_data.true_labels,
-                             predict_data.predicted_labels)
+        true_recall = recall(self._test_data.true_labels, predict_data.predicted_labels)
 
         return scores(true_recall, pred_recall)
 
 
 def scores(true_recall: List[float], pred_recall: List[float]) -> Dict:
     scores = dict()
-    scores['explained_variance_score'] = explained_variance_score(
+    scores["explained_variance_score"] = explained_variance_score(
         true_recall, pred_recall
     )
-    scores['mean_squared_error'] = mean_squared_error(
-        true_recall, pred_recall)
+    scores["mean_squared_error"] = mean_squared_error(true_recall, pred_recall)
 
-    scores['correlation_coefficient'] = np.corrcoef(true_recall, pred_recall)[
-        0, 1]
+    scores["correlation_coefficient"] = np.corrcoef(true_recall, pred_recall)[0, 1]
     return scores

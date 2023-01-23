@@ -6,7 +6,36 @@ on:
     branches: [ master ]
 
   workflow_dispatch:
+
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+          cache: 'poetry'
+
+      - name: Install dependencies
+        run: poetry install --no-root
+
+      - name: Lint with flake8
+        run: poetry run flake8
+
+      - name: Test Black Code Style compliance
+        run: poetry run black . --check --diff
+
+      - name: Look for security issues in code
+        run: poetry run bandit -r qualle
+        continue-on-error: true
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -28,9 +57,6 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-root
 
-      - name: Test Code Style
-        run: poetry run flake8
-
       - name: Test Code
         run: poetry run pytest --cov=qualle --cov-report=xml
 
@@ -40,8 +66,4 @@ jobs:
 
       - name: Look for security vulnerabilities in dependencies
         run: poetry run safety check --full-report
-        continue-on-error: true
-
-      - name: Look for security issues in code
-        run: poetry run bandit -r qualle
         continue-on-error: true

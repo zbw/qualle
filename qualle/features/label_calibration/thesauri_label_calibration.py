@@ -36,46 +36,45 @@ class NotInitializedException(Exception):
 
 class Thesaurus:
     """Handle access to RDF Graph."""
+
     def __init__(
-            self,
-            graph: Graph,
-            subthesaurus_type_uri: URIRef,
-            concept_type_uri: URIRef,
-            concept_uri_prefix: str
+        self,
+        graph: Graph,
+        subthesaurus_type_uri: URIRef,
+        concept_type_uri: URIRef,
+        concept_uri_prefix: str,
     ):
         self.graph = graph
         self.subthesaurus_type_uri = subthesaurus_type_uri
         self.concept_type_uri = concept_type_uri
-        self.concept_uri_prefix_len_ = 1 + len(
-            concept_uri_prefix.rstrip('/')
-        )
+        self.concept_uri_prefix_len_ = 1 + len(concept_uri_prefix.rstrip("/"))
 
     @lru_cache(maxsize=1000)
     def get_concepts_for_subthesaurus(self, subthesaurus: URIRef) -> Set:
         concepts = set()
-        for x in self.graph[subthesaurus:SKOS.narrower]:
+        for x in self.graph[subthesaurus : SKOS.narrower]:
             if (x, RDF.type, self.subthesaurus_type_uri) in self.graph:
-                concepts_from_subthesaurus =\
-                    self.get_concepts_for_subthesaurus(x)
+                concepts_from_subthesaurus = self.get_concepts_for_subthesaurus(x)
                 concepts = concepts.union(concepts_from_subthesaurus)
             elif (x, RDF.type, self.concept_type_uri) in self.graph:
                 concepts.add(self.extract_concept_id_from_uri_ref(x))
             else:
-                logging.warning('unknown narrower type %s', str(x))
+                logging.warning("unknown narrower type %s", str(x))
         return concepts
 
     def get_all_subthesauri(self) -> List[URIRef]:
-        return list(self.graph[:RDF.type:self.subthesaurus_type_uri])
+        return list(self.graph[: RDF.type : self.subthesaurus_type_uri])
 
-    def extract_concept_id_from_uri_ref(self,  concept_uri: URIRef):
-        return concept_uri.toPython()[self.concept_uri_prefix_len_:]
+    def extract_concept_id_from_uri_ref(self, concept_uri: URIRef):
+        return concept_uri.toPython()[self.concept_uri_prefix_len_ :]
 
 
 class LabelCountForSubthesauriTransformer:
     """Compute count of labels per Subthesauri for a given RDF Graph."""
+
     def __init__(
-            self,
-            use_sparse_count_matrix: bool,
+        self,
+        use_sparse_count_matrix: bool,
     ):
         self._use_sparse_count_matrix = use_sparse_count_matrix
         self._mapping = None
@@ -121,8 +120,7 @@ class LabelCountForSubthesauriTransformer:
                     col_inds.append(col_idx)
 
         return coo_matrix(
-            (values, (row_inds, col_inds)),
-            shape=(len(X), self._subthesauri_count)
+            (values, (row_inds, col_inds)), shape=(len(X), self._subthesauri_count)
         )
 
     def _transform_without_sparse_matrix(self, X: List[Labels]) -> Matrix:
@@ -140,8 +138,8 @@ class LabelCountForSubthesauriTransformer:
             if not subthesauri_membership:
                 self._logger.warning(
                     'Concept "%s" not found in concept map. '
-                    'Seems to be invalid for this thesaurus.',
-                    concept
+                    "Seems to be invalid for this thesaurus.",
+                    concept,
                 )
             else:
                 for j, is_in_subthesauri in enumerate(subthesauri_membership):
@@ -151,11 +149,11 @@ class LabelCountForSubthesauriTransformer:
 
 
 class ThesauriLabelCalibrator(AbstractLabelCalibrator):
-
     def __init__(
-            self, transformer: LabelCountForSubthesauriTransformer,
-            regressor_class=ExtraTreesRegressor,
-            regressor_params=None
+        self,
+        transformer: LabelCountForSubthesauriTransformer,
+        regressor_class=ExtraTreesRegressor,
+        regressor_params=None,
     ):
         self.transformer = transformer
         self.regressor_class = regressor_class
@@ -163,8 +161,7 @@ class ThesauriLabelCalibrator(AbstractLabelCalibrator):
 
     def fit(self, X: Documents, y: List[Labels]):
         self.calibrator_ = MultiCategoryLabelCalibrator(
-            regressor_class=self.regressor_class,
-            regressor_params=self.regressor_params
+            regressor_class=self.regressor_class, regressor_params=self.regressor_params
         )
         y_transformed = self.transformer.transform(y)
         self.calibrator_.fit(X, y_transformed)
@@ -176,19 +173,16 @@ class ThesauriLabelCalibrator(AbstractLabelCalibrator):
 
 
 class ThesauriLabelCalibrationFeatures(Features):
-
     def __init__(self, transformer: LabelCountForSubthesauriTransformer):
         self.transformer = transformer
 
     def transform(self, X: LabelCalibrationData):
         rows = len(X.predicted_no_of_labels)
-        no_of_predicted_labels = self.transformer.transform(
-            X.predicted_labels
-        )
+        no_of_predicted_labels = self.transformer.transform(X.predicted_labels)
         transformed_cols_len = no_of_predicted_labels.shape[1]
         data = np.zeros((rows, 2 * transformed_cols_len))
         data[:, :transformed_cols_len] = X.predicted_no_of_labels
         data[:, transformed_cols_len:] = (
-                X.predicted_no_of_labels - no_of_predicted_labels
+            X.predicted_no_of_labels - no_of_predicted_labels
         )
         return data

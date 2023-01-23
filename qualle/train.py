@@ -19,10 +19,12 @@ from qualle.features.base import Features
 from qualle.features.combined import CombinedFeaturesData, CombinedFeatures
 from qualle.features.confidence import ConfidenceFeatures
 from qualle.features.label_calibration.base import AbstractLabelCalibrator
-from qualle.features.label_calibration.simple_label_calibration import \
-    SimpleLabelCalibrationFeatures
-from qualle.features.label_calibration.thesauri_label_calibration import \
-    ThesauriLabelCalibrationFeatures
+from qualle.features.label_calibration.simple_label_calibration import (
+    SimpleLabelCalibrationFeatures,
+)
+from qualle.features.label_calibration.thesauri_label_calibration import (
+    ThesauriLabelCalibrationFeatures,
+)
 from qualle.features.text import TextFeatures
 from qualle.models import PredictData, LabelCalibrationData
 from qualle.pipeline import QualityEstimationPipeline
@@ -32,25 +34,21 @@ FeaturesTypes = Set[Type[Features]]
 
 
 class Trainer:
-
     def __init__(
-            self, train_data,
-            label_calibrator: AbstractLabelCalibrator,
-            quality_regressor: RegressorMixin,
-            features: List[Features],
-            should_debug=False
+        self,
+        train_data,
+        label_calibrator: AbstractLabelCalibrator,
+        quality_regressor: RegressorMixin,
+        features: List[Features],
+        should_debug=False,
     ):
         combined_features = CombinedFeatures(features)
-        rp = QualityEstimator(
-            regressor=quality_regressor, features=combined_features
-        )
+        rp = QualityEstimator(regressor=quality_regressor, features=combined_features)
         self._qe_p = QualityEstimationPipeline(
             recall_predictor=rp,
             label_calibrator=label_calibrator,
             should_debug=should_debug,
-            features_data_mapper=FeaturesDataMapper(
-                set(f.__class__ for f in features)
-            )
+            features_data_mapper=FeaturesDataMapper(set(f.__class__ for f in features)),
         )
         self._train_data = train_data
 
@@ -61,12 +59,11 @@ class Trainer:
 
 
 class FeaturesDataMapper:
-
     def __init__(self, features_types: FeaturesTypes):
         self._features_types = features_types
 
     def __call__(
-            self, p_data: PredictData, l_data: LabelCalibrationData
+        self, p_data: PredictData, l_data: LabelCalibrationData
     ) -> CombinedFeaturesData:
         features_data = dict()
         for ftype in self._features_types:
@@ -75,8 +72,8 @@ class FeaturesDataMapper:
             if ftype == TextFeatures:
                 features_data[TextFeatures] = p_data.docs
             if ftype in (
-                    SimpleLabelCalibrationFeatures,
-                    ThesauriLabelCalibrationFeatures
+                SimpleLabelCalibrationFeatures,
+                ThesauriLabelCalibrationFeatures,
             ):
                 features_data[ftype] = l_data
         return features_data

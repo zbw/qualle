@@ -16,7 +16,6 @@ import numpy as np
 
 
 class DummyRegressor:
-
     def fit(self, X, y):
         self.X = X
         self.y = y

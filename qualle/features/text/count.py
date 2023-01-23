@@ -21,6 +21,7 @@ from qualle.features.base import Features
 
 class TextCountFeature(Features):
     """Feature based on the occurence of something in a text."""
+
     def __init__(self, count_fun: Callable[[str], int]):
         self.count_fun = count_fun
 
@@ -35,7 +36,6 @@ class TextCountFeature(Features):
 
 
 class CountCharsFeature(TextCountFeature):
-
     def __init__(self):
         super().__init__(self._count_char)
 
@@ -45,7 +45,6 @@ class CountCharsFeature(TextCountFeature):
 
 
 class CountWordsFeature(TextCountFeature):
-
     def __init__(self):
         super().__init__(self._count_word)
 
@@ -66,7 +65,6 @@ class CountSpecialCharsFeature(TextCountFeature):
 
 
 class CountUpperCharsFeature(TextCountFeature):
-
     def __init__(self):
         super().__init__(self._count_upper)
 

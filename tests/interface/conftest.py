@@ -16,13 +16,13 @@ import pytest
 
 @pytest.fixture
 def thsys_file_path(tmp_path):
-    fp = tmp_path / 'thsys'
-    fp.write_text('')
+    fp = tmp_path / "thsys"
+    fp.write_text("")
     return fp
 
 
 @pytest.fixture
 def model_path(tmp_path):
-    fp = tmp_path / 'model'
-    fp.write_text('')
+    fp = tmp_path / "model"
+    fp.write_text("")
     return fp

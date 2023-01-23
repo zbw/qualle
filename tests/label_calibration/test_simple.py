@@ -41,7 +41,7 @@ def test_lc_fit_fits_regressor_with_txt_features(calibrator, X, mocker):
     txt_features = TextFeatures().fit(X)
     X_transformed = txt_features.transform(X)
 
-    spy = mocker.spy(calibrator.regressor, 'fit')
+    spy = mocker.spy(calibrator.regressor, "fit")
     calibrator.fit(X, y)
     spy.assert_called_once()
     assert (spy.call_args[0][0].toarray() == X_transformed.toarray()).all()
