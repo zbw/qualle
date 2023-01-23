@@ -17,8 +17,10 @@ import pytest
 from sklearn.ensemble import ExtraTreesRegressor
 
 from qualle.features.confidence import ConfidenceFeatures
-from qualle.features.label_calibration.simple_label_calibration import \
-    SimpleLabelCalibrator, SimpleLabelCalibrationFeatures
+from qualle.features.label_calibration.simple_label_calibration import (
+    SimpleLabelCalibrator,
+    SimpleLabelCalibrationFeatures,
+)
 from qualle.features.text import TextFeatures
 from qualle.models import LabelCalibrationData
 from qualle.train import Trainer, FeaturesDataMapper
@@ -29,7 +31,7 @@ def l_data(train_data):
     p_data = train_data.predict_data
     return LabelCalibrationData(
         predicted_no_of_labels=np.array([0] * 5),
-        predicted_labels=p_data.predicted_labels
+        predicted_labels=p_data.predicted_labels,
     )
 
 
@@ -38,9 +40,9 @@ def test_train_trains_qe_pipeline(train_data, mocker):
         train_data=train_data,
         label_calibrator=SimpleLabelCalibrator(ExtraTreesRegressor()),
         quality_regressor=ExtraTreesRegressor(),
-        features=[SimpleLabelCalibrationFeatures()]
+        features=[SimpleLabelCalibrationFeatures()],
     )
-    spy = mocker.spy(t._qe_p, 'train')
+    spy = mocker.spy(t._qe_p, "train")
     t.train()
 
     spy.assert_called_once()
@@ -48,21 +50,19 @@ def test_train_trains_qe_pipeline(train_data, mocker):
 
 def test_features_data_mapper_with_lc(train_data, l_data):
     p_data = train_data.predict_data
-    mapper = FeaturesDataMapper(set([
-        SimpleLabelCalibrationFeatures, ConfidenceFeatures])
+    mapper = FeaturesDataMapper(
+        set([SimpleLabelCalibrationFeatures, ConfidenceFeatures])
     )
     assert mapper(p_data, l_data) == {
         SimpleLabelCalibrationFeatures: l_data,
-        ConfidenceFeatures: p_data.scores
+        ConfidenceFeatures: p_data.scores,
     }
 
 
 def test_features_data_mapper_without_lc(train_data, l_data):
     p_data = train_data.predict_data
     mapper = FeaturesDataMapper(set([ConfidenceFeatures]))
-    assert mapper(p_data, l_data) == {
-        ConfidenceFeatures: p_data.scores
-    }
+    assert mapper(p_data, l_data) == {ConfidenceFeatures: p_data.scores}
 
 
 def test_features_data_mapper_without_features(train_data, l_data):
@@ -74,11 +74,12 @@ def test_features_data_mapper_without_features(train_data, l_data):
 def test_features_data_mapper_for_each_feature(train_data, l_data):
     p_data = train_data.predict_data
 
-    assert FeaturesDataMapper(
-        {SimpleLabelCalibrationFeatures})(p_data, l_data) == {
-               SimpleLabelCalibrationFeatures: l_data}
-    assert FeaturesDataMapper(
-        {ConfidenceFeatures})(p_data, l_data) == {
-               ConfidenceFeatures: p_data.scores}
-    assert FeaturesDataMapper(
-        {TextFeatures})(p_data, l_data) == {TextFeatures: p_data.docs}
+    assert FeaturesDataMapper({SimpleLabelCalibrationFeatures})(p_data, l_data) == {
+        SimpleLabelCalibrationFeatures: l_data
+    }
+    assert FeaturesDataMapper({ConfidenceFeatures})(p_data, l_data) == {
+        ConfidenceFeatures: p_data.scores
+    }
+    assert FeaturesDataMapper({TextFeatures})(p_data, l_data) == {
+        TextFeatures: p_data.docs
+    }

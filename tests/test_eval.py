@@ -15,8 +15,10 @@ import pytest
 from sklearn.ensemble import ExtraTreesRegressor
 
 from qualle.evaluate import Evaluator, scores
-from qualle.features.label_calibration.simple_label_calibration import \
-    SimpleLabelCalibrationFeatures, SimpleLabelCalibrator
+from qualle.features.label_calibration.simple_label_calibration import (
+    SimpleLabelCalibrationFeatures,
+    SimpleLabelCalibrator,
+)
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import QualityEstimator
 
@@ -25,11 +27,10 @@ from qualle.quality_estimation import QualityEstimator
 def evaluator(train_data):
     qe_p = QualityEstimationPipeline(
         recall_predictor=QualityEstimator(
-            regressor=ExtraTreesRegressor(),
-            features=SimpleLabelCalibrationFeatures()
+            regressor=ExtraTreesRegressor(), features=SimpleLabelCalibrationFeatures()
         ),
         label_calibrator=SimpleLabelCalibrator(ExtraTreesRegressor()),
-        features_data_mapper=lambda _, l_data: l_data
+        features_data_mapper=lambda _, l_data: l_data,
     )
     qe_p.train(train_data)
     return Evaluator(train_data, qe_p)
@@ -38,8 +39,11 @@ def evaluator(train_data):
 def test_evaluate_returns_scores(evaluator):
     scores = evaluator.evaluate()
 
-    assert {'explained_variance_score', 'mean_squared_error',
-            'correlation_coefficient'} == set(scores.keys())
+    assert {
+        "explained_variance_score",
+        "mean_squared_error",
+        "correlation_coefficient",
+    } == set(scores.keys())
 
 
 def test_scores():
@@ -47,6 +51,6 @@ def test_scores():
     y_pred = [2.5, 0.0, 2, 8]
     s = scores(y_true, y_pred)
 
-    assert s['explained_variance_score'] == 0.9571734475374732
-    assert s['mean_squared_error'] == 0.375
-    assert s['correlation_coefficient'] == 0.9848696184482703
+    assert s["explained_variance_score"] == 0.9571734475374732
+    assert s["mean_squared_error"] == 0.375
+    assert s["correlation_coefficient"] == 0.9848696184482703

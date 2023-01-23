@@ -28,7 +28,7 @@ def calibrator():
 def test_mclc_fit_zero_categories_raises_value_error(calibrator, X):
     with pytest.raises(ValueError) as excinfo:
         calibrator.fit(X, np.array([]))
-    assert str(excinfo.value) == 'Number of categories must be greater 0'
+    assert str(excinfo.value) == "Number of categories must be greater 0"
 
 
 def test_mclc_predict(calibrator, X):
@@ -55,9 +55,7 @@ def test_mclc_fit_fits_calibrators(calibrator, X):
         assert (y_actual == y[:, i]).all()
 
 
-def test_mlc_fit_with_sparse_matrix_fits_calibrators_with_nparray(
-        calibrator, X
-):
+def test_mlc_fit_with_sparse_matrix_fits_calibrators_with_nparray(calibrator, X):
     y = np.array([[3, 0], [0, 2]])
     y_coo = coo_matrix(y)
 

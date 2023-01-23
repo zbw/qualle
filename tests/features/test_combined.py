@@ -23,23 +23,18 @@ from qualle.features.combined import CombinedFeatures
 
 
 class FeatureA(Features):
-
     def transform(self, X: List[List[str]]):
         return np.array(list(map(lambda x: [x], map(len, X))))
 
 
 class FeatureB(Features):
-
     def transform(self, X: List[List[float]]):
         return np.array(list(map(lambda x: [x], map(sum, X))))
 
 
 @pytest.fixture
 def X():
-    return {
-        FeatureA: [['x0', 'x1'], ['x2']],
-        FeatureB: [[3, 4], [5]]
-    }
+    return {FeatureA: [["x0", "x1"], ["x2"]], FeatureB: [[3, 4], [5]]}
 
 
 @pytest.fixture
@@ -50,7 +45,7 @@ def combined_features():
 def test_combined_fit_combines_features(combined_features, X, mocker):
     spies = []
     for f in combined_features.features:
-        spies.append(mocker.spy(f, 'fit'))
+        spies.append(mocker.spy(f, "fit"))
     combined_features.fit(X)
     for i, spy in enumerate(spies):
         spy.assert_called_once_with(X[combined_features.features[i].__class__])
@@ -69,16 +64,12 @@ def test_transform_hstacks_result(combined_features, X):
     assert (transformed == [[2, 7], [1, 5]]).all()
 
 
-def test_transform_uses_sparse_hstack_if_any_feature_is_sparse(
-        combined_features, X
-):
+def test_transform_uses_sparse_hstack_if_any_feature_is_sparse(combined_features, X):
     class SparseFeature(Features):
         def transform(self, X: List[List[float]]):
             return sp.csr_matrix([[1, 0], [3, 5]])
 
-    combined_features.set_params(
-        features=[FeatureA(), FeatureB(), SparseFeature()]
-    )
+    combined_features.set_params(features=[FeatureA(), FeatureB(), SparseFeature()])
     X[SparseFeature] = [[0], [1]]
     combined_features.fit(X)
     transformed = combined_features.transform(X)

@@ -18,10 +18,17 @@ from fastapi import status
 from fastapi.testclient import TestClient
 
 from qualle.interface.config import RESTSettings
-from qualle.interface.rest import Document, QualityScores, \
-    QualityEstimation, Metric, \
-    _map_documents_to_predict_data, Documents, create_app, PREDICT_ENDPOINT, \
-    run
+from qualle.interface.rest import (
+    Document,
+    QualityScores,
+    QualityEstimation,
+    Metric,
+    _map_documents_to_predict_data,
+    Documents,
+    create_app,
+    PREDICT_ENDPOINT,
+    run,
+)
 
 
 @pytest.fixture
@@ -30,7 +37,7 @@ def mocked_pipeline(mocker):
     m_pipe.predict.side_effect = lambda p_data: list(range(len(p_data.scores)))
 
     m_load_model = mocker.Mock(return_value=m_pipe)
-    mocker.patch('qualle.interface.rest.internal_load_model', m_load_model)
+    mocker.patch("qualle.interface.rest.internal_load_model", m_load_model)
 
     return m_pipe
 
@@ -45,13 +52,16 @@ def client(mocked_pipeline, model_path):
 @pytest.fixture
 def documents(train_data):
     p_data = train_data.predict_data
-    return Documents(documents=[
-        Document(
-            content=p_data.docs[idx],
-            predicted_labels=p_data.predicted_labels[idx],
-            scores=p_data.scores[idx]
-        ) for idx in range(len(p_data.docs))
-    ])
+    return Documents(
+        documents=[
+            Document(
+                content=p_data.docs[idx],
+                predicted_labels=p_data.predicted_labels[idx],
+                scores=p_data.scores[idx],
+            )
+            for idx in range(len(p_data.docs))
+        ]
+    )
 
 
 def test_return_http_200_for_predict(client, documents):
@@ -63,34 +73,33 @@ def test_return_scores_for_predict(client, documents):
     resp = client.post(PREDICT_ENDPOINT, json=documents.dict())
 
     expected_scores = QualityEstimation(
-        scores=[QualityScores(
-            name=Metric.RECALL,
-            scores=list(range(len(documents.documents)))
-        )]
+        scores=[
+            QualityScores(
+                name=Metric.RECALL, scores=list(range(len(documents.documents)))
+            )
+        ]
     )
     assert resp.json() == json.loads(expected_scores.json())
 
 
 def test_return_http_200_for_up(client):
-    resp = client.get('/_up')
+    resp = client.get("/_up")
     assert resp.status_code == status.HTTP_200_OK
 
 
 def test_run(mocker, model_path):
     m_app = mocker.Mock()
     m_create_app = mocker.Mock(return_value=m_app)
-    mocker.patch('qualle.interface.rest.create_app', m_create_app)
+    mocker.patch("qualle.interface.rest.create_app", m_create_app)
     m_uvicorn_run = mocker.Mock()
-    mocker.patch('qualle.interface.rest.uvicorn.run', m_uvicorn_run)
+    mocker.patch("qualle.interface.rest.uvicorn.run", m_uvicorn_run)
 
     settings = RESTSettings(model_file=model_path)
 
     run(settings)
 
     m_create_app.assert_called_once_with(settings)
-    m_uvicorn_run.assert_called_once_with(
-        m_app, host=settings.host, port=settings.port
-    )
+    m_uvicorn_run.assert_called_once_with(m_app, host=settings.host, port=settings.port)
 
 
 def test_map_documents_to_predict_data(documents, train_data):

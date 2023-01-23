@@ -27,11 +27,7 @@ class MultiCategoryLabelCalibrator(BaseEstimator, RegressorMixin):
     """Label calibrator for multiple distinct categories.
     E.g. to predict the no of labels for different thesauri."""
 
-    def __init__(
-            self,
-            regressor_class=ExtraTreesRegressor,
-            regressor_params=None
-    ):
+    def __init__(self, regressor_class=ExtraTreesRegressor, regressor_params=None):
         self.regressor_class = regressor_class
         self.regressor_params = regressor_params or {}
 
@@ -45,7 +41,7 @@ class MultiCategoryLabelCalibrator(BaseEstimator, RegressorMixin):
         try:
             no_categories = y.shape[1]
         except IndexError:
-            raise ValueError('Number of categories must be greater 0')
+            raise ValueError("Number of categories must be greater 0")
 
         self.calibrators_ = [
             LabelCalibrator(self.regressor_class(**self.regressor_params))

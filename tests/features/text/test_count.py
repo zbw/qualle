@@ -14,8 +14,13 @@
 
 import pytest
 
-from qualle.features.text import CountCharsFeature, CountWordsFeature, \
-    CountSpecialCharsFeature, CountUpperCharsFeature, CountDigitsFeature
+from qualle.features.text import (
+    CountCharsFeature,
+    CountWordsFeature,
+    CountSpecialCharsFeature,
+    CountUpperCharsFeature,
+    CountDigitsFeature,
+)
 from qualle.features.text.count import TextCountFeature
 
 

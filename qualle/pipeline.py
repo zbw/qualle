@@ -23,15 +23,12 @@ from qualle.utils import recall, get_logger, timeit
 
 
 class QualityEstimationPipeline:
-
     def __init__(
-            self,
-            label_calibrator: AbstractLabelCalibrator,
-            recall_predictor: QualityEstimator,
-            features_data_mapper: Callable[
-                [PredictData, LabelCalibrationData], Any
-            ],
-            should_debug=False
+        self,
+        label_calibrator: AbstractLabelCalibrator,
+        recall_predictor: QualityEstimator,
+        features_data_mapper: Callable[[PredictData, LabelCalibrationData], Any],
+        should_debug=False,
     ):
         self._label_calibrator = label_calibrator
         self._recall_predictor = recall_predictor
@@ -41,27 +38,23 @@ class QualityEstimationPipeline:
 
     def train(self, data: TrainData):
         predict_data = data.predict_data
-        with self._debug('cross_val_predict with label calibrator'):
+        with self._debug("cross_val_predict with label calibrator"):
             predicted_no_of_labels = cross_val_predict(
                 self._label_calibrator, predict_data.docs, data.true_labels
             )
 
-        with self._debug('label calibrator fit'):
+        with self._debug("label calibrator fit"):
             self._label_calibrator.fit(predict_data.docs, data.true_labels)
 
         label_calibration_data = LabelCalibrationData(
             predicted_labels=predict_data.predicted_labels,
-            predicted_no_of_labels=predicted_no_of_labels
+            predicted_no_of_labels=predicted_no_of_labels,
         )
-        features_data = self._features_data_mapper(
-            predict_data, label_calibration_data
-        )
-        with self._debug('recall computation'):
-            true_recall = recall(
-                data.true_labels, predict_data.predicted_labels
-            )
+        features_data = self._features_data_mapper(predict_data, label_calibration_data)
+        with self._debug("recall computation"):
+            true_recall = recall(data.true_labels, predict_data.predicted_labels)
 
-        with self._debug('RecallPredictor fit'):
+        with self._debug("RecallPredictor fit"):
             self._recall_predictor.fit(features_data, true_recall)
 
     def predict(self, data: PredictData) -> List[float]:
@@ -78,9 +71,7 @@ class QualityEstimationPipeline:
             features_data = self._features_data_mapper(
                 data_with_labels, label_calibration_data
             )
-            predicted_recall = self._recall_predictor.predict(
-                features_data
-            )
+            predicted_recall = self._recall_predictor.predict(features_data)
             recall_scores = self._merge_zero_recall_with_predicted_recall(
                 predicted_recall=predicted_recall,
                 zero_labels_idx=zero_idxs,
@@ -92,8 +83,7 @@ class QualityEstimationPipeline:
     @staticmethod
     def _get_pdata_idxs_with_zero_labels(data: PredictData) -> Collection[int]:
         return [
-            i for i in range(len(data.predicted_labels))
-            if not data.predicted_labels[i]
+            i for i in range(len(data.predicted_labels)) if not data.predicted_labels[i]
         ]
 
     @staticmethod
@@ -101,8 +91,7 @@ class QualityEstimationPipeline:
         data: PredictData, zero_labels_idxs: Collection[int]
     ) -> PredictData:
         non_zero_idxs = [
-            i for i in range(len(data.predicted_labels))
-            if i not in zero_labels_idxs
+            i for i in range(len(data.predicted_labels)) if i not in zero_labels_idxs
         ]
         return PredictData(
             docs=[data.docs[i] for i in non_zero_idxs],
@@ -117,9 +106,7 @@ class QualityEstimationPipeline:
     ):
         recall_scores = []
         j = 0
-        for i in range(
-                len(zero_labels_idx) +
-                len(predicted_recall)):
+        for i in range(len(zero_labels_idx) + len(predicted_recall)):
             if i in zero_labels_idx:
                 recall_scores.append(0)
             else:
@@ -132,9 +119,9 @@ class QualityEstimationPipeline:
         if self._should_debug:
             with timeit() as t:
                 yield
-            self._logger.debug('Ran %s in %.4f seconds', method_name, t())
+            self._logger.debug("Ran %s in %.4f seconds", method_name, t())
         else:
             yield
 
     def __str__(self):
-        return f'{self._label_calibrator}\n{self._recall_predictor}'
+        return f"{self._label_calibrator}\n{self._recall_predictor}"

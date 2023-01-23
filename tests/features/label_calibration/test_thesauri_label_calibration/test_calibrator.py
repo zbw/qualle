@@ -16,10 +16,11 @@ import numpy as np
 import pytest
 from sklearn.exceptions import NotFittedError
 
-from qualle.features.label_calibration.thesauri_label_calibration import \
-    ThesauriLabelCalibrator, NotInitializedException
-import tests.features.label_calibration.test_thesauri_label_calibration.common\
-    as c
+from qualle.features.label_calibration.thesauri_label_calibration import (
+    ThesauriLabelCalibrator,
+    NotInitializedException,
+)
+import tests.features.label_calibration.test_thesauri_label_calibration.common as c
 
 
 class DummyRegressor:
@@ -48,7 +49,7 @@ def calibrator(transformer):
 
 @pytest.fixture
 def X():
-    return ['doc0', 'doc1']
+    return ["doc0", "doc1"]
 
 
 @pytest.fixture
@@ -72,13 +73,9 @@ def test_fit_fits_underlying_regressors_with_transformed_y(calibrator, X, y):
     assert (DummyRegressor.y_total[1] == np.array([0, 2])).all()
 
 
-def test_fit_with_uninitialized_transformer_raises_exc(
-        uninitialized_transformer, X
-):
+def test_fit_with_uninitialized_transformer_raises_exc(uninitialized_transformer, X):
     with pytest.raises(NotInitializedException):
-        ThesauriLabelCalibrator(uninitialized_transformer).fit(
-            X, [[c.CONCEPT_x0]] * 2
-        )
+        ThesauriLabelCalibrator(uninitialized_transformer).fit(X, [[c.CONCEPT_x0]] * 2)
 
 
 def test_predict_without_fit_raises_exc(calibrator, X):

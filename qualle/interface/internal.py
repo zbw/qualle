@@ -22,19 +22,25 @@ from joblib import dump, load
 from rdflib import Graph, URIRef
 
 from qualle.evaluate import Evaluator
-from qualle.features.label_calibration.simple_label_calibration import \
-    SimpleLabelCalibrator, SimpleLabelCalibrationFeatures
-from qualle.features.label_calibration.thesauri_label_calibration import \
-    ThesauriLabelCalibrator, ThesauriLabelCalibrationFeatures, \
-    LabelCountForSubthesauriTransformer, Thesaurus
-from qualle.interface.config import TrainSettings, EvalSettings, \
-    PredictSettings
+from qualle.features.label_calibration.simple_label_calibration import (
+    SimpleLabelCalibrator,
+    SimpleLabelCalibrationFeatures,
+)
+from qualle.features.label_calibration.thesauri_label_calibration import (
+    ThesauriLabelCalibrator,
+    ThesauriLabelCalibrationFeatures,
+    LabelCountForSubthesauriTransformer,
+    Thesaurus,
+)
+from qualle.interface.config import TrainSettings, EvalSettings, PredictSettings
 from qualle.models import TrainData, PredictData
 from qualle.train import Trainer
 from qualle.utils import get_logger, timeit
 from qualle.interface.data.annif import AnnifHandler
-from qualle.interface.data.tsv import \
-    load_train_input as load_tsv_train_input, load_predict_input
+from qualle.interface.data.tsv import (
+    load_train_input as load_tsv_train_input,
+    load_predict_input,
+)
 
 
 def train(settings: TrainSettings):
@@ -49,9 +55,9 @@ def train(settings: TrainSettings):
     )
     lc_regressor_params = settings.label_calibrator_regressor.params
     logger.debug(
-        'Use (%s %s) as Regressor for Label Calibration',
+        "Use (%s %s) as Regressor for Label Calibration",
         settings.label_calibrator_regressor.regressor_class,
-        settings.label_calibrator_regressor.params
+        settings.label_calibrator_regressor.params,
     )
 
     quality_estimator_cls = _get_class_from_str(
@@ -61,23 +67,23 @@ def train(settings: TrainSettings):
         **settings.quality_estimator_regressor.params
     )
     logger.debug(
-        'Use (%s %s) as Regressor for Quality Estimation',
+        "Use (%s %s) as Regressor for Quality Estimation",
         settings.quality_estimator_regressor.regressor_class,
-        settings.quality_estimator_regressor.params
+        settings.quality_estimator_regressor.params,
     )
 
     with timeit() as t:
         train_data = _load_train_input(path_to_train_data)
 
-    logger.debug('Loaded train data in %.4f seconds', t())
+    logger.debug("Loaded train data in %.4f seconds", t())
 
     if slc_settings:
-        logger.info('Run training with Subthesauri Label Calibration')
+        logger.info("Run training with Subthesauri Label Calibration")
         path_to_graph = slc_settings.thesaurus_file
         g = Graph()
         with timeit() as t:
             g.parse(path_to_graph)
-        logger.debug('Parsed RDF Graph in %.4f seconds', t())
+        logger.debug("Parsed RDF Graph in %.4f seconds", t())
 
         thesaurus = Thesaurus(
             graph=g,
@@ -85,19 +91,14 @@ def train(settings: TrainSettings):
             concept_type_uri=URIRef(slc_settings.concept_type),
             concept_uri_prefix=slc_settings.concept_type_prefix,
         )
-        subthesauri = list(map(
-            lambda s: URIRef(s), slc_settings.subthesauri
-        ))
+        subthesauri = list(map(lambda s: URIRef(s), slc_settings.subthesauri))
         if not subthesauri:
-            logger.info(
-                'No subthesauri passed, will extract subthesauri by type'
-            )
+            logger.info("No subthesauri passed, will extract subthesauri by type")
             subthesauri = thesaurus.get_all_subthesauri()
             logger.debug("Extracted %d subthesauri", len(subthesauri))
         if slc_settings.use_sparse_count_matrix:
             logger.info(
-                'Will use Sparse Count Matrix for '
-                'Subthesauri Label Calibration'
+                "Will use Sparse Count Matrix for " "Subthesauri Label Calibration"
             )
         transformer = LabelCountForSubthesauriTransformer(
             use_sparse_count_matrix=slc_settings.use_sparse_count_matrix
@@ -113,13 +114,14 @@ def train(settings: TrainSettings):
             label_calibrator=ThesauriLabelCalibrator(
                 regressor_class=lc_regressor_cls,
                 regressor_params=lc_regressor_params,
-                transformer=transformer),
+                transformer=transformer,
+            ),
             quality_regressor=quality_estimator,
             features=features,
-            should_debug=settings.should_debug
+            should_debug=settings.should_debug,
         )
     else:
-        logger.info('Run training with Simple Label Calibration')
+        logger.info("Run training with Simple Label Calibration")
         label_calibration_features = SimpleLabelCalibrationFeatures()
         features.append(label_calibration_features)
         t = Trainer(
@@ -129,17 +131,17 @@ def train(settings: TrainSettings):
             ),
             quality_regressor=quality_estimator,
             features=features,
-            should_debug=settings.should_debug
+            should_debug=settings.should_debug,
         )
 
     model = t.train()
-    logger.info('Store trained model in %s', path_to_model_output_file)
+    logger.info("Store trained model in %s", path_to_model_output_file)
     dump(model, path_to_model_output_file)
 
 
 def _get_class_from_str(fully_qualified_path: str) -> Type:
-    split = fully_qualified_path.split('.')
-    module = '.'.join(split[:-1])
+    split = fully_qualified_path.split(".")
+    module = ".".join(split[:-1])
     cls_name = split[-1]
     return getattr(import_module(module), cls_name)
 
@@ -149,13 +151,13 @@ def evaluate(settings: EvalSettings):
     path_to_test_data = settings.test_data_path
     path_to_model_file = settings.model_file
     model = load_model(str(path_to_model_file))
-    logger.info('Run evaluation with model:\n%s', model)
+    logger.info("Run evaluation with model:\n%s", model)
     test_input = _load_train_input(path_to_test_data)
     ev = Evaluator(test_input, model)
     eval_data = ev.evaluate()
-    logger.info('\nScores:')
+    logger.info("\nScores:")
     for metric, score in eval_data.items():
-        logger.info(f'{metric}: {score}')
+        logger.info(f"{metric}: {score}")
 
 
 def predict(settings: PredictSettings):
@@ -168,7 +170,7 @@ def predict(settings: PredictSettings):
         predict_data_path=path_to_predict_data, output_path=output_path
     )
     predict_data = io_handler.load_predict_data()
-    logger.info('Run predict with model:\n%s', model)
+    logger.info("Run predict with model:\n%s", model)
 
     scores = model.predict(predict_data)
     io_handler.store(scores)
@@ -187,9 +189,7 @@ def _load_train_input(p: Path) -> TrainData:
 
 
 class PredictTSVIOHandler:
-
-    def __init__(self, predict_data_path: Path,
-                 output_path: Optional[Path] = None):
+    def __init__(self, predict_data_path: Path, output_path: Optional[Path] = None):
         self._predict_data_path = predict_data_path
         self._output_path = output_path
 
@@ -203,7 +203,6 @@ class PredictTSVIOHandler:
 
 
 class PredictAnnifIOHandler:
-
     def __init__(self, predict_data_path: Path):
         self._annif_handler = AnnifHandler(dir=predict_data_path)
         self._doc_ids = []
@@ -219,7 +218,7 @@ class PredictAnnifIOHandler:
 
 
 def _get_predict_io_handler(
-        predict_data_path: Path, output_path: Optional[Path]
+    predict_data_path: Path, output_path: Optional[Path]
 ) -> Union[PredictAnnifIOHandler, PredictTSVIOHandler]:
     if predict_data_path.is_dir():
         return PredictAnnifIOHandler(predict_data_path)

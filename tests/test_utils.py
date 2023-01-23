@@ -16,20 +16,18 @@ from qualle.utils import recall, timeit
 
 
 def test_recall():
-    true_labels = [['x0', 'x2'], ['x1'], ['x3']]
-    pred_labels = [['x0', 'x1'], ['x2'], ['x3']]
+    true_labels = [["x0", "x2"], ["x1"], ["x3"]]
+    pred_labels = [["x0", "x1"], ["x2"], ["x3"]]
 
-    assert recall(
-        true_labels=true_labels, predicted_labels=pred_labels) == [
-        0.5, 0, 1]
+    assert recall(true_labels=true_labels, predicted_labels=pred_labels) == [0.5, 0, 1]
 
 
 def test_recall_empty_true_labels_return_zero():
-    assert recall(true_labels=[[]], predicted_labels=[['x']]) == [0]
+    assert recall(true_labels=[[]], predicted_labels=[["x"]]) == [0]
 
 
 def test_recall_empty_pred_labels_return_zero():
-    assert recall(true_labels=[['x']], predicted_labels=[[]]) == [0]
+    assert recall(true_labels=[["x"]], predicted_labels=[[]]) == [0]
 
 
 def test_recall_empty_input():
@@ -38,7 +36,7 @@ def test_recall_empty_input():
 
 def test_timeit(mocker):
     m = mocker.Mock(side_effect=[1, 3])
-    mocker.patch('qualle.utils.perf_counter', m)
+    mocker.patch("qualle.utils.perf_counter", m)
     with timeit() as t:
         _ = 1 + 1
     assert t() == 2

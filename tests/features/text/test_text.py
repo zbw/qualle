@@ -24,8 +24,8 @@ from qualle.features.text import TextFeatures
 @pytest.fixture
 def data():
     return [
-        'Oneword',
-        '2word speci?l',
+        "Oneword",
+        "2word speci?l",
     ]
 
 
@@ -52,8 +52,7 @@ def test_transform_computes_all_features(data):
     # therefore we assert nonzero indices of rows are disjoint because words
     # are disjoint
     assert (
-        set(np.flatnonzero(vect_feat[0])) & set(np.flatnonzero(vect_feat[1]))
-        == set()
+        set(np.flatnonzero(vect_feat[0])) & set(np.flatnonzero(vect_feat[1])) == set()
     )
     assert (n_char_feat == [7, 13]).all()
     assert (n_word_feat == [0, 1]).all()

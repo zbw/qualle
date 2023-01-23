@@ -15,61 +15,68 @@ import pytest
 from rdflib import Graph, RDF, URIRef
 from rdflib.namespace import SKOS
 
-from qualle.features.label_calibration.thesauri_label_calibration import \
-    LabelCountForSubthesauriTransformer, Thesaurus
-from tests.features.label_calibration.test_thesauri_label_calibration import \
-    common as c
+from qualle.features.label_calibration.thesauri_label_calibration import (
+    LabelCountForSubthesauriTransformer,
+    Thesaurus,
+)
+from tests.features.label_calibration.test_thesauri_label_calibration import common as c
 
 
 @pytest.fixture
 def graph():
-    c_x0 = URIRef(f'{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x0}')
-    c_x1 = URIRef(f'{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x1}')
-    c_x2 = URIRef(f'{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x2}')
+    c_x0 = URIRef(f"{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x0}")
+    c_x1 = URIRef(f"{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x1}")
+    c_x2 = URIRef(f"{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x2}")
 
     g = Graph()
     for s in (c.SUBTHESAURUS_A, c.SUBTHESAURUS_B, c.SUBTHESAURUS_C):
-        g.add((
-            s,
-            RDF.type,
-            c.DUMMY_SUBTHESAURUS_TYPE))
+        g.add((s, RDF.type, c.DUMMY_SUBTHESAURUS_TYPE))
     for concept in (c_x0, c_x1, c_x2):
-        g.add((
-            concept,
-            RDF.type,
-            c.DUMMY_CONCEPT_TYPE))
+        g.add((concept, RDF.type, c.DUMMY_CONCEPT_TYPE))
 
-    g.add((
-        c.SUBTHESAURUS_A,
-        SKOS.narrower,
-        c.SUBTHESAURUS_C,
-    ))
+    g.add(
+        (
+            c.SUBTHESAURUS_A,
+            SKOS.narrower,
+            c.SUBTHESAURUS_C,
+        )
+    )
 
-    g.add((
-        c.SUBTHESAURUS_A,
-        SKOS.narrower,
-        c_x0,
-    ))
-    g.add((
-        c.SUBTHESAURUS_A,
-        SKOS.narrower,
-        c_x1,
-    ))
-    g.add((
-        c.SUBTHESAURUS_B,
-        SKOS.narrower,
-        c_x1,
-    ))
-    g.add((
-        c.SUBTHESAURUS_B,
-        SKOS.narrower,
-        c_x2,
-    ))
-    g.add((
-        c.SUBTHESAURUS_C,
-        SKOS.narrower,
-        c_x2,
-    ))
+    g.add(
+        (
+            c.SUBTHESAURUS_A,
+            SKOS.narrower,
+            c_x0,
+        )
+    )
+    g.add(
+        (
+            c.SUBTHESAURUS_A,
+            SKOS.narrower,
+            c_x1,
+        )
+    )
+    g.add(
+        (
+            c.SUBTHESAURUS_B,
+            SKOS.narrower,
+            c_x1,
+        )
+    )
+    g.add(
+        (
+            c.SUBTHESAURUS_B,
+            SKOS.narrower,
+            c_x2,
+        )
+    )
+    g.add(
+        (
+            c.SUBTHESAURUS_C,
+            SKOS.narrower,
+            c_x2,
+        )
+    )
     return g
 
 
@@ -79,18 +86,15 @@ def thesaurus(graph):
         graph=graph,
         subthesaurus_type_uri=c.DUMMY_SUBTHESAURUS_TYPE,
         concept_type_uri=c.DUMMY_CONCEPT_TYPE,
-        concept_uri_prefix=c.CONCEPT_URI_PREFIX
+        concept_uri_prefix=c.CONCEPT_URI_PREFIX,
     )
 
 
 @pytest.fixture
 def transformer(thesaurus):
-    transformer = LabelCountForSubthesauriTransformer(
-        use_sparse_count_matrix=False
-    )
+    transformer = LabelCountForSubthesauriTransformer(use_sparse_count_matrix=False)
     transformer.init(
-        thesaurus=thesaurus,
-        subthesauri=[c.SUBTHESAURUS_A, c.SUBTHESAURUS_B]
+        thesaurus=thesaurus, subthesauri=[c.SUBTHESAURUS_A, c.SUBTHESAURUS_B]
     )
     return transformer
 

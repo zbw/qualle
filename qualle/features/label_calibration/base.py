@@ -19,7 +19,6 @@ from qualle.models import Documents, Labels
 
 
 class AbstractLabelCalibrator(BaseEstimator, RegressorMixin):
-
     def fit(self, X: Documents, y: List[Labels]):
         pass  # pragma: no cover
 

@@ -25,7 +25,7 @@ from qualle.interface.internal import load_model as internal_load_model
 from qualle.models import PredictData
 from qualle.pipeline import QualityEstimationPipeline
 
-PREDICT_ENDPOINT = '/predict'
+PREDICT_ENDPOINT = "/predict"
 
 
 class Document(BaseModel):
@@ -39,7 +39,7 @@ class Documents(BaseModel):
 
 
 class Metric(Enum):
-    RECALL = 'recall'
+    RECALL = "recall"
 
 
 class QualityScores(BaseModel):
@@ -62,21 +62,19 @@ def load_model() -> QualityEstimationPipeline:
 
 
 @router.post(
-    PREDICT_ENDPOINT, status_code=status.HTTP_200_OK,
-    response_model=QualityEstimation
+    PREDICT_ENDPOINT, status_code=status.HTTP_200_OK, response_model=QualityEstimation
 )
 def predict(
-        documents: Documents,
-        qe_pipeline: QualityEstimationPipeline = Depends(load_model)
+    documents: Documents, qe_pipeline: QualityEstimationPipeline = Depends(load_model)
 ) -> QualityEstimation:
     predict_data = _map_documents_to_predict_data(documents)
     scores = qe_pipeline.predict(predict_data)
-    return QualityEstimation(scores=[QualityScores(
-        name=Metric.RECALL, scores=list(scores))
-    ])
+    return QualityEstimation(
+        scores=[QualityScores(name=Metric.RECALL, scores=list(scores))]
+    )
 
 
-@router.get('/_up')
+@router.get("/_up")
 def up():
     return True
 
@@ -90,9 +88,7 @@ def _map_documents_to_predict_data(documents: Documents) -> PredictData:
         docs.append(doc.content)
         p_labels.append(doc.predicted_labels)
         scores.append(doc.scores)
-    return PredictData(
-        docs=docs, predicted_labels=p_labels, scores=scores
-    )
+    return PredictData(docs=docs, predicted_labels=p_labels, scores=scores)
 
 
 def create_app(settings: Optional[RESTSettings] = None):

@@ -19,9 +19,7 @@ from typing import List
 from qualle.models import Labels
 
 
-def recall(
-        true_labels: List[Labels], predicted_labels: List[Labels]
-) -> List:
+def recall(true_labels: List[Labels], predicted_labels: List[Labels]) -> List:
     return [
         len(set(tc) & set(pc)) / len_tc if (len_tc := len(tc)) > 0 else 0
         for tc, pc in zip(true_labels, predicted_labels)
@@ -29,7 +27,7 @@ def recall(
 
 
 def get_logger():
-    return logging.getLogger('qualle')
+    return logging.getLogger("qualle")
 
 
 @contextmanager

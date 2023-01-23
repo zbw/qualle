@@ -25,6 +25,7 @@ CombinedFeaturesData = Dict[Type[Features], Any]
 
 class CombinedFeatures(Features):
     """Combine n features by horizontal stacking"""
+
     def __init__(self, features: List[Features]):
         self.features = features
 
@@ -39,6 +40,6 @@ class CombinedFeatures(Features):
         combined = [f.transform(X[f.__class__]) for f in self.features_]
         issparse = any(map(sp.issparse, combined))
         if issparse:
-            return sp.hstack(combined, format='csr')
+            return sp.hstack(combined, format="csr")
         else:
             return np.hstack(combined)

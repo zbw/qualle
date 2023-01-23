@@ -29,7 +29,6 @@ def transform_to_label_count(X: List[Labels]) -> np.array:
 
 
 class SimpleLabelCalibrator(AbstractLabelCalibrator):
-
     def __init__(self, regressor: RegressorMixin):
         self.regressor = regressor
 
@@ -45,7 +44,6 @@ class SimpleLabelCalibrator(AbstractLabelCalibrator):
 
 
 class SimpleLabelCalibrationFeatures(Features):
-
     def transform(self, X: LabelCalibrationData):
         no_of_pred_labels = transform_to_label_count(X.predicted_labels)
         rows = len(X.predicted_no_of_labels)

@@ -17,4 +17,4 @@ import pytest
 
 @pytest.fixture
 def X():
-    return ['txt0', 'txt1']
+    return ["txt0", "txt1"]

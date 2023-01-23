@@ -16,8 +16,9 @@ import numpy as np
 import pytest
 from sklearn.exceptions import NotFittedError
 
-from qualle.features.label_calibration.simple_label_calibration import \
-    SimpleLabelCalibrator
+from qualle.features.label_calibration.simple_label_calibration import (
+    SimpleLabelCalibrator,
+)
 from tests.common import DummyRegressor
 
 
@@ -28,12 +29,12 @@ def calibrator():
 
 @pytest.fixture
 def X():
-    return ['doc0', 'doc1']
+    return ["doc0", "doc1"]
 
 
 @pytest.fixture
 def y():
-    return [['c0'], ['c0', 'c1']]
+    return [["c0"], ["c0", "c1"]]
 
 
 def test_fit_fits_underlying_regressor(calibrator, X, y):
