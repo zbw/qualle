@@ -13,12 +13,15 @@
 #  limitations under the License.
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, root_validator, FilePath, DirectoryPath
 from pydantic.networks import AnyUrl
 from qualle.features.confidence import ConfidenceFeatures
 from qualle.features.text import TextFeatures
+
+
+FileOrDirPath = Union[FilePath, DirectoryPath]
 
 
 class RegressorSettings(BaseSettings):
@@ -27,7 +30,7 @@ class RegressorSettings(BaseSettings):
 
 
 class SubthesauriLabelCalibrationSettings(BaseSettings):
-    thesaurus_file: Path
+    thesaurus_file: FilePath
     subthesaurus_type: AnyUrl
     concept_type: AnyUrl
     concept_type_prefix: AnyUrl
@@ -45,7 +48,7 @@ class TrainSettings(BaseSettings):
     label_calibrator_regressor: RegressorSettings
     quality_estimator_regressor: RegressorSettings
 
-    train_data_path: Path
+    train_data_path: FileOrDirPath
     output_path: Path
 
     features: List[FeaturesEnum]
@@ -57,11 +60,28 @@ class TrainSettings(BaseSettings):
 
 
 class EvalSettings(BaseSettings):
-    test_data_path: Path
-    model_file: Path
+    test_data_path: FileOrDirPath
+    model_file: FilePath
+
+
+class PredictSettings(BaseSettings):
+    predict_data_path: FileOrDirPath
+    model_file: FilePath
+    output_path: Optional[Path]
+
+    @root_validator
+    def check_output_path_specified_for_input_file(cls, values):
+        predict_data_path = values.get("predict_data_path")
+        output_path = values.get("output_path")
+        if predict_data_path.is_file() and not output_path:
+            raise ValueError(
+                "output_path has to be specified if predict_data_path "
+                "refers to a file"
+            )
+        return values
 
 
 class RESTSettings(BaseSettings):
-    model_file: Path
+    model_file: FilePath
     port: int = 8000
     host: str = '127.0.0.1'

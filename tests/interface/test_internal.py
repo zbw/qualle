@@ -23,29 +23,63 @@ from qualle.features.label_calibration.thesauri_label_calibration import \
     ThesauriLabelCalibrator, ThesauriLabelCalibrationFeatures
 from qualle.features.text import TextFeatures
 from qualle.interface.config import TrainSettings, FeaturesEnum, \
-    RegressorSettings, SubthesauriLabelCalibrationSettings, EvalSettings
+    RegressorSettings, SubthesauriLabelCalibrationSettings, EvalSettings, \
+    PredictSettings
 import qualle.interface.internal as internal
 from qualle.interface.internal import train
 
 import tests.interface.common as c
+from qualle.models import PredictData, TrainData
 
 TRAINER_CLS_FULL_PATH = 'qualle.interface.internal.Trainer'
+URI_PREFIX = 'http://uri.tld/'
 
 
 @pytest.fixture(autouse=True)
-def mock_io(mocker, train_data):
+def mock_io(mocker):
     mocker.patch('qualle.interface.internal.dump')
     mocker.patch('qualle.interface.internal.load')
-    mocker.patch(
-        'qualle.interface.internal.load_train_input',
-        mocker.Mock(return_value=train_data)
+
+
+@pytest.fixture
+def train_data():
+    p = PredictData(
+        docs=[f'Title{i}' for i in range(20)],
+        predicted_labels=[[f'concept{i}'] for i in range(20)],
+        scores=[[i / 20] for i in range(20)]
+    )
+    return TrainData(
+        predict_data=p,
+        true_labels=[[f'concept{i}'] for i in range(20)]
     )
 
 
 @pytest.fixture
-def train_settings():
+def tsv_data_path(tmp_path):
+    tsv_file = tmp_path / 'doc.tsv'
+    content = '\n'.join(f'Title{i}\tconcept{i}:{i / 20}\tconcept{i}'
+                        for i in range(20))
+    tsv_file.write_text(content)
+    return tsv_file
+
+
+@pytest.fixture
+def annif_data_dir(tmp_path):
+    for i in range(20):
+        doc0 = tmp_path / f'doc{i}.txt'
+        doc0.write_text(f"Title{i}")
+        scores0 = tmp_path / f'doc{i}.annif'
+        scores0.write_text(f'<{URI_PREFIX}concept{i}>\tlabel0\t{i / 20}\n')
+
+        labels0 = tmp_path / f'doc{i}.tsv'
+        labels0.write_text(f'<{URI_PREFIX}concept{i}>\tlabel1\n')
+    return tmp_path
+
+
+@pytest.fixture
+def train_settings(tsv_data_path):
     return TrainSettings(
-        train_data_path='/tmp/train',
+        train_data_path=tsv_data_path,
         output_path='/tmp/output',
         should_debug=False,
         features=[FeaturesEnum.TEXT],
@@ -94,7 +128,7 @@ def test_train_without_slc_creates_respective_trainer(train_settings, mocker,
 
 
 def test_train_with_slc_creates_respective_trainer(
-        train_settings, mocker, train_data
+        train_settings, mocker, train_data, thsys_file_path
 ):
     m_graph = mocker.Mock()
     m_graph_cls = mocker.Mock(return_value=m_graph)
@@ -112,7 +146,7 @@ def test_train_with_slc_creates_respective_trainer(
 
     train_settings.subthesauri_label_calibration = \
         SubthesauriLabelCalibrationSettings(
-            thesaurus_file=c.DUMMY_THESAURUS_FILE,
+            thesaurus_file=thsys_file_path,
             subthesaurus_type=c.DUMMY_SUBTHESAURUS_TYPE,
             concept_type=c.DUMMY_CONCEPT_TYPE,
             concept_type_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
@@ -123,7 +157,7 @@ def test_train_with_slc_creates_respective_trainer(
     train(train_settings)
 
     m_graph_cls.assert_called_once()
-    m_graph.parse.assert_called_once_with(c.DUMMY_THESAURUS_FILE)
+    m_graph.parse.assert_called_once_with(thsys_file_path)
 
     m_thesaurus_cls.assert_called_once_with(
         graph=m_graph,
@@ -163,7 +197,7 @@ def test_train_with_slc_creates_respective_trainer(
 
 
 def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
-        train_settings, mocker
+        train_settings, mocker, thsys_file_path
 ):
     m_graph = mocker.Mock()
     m_graph_cls = mocker.Mock(return_value=m_graph)
@@ -184,7 +218,7 @@ def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
 
     train_settings.subthesauri_label_calibration = \
         SubthesauriLabelCalibrationSettings(
-            thesaurus_file=c.DUMMY_THESAURUS_FILE,
+            thesaurus_file=thsys_file_path,
             subthesaurus_type=c.DUMMY_SUBTHESAURUS_TYPE,
             concept_type=c.DUMMY_CONCEPT_TYPE,
             concept_type_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
@@ -202,7 +236,7 @@ def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
     )
 
 
-def test_evaluate(mocker, train_data):
+def test_evaluate(mocker, tsv_data_path, train_data, model_path):
     m_eval = mocker.Mock()
     m_eval.evaluate.return_value = {}
     m_eval_cls = mocker.Mock(return_value=m_eval)
@@ -210,15 +244,71 @@ def test_evaluate(mocker, train_data):
     internal.load.return_value = 'testmodel'
 
     settings = EvalSettings(
-        test_data_path='/tmp/test',
-        model_file='/tmp/model'
+        test_data_path=tsv_data_path,
+        model_file=model_path
     )
     internal.evaluate(settings)
-
-    internal.load_train_input.assert_called_once_with('/tmp/test')
 
     m_eval_cls.assert_called_once_with(
         train_data,
         'testmodel'
     )
     m_eval.evaluate.assert_called_once()
+
+
+def test_load_train_input_from_annif(annif_data_dir, train_data):
+    actual_train_data = internal._load_train_input(annif_data_dir)
+    actual_train_data_tpls = zip(
+        actual_train_data.predict_data.docs,
+        actual_train_data.predict_data.predicted_labels,
+        actual_train_data.predict_data.scores,
+        actual_train_data.true_labels
+    )
+    expected_train_data_tpls = zip(
+        train_data.predict_data.docs,
+        train_data.predict_data.predicted_labels,
+        train_data.predict_data.scores,
+        train_data.true_labels
+    )
+    assert sorted(actual_train_data_tpls, key=lambda t: t[0]
+                  ) == sorted(expected_train_data_tpls, key=lambda t: t[0])
+
+
+def test_load_train_input_from_tsv(tsv_data_path, train_data):
+    assert internal._load_train_input(tsv_data_path) == train_data
+
+
+def test_predict_stores_scores_from_model(tsv_data_path, tmp_path, model_path):
+    output_path = tmp_path / 'qualle.txt'
+    settings = PredictSettings(
+        predict_data_path=tsv_data_path,
+        model_file=model_path,
+        output_path=output_path
+    )
+    mock_model = internal.load.return_value
+    mock_model.predict.side_effect = lambda p_data: map(
+        lambda s: s[0], p_data.scores)
+
+    internal.predict(settings)
+
+    assert output_path.read_text().rstrip("\n") == "\n".join(
+        [str(x / 20) for x in range(20)]
+    )
+
+
+def test_predict_with_annif_data_stores_scores_from_model(
+        annif_data_dir, tmp_path, model_path):
+    settings = PredictSettings(
+        predict_data_path=annif_data_dir,
+        model_file=model_path,
+    )
+    mock_model = internal.load.return_value
+    mock_model.predict.side_effect = lambda p_data: map(
+        lambda s: s[0], p_data.scores)
+
+    internal.predict(settings)
+
+    for i in range(20):
+        fp = annif_data_dir / f"doc{i}.qualle"
+        assert fp.exists()
+        assert fp.read_text() == str(i / 20), f"fail for {fp}"

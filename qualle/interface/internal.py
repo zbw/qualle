@@ -15,7 +15,8 @@
 """Internal interface to access Qualle functionality"""
 
 from importlib import import_module
-from typing import Type
+from pathlib import Path
+from typing import Type, Optional, List, Any, Union
 
 from joblib import dump, load
 from rdflib import Graph, URIRef
@@ -26,9 +27,14 @@ from qualle.features.label_calibration.simple_label_calibration import \
 from qualle.features.label_calibration.thesauri_label_calibration import \
     ThesauriLabelCalibrator, ThesauriLabelCalibrationFeatures, \
     LabelCountForSubthesauriTransformer, Thesaurus
-from qualle.interface.config import TrainSettings, EvalSettings
+from qualle.interface.config import TrainSettings, EvalSettings, \
+    PredictSettings
+from qualle.models import TrainData, PredictData
 from qualle.train import Trainer
-from qualle.utils import get_logger, load_train_input, timeit
+from qualle.utils import get_logger, timeit
+from qualle.interface.data.annif import AnnifHandler
+from qualle.interface.data.tsv import \
+    load_train_input as load_tsv_train_input, load_predict_input
 
 
 def train(settings: TrainSettings):
@@ -61,7 +67,8 @@ def train(settings: TrainSettings):
     )
 
     with timeit() as t:
-        train_data = load_train_input(str(path_to_train_data))
+        train_data = _load_train_input(path_to_train_data)
+
     logger.debug('Loaded train data in %.4f seconds', t())
 
     if slc_settings:
@@ -141,9 +148,9 @@ def evaluate(settings: EvalSettings):
     logger = get_logger()
     path_to_test_data = settings.test_data_path
     path_to_model_file = settings.model_file
-    model = load_model(path_to_model_file)
+    model = load_model(str(path_to_model_file))
     logger.info('Run evaluation with model:\n%s', model)
-    test_input = load_train_input(str(path_to_test_data))
+    test_input = _load_train_input(path_to_test_data)
     ev = Evaluator(test_input, model)
     eval_data = ev.evaluate()
     logger.info('\nScores:')
@@ -151,5 +158,71 @@ def evaluate(settings: EvalSettings):
         logger.info(f'{metric}: {score}')
 
 
+def predict(settings: PredictSettings):
+    logger = get_logger()
+    path_to_predict_data = settings.predict_data_path
+    path_to_model_file = settings.model_file
+    output_path = settings.output_path
+    model = load_model(str(path_to_model_file))
+    io_handler = _get_predict_io_handler(
+        predict_data_path=path_to_predict_data, output_path=output_path
+    )
+    predict_data = io_handler.load_predict_data()
+    logger.info('Run predict with model:\n%s', model)
+
+    scores = model.predict(predict_data)
+    io_handler.store(scores)
+
+
 def load_model(path_to_model_file: str):
     return load(path_to_model_file)
+
+
+def _load_train_input(p: Path) -> TrainData:
+    if p.is_dir():
+        train_input = AnnifHandler(dir=p).load_train_input().train_data
+    else:
+        train_input = load_tsv_train_input(p)
+    return train_input
+
+
+class PredictTSVIOHandler:
+
+    def __init__(self, predict_data_path: Path,
+                 output_path: Optional[Path] = None):
+        self._predict_data_path = predict_data_path
+        self._output_path = output_path
+
+    def load_predict_data(self):
+        return load_predict_input(self._predict_data_path)
+
+    def store(self, data: List[Any]):
+        with self._output_path.open("w") as f:
+            for d in data:
+                f.write(str(d) + "\n")
+
+
+class PredictAnnifIOHandler:
+
+    def __init__(self, predict_data_path: Path):
+        self._annif_handler = AnnifHandler(dir=predict_data_path)
+        self._doc_ids = []
+
+    def load_predict_data(self) -> PredictData:
+        data = self._annif_handler.load_predict_input()
+        self._doc_ids = data.document_ids
+        return data.predict_data
+
+    def store(self, data: List[Any]):
+        quality_ests = zip(data, self._doc_ids)
+        self._annif_handler.store_quality_estimations(quality_ests)
+
+
+def _get_predict_io_handler(
+        predict_data_path: Path, output_path: Optional[Path]
+) -> Union[PredictAnnifIOHandler, PredictTSVIOHandler]:
+    if predict_data_path.is_dir():
+        return PredictAnnifIOHandler(predict_data_path)
+    return PredictTSVIOHandler(
+        predict_data_path=predict_data_path, output_path=output_path
+    )

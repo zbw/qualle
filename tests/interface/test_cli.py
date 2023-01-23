@@ -18,18 +18,18 @@ import pytest
 import qualle.interface.cli as cli
 from qualle.interface.config import FeaturesEnum, RegressorSettings, \
     SubthesauriLabelCalibrationSettings, TrainSettings, EvalSettings, \
-    RESTSettings
+    RESTSettings, PredictSettings
 from qualle.interface.cli import CliValidationError, handle_train, handle_eval
 
 import tests.interface.common as c
 
-DUMMY_MODEL_PATH = '/tmp/model'
-
 
 @pytest.fixture
-def train_args_dict():
+def train_args_dict(tmp_path):
+    train_data_path = tmp_path / 'train'
+    train_data_path.mkdir()
     return dict(
-        train_data_path='/tmp/train',
+        train_data_path=train_data_path,
         output='/tmp/output',
         slc=False,
         should_debug=False,
@@ -45,9 +45,9 @@ def train_args_dict():
 
 
 @pytest.fixture
-def train_args_dict_with_slc(train_args_dict):
+def train_args_dict_with_slc(train_args_dict, thsys_file_path):
     train_args_dict['slc'] = True
-    train_args_dict['thsys'] = [c.DUMMY_THESAURUS_FILE]
+    train_args_dict['thsys'] = [thsys_file_path]
     train_args_dict['s_type'] = [c.DUMMY_SUBTHESAURUS_TYPE]
     train_args_dict['c_uri_prefix'] = [c.DUMMY_CONCEPT_TYPE_PREFIX]
     train_args_dict['c_type'] = [c.DUMMY_CONCEPT_TYPE]
@@ -61,6 +61,14 @@ def train_args_dict_with_slc(train_args_dict):
 def mock_internal_interface(mocker):
     mocker.patch('qualle.interface.cli.train')
     mocker.patch('qualle.interface.cli.evaluate')
+    mocker.patch('qualle.interface.cli.predict')
+
+
+@pytest.fixture
+def tsv_file_path(tmp_path):
+    fp = tmp_path / 'doc.tsv'
+    fp.write_text("t\tc:0\tc")
+    return fp
 
 
 def test_handle_train_slc_without_all_required_args_raises_exc(
@@ -75,7 +83,9 @@ def test_handle_train_slc_without_all_required_args_raises_exc(
         handle_train(Namespace(**train_args_dict))
 
 
-def test_handle_train_slc_with_subthesauri(train_args_dict_with_slc):
+def test_handle_train_slc_with_subthesauri(
+        train_args_dict_with_slc, thsys_file_path
+):
     train_args_dict_with_slc['subthesauri'] = [
         ','.join((c.DUMMY_SUBTHESAURUS_A, c.DUMMY_SUBTHESAURUS_B))]
 
@@ -87,7 +97,7 @@ def test_handle_train_slc_with_subthesauri(train_args_dict_with_slc):
     assert isinstance(actual_settings, TrainSettings)
     assert actual_settings.subthesauri_label_calibration ==\
            SubthesauriLabelCalibrationSettings(
-                thesaurus_file=c.DUMMY_THESAURUS_FILE,
+                thesaurus_file=thsys_file_path,
                 subthesaurus_type=c.DUMMY_SUBTHESAURUS_TYPE,
                 concept_type=c.DUMMY_CONCEPT_TYPE,
                 concept_type_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
@@ -95,7 +105,9 @@ def test_handle_train_slc_with_subthesauri(train_args_dict_with_slc):
             )
 
 
-def test_handle_train_slc_without_subthesauri(train_args_dict_with_slc):
+def test_handle_train_slc_without_subthesauri(
+        train_args_dict_with_slc, thsys_file_path
+):
     handle_train(Namespace(**train_args_dict_with_slc))
 
     cli.train.assert_called_once()
@@ -104,7 +116,7 @@ def test_handle_train_slc_without_subthesauri(train_args_dict_with_slc):
     assert isinstance(actual_settings, TrainSettings)
     assert actual_settings.subthesauri_label_calibration ==\
            SubthesauriLabelCalibrationSettings(
-                thesaurus_file=c.DUMMY_THESAURUS_FILE,
+                thesaurus_file=thsys_file_path,
                 subthesaurus_type=c.DUMMY_SUBTHESAURUS_TYPE,
                 concept_type=c.DUMMY_CONCEPT_TYPE,
                 concept_type_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
@@ -112,7 +124,9 @@ def test_handle_train_slc_without_subthesauri(train_args_dict_with_slc):
             )
 
 
-def test_handle_train_slc_with_sparse_count_matrix(train_args_dict_with_slc):
+def test_handle_train_slc_with_sparse_count_matrix(
+        train_args_dict_with_slc, thsys_file_path
+):
     train_args_dict_with_slc['use_sparse_count_matrix'] = True
 
     handle_train(Namespace(**train_args_dict_with_slc))
@@ -123,7 +137,7 @@ def test_handle_train_slc_with_sparse_count_matrix(train_args_dict_with_slc):
     assert isinstance(actual_settings, TrainSettings)
     assert actual_settings.subthesauri_label_calibration ==\
            SubthesauriLabelCalibrationSettings(
-                thesaurus_file=c.DUMMY_THESAURUS_FILE,
+                thesaurus_file=thsys_file_path,
                 subthesaurus_type=c.DUMMY_SUBTHESAURUS_TYPE,
                 concept_type=c.DUMMY_CONCEPT_TYPE,
                 concept_type_prefix=c.DUMMY_CONCEPT_TYPE_PREFIX,
@@ -195,25 +209,69 @@ def test_handle_train_creates_regressors(train_args_dict):
     )
 
 
-def test_handle_eval():
+def test_handle_eval(tmp_path, model_path):
+    test_data_path = tmp_path / "testdata"
+    test_data_path.mkdir()
     handle_eval(
-        Namespace(**dict(test_data_path='/tmp/test', model=DUMMY_MODEL_PATH)))
+        Namespace(**dict(test_data_path=test_data_path, model=model_path)))
     cli.evaluate.assert_called_once()
     actual_settings = cli.evaluate.call_args[0][0]
     assert actual_settings == EvalSettings(
-        test_data_path='/tmp/test',
-        model_file=DUMMY_MODEL_PATH
+        test_data_path=test_data_path,
+        model_file=model_path
     )
 
 
-def test_handle_rest(mocker):
+def test_handle_rest(mocker, model_path):
     m_run = mocker.Mock()
     mocker.patch('qualle.interface.cli.run', m_run)
 
     cli.handle_rest(
-        Namespace(**dict(model=DUMMY_MODEL_PATH, port=[9000], host=['x']))
+        Namespace(**dict(model=model_path, port=[9000], host=['x']))
     )
 
     m_run.assert_called_once_with(
-        RESTSettings(model_file=DUMMY_MODEL_PATH, host='x', port=9000)
+        RESTSettings(model_file=model_path, host='x', port=9000)
     )
+
+
+def test_handle_predict_with_dir(tmp_path, model_path):
+    predict_data_path = tmp_path / "predict"
+    predict_data_path.mkdir()
+    cli.handle_predict(
+        Namespace(
+            **dict(
+                predict_data_path=predict_data_path, model=model_path,
+                output=None)
+            )
+    )
+    cli.predict.assert_called_once()
+    actual_settings = cli.predict.call_args[0][0]
+    assert actual_settings == PredictSettings(
+        predict_data_path=predict_data_path,
+        model_file=model_path
+    )
+
+
+def test_handle_predict_with_file(tsv_file_path, tmp_path, model_path):
+    output_path = tmp_path / 'output.txt'
+    cli.handle_predict(
+        Namespace(**dict(predict_data_path=tsv_file_path, model=model_path,
+                         output=[output_path])))
+    cli.predict.assert_called_once()
+    actual_settings = cli.predict.call_args[0][0]
+    assert actual_settings == PredictSettings(
+        predict_data_path=tsv_file_path,
+        model_file=model_path,
+        output_path=output_path
+    )
+
+
+def test_handle_predict_with_file_raises_exc_if_no_output_file(
+        tsv_file_path, model_path
+):
+    with pytest.raises(CliValidationError):
+        cli.handle_predict(
+            Namespace(**dict(
+                predict_data_path=tsv_file_path, model=model_path, output=None
+            )))
