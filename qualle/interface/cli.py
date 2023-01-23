@@ -167,7 +167,7 @@ def cli_entrypoint():
 
     eval_parser.add_argument('test_data_path', type=str,
                              help='Path to test data. '
-                             'Accepted are either a tsv file or '
+                             'Accepted inputs are either a tsv file or '
                              'a folder in Annif format.')
     eval_parser.add_argument('model', type=str, help=PATH_TO_MODEL_FILE_STR)
 
@@ -178,7 +178,7 @@ def cli_entrypoint():
     train_parser.set_defaults(func=handle_train)
     train_parser.add_argument('train_data_path', type=str,
                               help='Path to train data. '
-                              'Accepted are either a tsv file or '
+                              'Accepted inputs are either a tsv file or '
                               'a folder in Annif format.')
     train_parser.add_argument('output', type=str,
                               help='Path to output model file')
@@ -265,7 +265,7 @@ def cli_entrypoint():
 
     predict_parser = subparsers.add_parser(
         'predict',
-        description='Predict the quality for a a collection of automated '
+        description='Predict the quality for a collection of automated '
                     'subject indexing (MLC) results.'
     )
     predict_parser.set_defaults(func=handle_predict)
@@ -273,10 +273,10 @@ def cli_entrypoint():
     predict_parser.add_argument(
         'predict_data_path', type=Path,
         help='Path to data. '
-             'Accepted are either a tsv file or a folder in annif format. '
-             'If a tsv file is provided, the flag --output must be specified. '
-             'If a folder is provided, the predicted quality is written into '
-             'files using the ".qualle" prefix inside the folder.  '
+             'Accepted inputs are either a tsv file or a folder in annif '
+             'format. If a tsv file is provided, the flag --output must be '
+             'specified. If a folder is provided, the predicted quality is '
+             'written into files using the ".qualle" prefix inside the folder.'
     )
     predict_parser.add_argument(
         'model', type=str, help=PATH_TO_MODEL_FILE_STR

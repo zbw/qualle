@@ -88,8 +88,8 @@ docker run --rm -it -v \
 ## Usage
 
 ### Input data 
-In order to train a model, evaluate a model or predict the quality you have to 
-provide data. 
+In order to train a model, evaluate a model or predict the quality of an MLC result
+you have to provide data. 
 
 This can be a tabular-separated file (tsv) in the format (tabular is marked with ``\t``)
 
@@ -102,7 +102,8 @@ where
 (this is basically the output of the MLC method)
 - ``true_labels`` is a comma-separated list of true labels (ground truth)
 
-Note that you can omit the ``true_labels`` section if you only want to predict the quality of the data.
+Note that you can omit the ``true_labels`` section if you only want to predict the 
+quality of the MLC result.
 
 For example, a row in the data file could look like this:
 
@@ -119,7 +120,7 @@ This is a  folder with three files per document:
 * ``doc.txt`` : document content
 
 As above, you may omit the ``doc.tsv`` if you just want to
-predict the quality of the data.
+predict the quality of the MLC result.
 
 ### Train
 To train a model, use the ``train`` mode, e.g.:
