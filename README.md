@@ -1,16 +1,17 @@
 # Qualle
 [![Extended Tests](https://github.com/zbw/qualle/actions/workflows/extended.yml/badge.svg)](https://github.com/zbw/qualle/actions/workflows/extended.yml)
 [![codecov](https://codecov.io/gh/zbw/qualle/branch/master/graph/badge.svg?token=ZE7OWKA83Q)](https://codecov.io/gh/zbw/qualle)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 This is an implementation of the Qualle framework as proposed in the paper
 [1] and accompanying source code.
 
 The framework allows to train a model which can be used to predict
-the quality of the result of applying a multi-label classification (MLC) 
+the quality of the result of applying a multi-label classification (MLC)
 method on a document. In this implementation, only the
-[recall](https://en.wikipedia.org/wiki/Precision_and_recall) 
+[recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 is predicted for a document, but in principle
-any document-level quality estimation (such as the prediction of precision) 
+any document-level quality estimation (such as the prediction of precision)
 can be implemented analogously.
 
 Qualle provides a command-line interface to train
@@ -34,7 +35,7 @@ Qualle is available on [PyPI](pypi.org) . You can install Qualle using pip:
 This will install a command line tool called `qualle` . You can call `qualle -h` to see the help message which will
 display the available modes and options.
 
-Note that it is generally recommended to use a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to avoid 
+Note that it is generally recommended to use a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to avoid
  conflicting behaviour with the system package manager.
 
 ### From source
@@ -43,7 +44,7 @@ You also have the option to checkout the repository and install the packages fro
 
 ```shell
 # call inside the project directory
-poetry install --without ci 
+poetry install --without ci
 ```
 
 ### Docker
@@ -58,7 +59,7 @@ Alternatively, you can use the Dockerfile included in this project to build a Do
 By default, a container built from this image launches a REST interface listening on ``0.0.0.0:8000``
 
 You need to pass the model file (see below the section REST interface) per bind mount or volume to the docker container.
-Beyond that, you need to specify the location of the model file with an 
+Beyond that, you need to specify the location of the model file with an
 environment variable named `MODEL_FILE`:
 
 ``docker run --rm -it --env MODEL_FILE=/model -v /path/to/model:/model -p 8000:8000 ghcr.io/zbw/qualle``
@@ -89,7 +90,7 @@ docker run --rm -it -v \
 
 ### Input data 
 In order to train a model, evaluate a model or predict the quality of an MLC result
-you have to provide data. 
+you have to provide data.
 
 This can be a tabular-separated file (tsv) in the format (tabular is marked with ``\t``)
 
@@ -109,9 +110,9 @@ For example, a row in the data file could look like this:
 
 ``Optimal investment policy of the regulated firm\tConcept0:0.5,Concept1:1\tConcept0,Concept3``
 
-For those who use an MLC method via the toolkit [Annif](https://github.com/NatLibFi/annif) for automated subject indexing: 
-You can alternatively specify a 
-[full-text document corpus](https://github.com/NatLibFi/Annif/wiki/Document-corpus-formats/70a8f079313e872ed513a4bff1747c604b5781a7) 
+For those who use an MLC method via the toolkit [Annif](https://github.com/NatLibFi/annif) for automated subject indexing:
+You can alternatively specify a
+[full-text document corpus](https://github.com/NatLibFi/Annif/wiki/Document-corpus-formats/70a8f079313e872ed513a4bff1747c604b5781a7)
  combined with the result of the Annif index method (tested with Annif version 0.59) applied on the corpus.
 This is a  folder with three files per document:
 
@@ -136,7 +137,7 @@ such as the [explained variation](https://en.wikipedia.org/wiki/Explained_variat
 of the recall prediction (please consult the paper for more information).
 
 ### REST interface
-To perform the prediction on a MLC result, a REST interface can be started. 
+To perform the prediction on a MLC result, a REST interface can be started.
 [uvicorn](https://www.uvicorn.org/) is used as HTTP server. You can also use any
 ASGI server implementation and create the ASGI app directly with the method
 ``qualle.interface.rest.create_app``. You need to provide the environment variable
@@ -151,6 +152,9 @@ the Swagger UI accessible at ``http://address_of_server/docs`` to play around a 
 
 Contributions via pull requests are welcome. Please create an issue beforehand
 to explain and discuss the reasons for the respective contribution.
+
+qualle code should follow the [Black style](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html).
+The Black tool is included as a development dependency; you can run `black .` in the project root to autoformat code.
 
 ## References
 [1] [Toepfer, Martin, and Christin Seifert. "Content-based quality estimation for automatic subject indexing of short texts under precision and recall constraints." International Conference on Theory and Practice of Digital Libraries. Springer, Cham, 2018., DOI 10.1007/978-3-030-00066-0_1](https://arxiv.org/abs/1806.02743)
