@@ -12,15 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Union, Optional
 
 import numpy as np
 from pydantic import root_validator, BaseModel
 from scipy.sparse import spmatrix
 
-Labels = List[str]
-Documents = List[str]
-Scores = List[float]
+Label = str
+Labels = List[Label]
+Document = str
+Documents = List[Document]
+Score = float
+Scores = List[Score]
 Matrix = Union[np.ndarray, spmatrix]
 
 
@@ -44,8 +47,20 @@ class PredictData(BaseModel):
         return values
 
 
-class TrainData(BaseModel):
+class LabelCalibrationTrainData(BaseModel):
+    docs: Documents
+    true_labels: List[Labels]
 
+    @root_validator
+    def check_equal_length(cls, values):
+        docs = values.get("docs")
+        t_labels = values.get("true_labels")
+        if len(docs) != len(t_labels):
+            raise ValueError("length of true labels and docs do not match")
+        return values
+
+
+class PredictTrainData(BaseModel):
     predict_data: PredictData
     true_labels: List[Labels]
 
@@ -56,6 +71,14 @@ class TrainData(BaseModel):
         if len(p_data.predicted_labels) != len(t_labels):
             raise ValueError("length of true labels and predicted labels do not match")
         return values
+
+
+EvalData = PredictTrainData
+
+
+class TrainData(BaseModel):
+    label_calibration_split: Optional[LabelCalibrationTrainData]
+    predict_split: PredictTrainData
 
 
 @dataclass

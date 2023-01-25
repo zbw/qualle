@@ -28,7 +28,7 @@ from qualle.train import Trainer, FeaturesDataMapper
 
 @pytest.fixture
 def l_data(train_data):
-    p_data = train_data.predict_data
+    p_data = train_data.predict_split.predict_data
     return LabelCalibrationData(
         predicted_no_of_labels=np.array([0] * 5),
         predicted_labels=p_data.predicted_labels,
@@ -49,7 +49,7 @@ def test_train_trains_qe_pipeline(train_data, mocker):
 
 
 def test_features_data_mapper_with_lc(train_data, l_data):
-    p_data = train_data.predict_data
+    p_data = train_data.predict_split.predict_data
     mapper = FeaturesDataMapper(
         set([SimpleLabelCalibrationFeatures, ConfidenceFeatures])
     )
@@ -60,19 +60,19 @@ def test_features_data_mapper_with_lc(train_data, l_data):
 
 
 def test_features_data_mapper_without_lc(train_data, l_data):
-    p_data = train_data.predict_data
-    mapper = FeaturesDataMapper(set([ConfidenceFeatures]))
+    p_data = train_data.predict_split.predict_data
+    mapper = FeaturesDataMapper({ConfidenceFeatures})
     assert mapper(p_data, l_data) == {ConfidenceFeatures: p_data.scores}
 
 
 def test_features_data_mapper_without_features(train_data, l_data):
-    p_data = train_data.predict_data
+    p_data = train_data.predict_split.predict_data
     mapper = FeaturesDataMapper(set())
     assert mapper(p_data, l_data) == {}
 
 
 def test_features_data_mapper_for_each_feature(train_data, l_data):
-    p_data = train_data.predict_data
+    p_data = train_data.predict_split.predict_data
 
     assert FeaturesDataMapper({SimpleLabelCalibrationFeatures})(p_data, l_data) == {
         SimpleLabelCalibrationFeatures: l_data

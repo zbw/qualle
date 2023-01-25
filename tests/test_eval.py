@@ -33,7 +33,7 @@ def evaluator(train_data):
         features_data_mapper=lambda _, l_data: l_data,
     )
     qe_p.train(train_data)
-    return Evaluator(train_data, qe_p)
+    return Evaluator(train_data.predict_split, qe_p)
 
 
 def test_evaluate_returns_scores(evaluator):

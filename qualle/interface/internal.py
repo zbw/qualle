@@ -33,19 +33,18 @@ from qualle.features.label_calibration.thesauri_label_calibration import (
     Thesaurus,
 )
 from qualle.interface.config import TrainSettings, EvalSettings, PredictSettings
-from qualle.models import TrainData, PredictData
+from qualle.models import TrainData, PredictData, EvalData
 from qualle.train import Trainer
 from qualle.utils import get_logger, timeit
-from qualle.interface.data.annif import AnnifHandler
-from qualle.interface.data.tsv import (
-    load_train_input as load_tsv_train_input,
-    load_predict_input,
-)
+import qualle.interface.data.annif as annif
+import qualle.interface.data.tsv as tsv
 
 
 def train(settings: TrainSettings):
     logger = get_logger()
-    path_to_train_data = settings.train_data_path
+    path_to_p_train_data = settings.predict_train_data_path
+    path_to_lc_train_data = settings.label_calibration_train_data_path
+
     path_to_model_output_file = settings.output_path
     slc_settings = settings.subthesauri_label_calibration
     features = list(map(lambda f: f.value(), settings.features))
@@ -73,7 +72,7 @@ def train(settings: TrainSettings):
     )
 
     with timeit() as t:
-        train_data = _load_train_input(path_to_train_data)
+        train_data = _load_train_input(path_to_p_train_data, path_to_lc_train_data)
 
     logger.debug("Loaded train data in %.4f seconds", t())
 
@@ -98,7 +97,7 @@ def train(settings: TrainSettings):
             logger.debug("Extracted %d subthesauri", len(subthesauri))
         if slc_settings.use_sparse_count_matrix:
             logger.info(
-                "Will use Sparse Count Matrix for " "Subthesauri Label Calibration"
+                "Will use Sparse Count Matrix for Subthesauri Label Calibration"
             )
         transformer = LabelCountForSubthesauriTransformer(
             use_sparse_count_matrix=slc_settings.use_sparse_count_matrix
@@ -152,7 +151,7 @@ def evaluate(settings: EvalSettings):
     path_to_model_file = settings.model_file
     model = load_model(str(path_to_model_file))
     logger.info("Run evaluation with model:\n%s", model)
-    test_input = _load_train_input(path_to_test_data)
+    test_input = _load_eval_input(path_to_test_data)
     ev = Evaluator(test_input, model)
     eval_data = ev.evaluate()
     logger.info("\nScores:")
@@ -180,12 +179,40 @@ def load_model(path_to_model_file: str):
     return load(path_to_model_file)
 
 
-def _load_train_input(p: Path) -> TrainData:
-    if p.is_dir():
-        train_input = AnnifHandler(dir=p).load_train_input().train_data
+def _load_train_input(
+    predict_train_path: Path, label_calibration_train_path: Optional[Path] = None
+) -> TrainData:
+    if predict_train_path.is_dir():
+        predict_train_data = annif.load_predict_train_input(
+            predict_train_path
+        ).predict_train_data
     else:
-        train_input = load_tsv_train_input(p)
-    return train_input
+        predict_train_data = tsv.load_predict_train_input(predict_train_path)
+
+    if label_calibration_train_path:
+        if label_calibration_train_path.is_dir():
+            lc_train_data = annif.load_label_calibration_train_input(
+                label_calibration_train_path
+            ).label_calibration_train_data
+        else:
+            lc_train_data = tsv.load_label_calibration_train_input(
+                label_calibration_train_path
+            )
+    else:
+        lc_train_data = None
+
+    return TrainData(
+        predict_split=predict_train_data, label_calibration_split=lc_train_data
+    )
+
+
+def _load_eval_input(eval_data_path: Path) -> EvalData:
+    if eval_data_path.is_dir():
+        eval_data = annif.load_predict_train_input(eval_data_path).predict_train_data
+    else:
+        eval_data = tsv.load_predict_train_input(eval_data_path)
+
+    return eval_data
 
 
 class PredictTSVIOHandler:
@@ -194,7 +221,7 @@ class PredictTSVIOHandler:
         self._output_path = output_path
 
     def load_predict_data(self):
-        return load_predict_input(self._predict_data_path)
+        return tsv.load_predict_input(self._predict_data_path)
 
     def store(self, data: List[Any]):
         with self._output_path.open("w") as f:
@@ -203,18 +230,18 @@ class PredictTSVIOHandler:
 
 
 class PredictAnnifIOHandler:
-    def __init__(self, predict_data_path: Path):
-        self._annif_handler = AnnifHandler(dir=predict_data_path)
+    def __init__(self, predict_data_dir: Path):
+        self._dir = predict_data_dir
         self._doc_ids = []
 
     def load_predict_data(self) -> PredictData:
-        data = self._annif_handler.load_predict_input()
+        data = annif.load_predict_input(self._dir)
         self._doc_ids = data.document_ids
         return data.predict_data
 
     def store(self, data: List[Any]):
         quality_ests = zip(data, self._doc_ids)
-        self._annif_handler.store_quality_estimations(quality_ests)
+        annif.store_quality_estimations(dir=self._dir, quality_ests=quality_ests)
 
 
 def _get_predict_io_handler(

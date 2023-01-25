@@ -26,7 +26,7 @@ from qualle.features.label_calibration.thesauri_label_calibration import (
     ThesauriLabelCalibrationFeatures,
 )
 from qualle.features.text import TextFeatures
-from qualle.models import PredictData, LabelCalibrationData
+from qualle.models import PredictData, LabelCalibrationData, TrainData
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import QualityEstimator
 
@@ -36,7 +36,7 @@ FeaturesTypes = Set[Type[Features]]
 class Trainer:
     def __init__(
         self,
-        train_data,
+        train_data: TrainData,
         label_calibrator: AbstractLabelCalibrator,
         quality_regressor: RegressorMixin,
         features: List[Features],

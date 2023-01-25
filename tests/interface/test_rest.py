@@ -51,7 +51,7 @@ def client(mocked_pipeline, model_path):
 
 @pytest.fixture
 def documents(train_data):
-    p_data = train_data.predict_data
+    p_data = train_data.predict_split.predict_data
     return Documents(
         documents=[
             Document(
@@ -103,4 +103,7 @@ def test_run(mocker, model_path):
 
 
 def test_map_documents_to_predict_data(documents, train_data):
-    assert _map_documents_to_predict_data(documents) == train_data.predict_data
+    assert (
+        _map_documents_to_predict_data(documents)
+        == train_data.predict_split.predict_data
+    )

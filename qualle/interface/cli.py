@@ -102,7 +102,7 @@ def handle_train(args: argparse.Namespace):
     settings = TrainSettings(
         label_calibrator_regressor=lc_regressor,
         quality_estimator_regressor=qe_regressor,
-        train_data_path=args.train_data_path,
+        predict_train_data_path=args.train_data_path,
         output_path=args.output,
         features=features,
         subthesauri_label_calibration=slc,

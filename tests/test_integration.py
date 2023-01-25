@@ -127,7 +127,7 @@ def train(train_data_file, output_path):
         quality_estimator_regressor=RegressorSettings(
             regressor_class="sklearn.ensemble.GradientBoostingRegressor", params={}
         ),
-        train_data_path=train_data_file,
+        predict_train_data_path=train_data_file,
         output_path=output_path,
         features=[FeaturesEnum.TEXT],
     )

@@ -23,6 +23,13 @@ from qualle.utils import recall, get_logger, timeit
 
 
 class QualityEstimationPipeline:
+    """Performs pipeline-style quality estimation.
+
+    First, a label calibration is performed. Thereafter, the recall predictor
+    predicts the recall using the combined result of the label calibration
+    with other features.
+    """
+
     def __init__(
         self,
         label_calibrator: AbstractLabelCalibrator,
@@ -37,14 +44,18 @@ class QualityEstimationPipeline:
         self._logger = get_logger()
 
     def train(self, data: TrainData):
-        predict_data = data.predict_data
+        predict_data = data.predict_split.predict_data
         with self._debug("cross_val_predict with label calibrator"):
             predicted_no_of_labels = cross_val_predict(
-                self._label_calibrator, predict_data.docs, data.true_labels
+                self._label_calibrator,
+                predict_data.docs,
+                data.predict_split.true_labels,
             )
 
         with self._debug("label calibrator fit"):
-            self._label_calibrator.fit(predict_data.docs, data.true_labels)
+            self._label_calibrator.fit(
+                predict_data.docs, data.predict_split.true_labels
+            )
 
         label_calibration_data = LabelCalibrationData(
             predicted_labels=predict_data.predicted_labels,
@@ -52,7 +63,9 @@ class QualityEstimationPipeline:
         )
         features_data = self._features_data_mapper(predict_data, label_calibration_data)
         with self._debug("recall computation"):
-            true_recall = recall(data.true_labels, predict_data.predicted_labels)
+            true_recall = recall(
+                data.predict_split.true_labels, predict_data.predicted_labels
+            )
 
         with self._debug("RecallPredictor fit"):
             self._recall_predictor.fit(features_data, true_recall)

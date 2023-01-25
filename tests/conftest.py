@@ -13,7 +13,7 @@
 #  limitations under the License.
 import pytest
 
-from qualle.models import TrainData, PredictData
+from qualle.models import TrainData, PredictData, PredictTrainData
 
 
 @pytest.fixture
@@ -21,4 +21,5 @@ def train_data():
     p = PredictData(
         docs=["Title"] * 20, predicted_labels=[["concept"]] * 20, scores=[[0.0]] * 20
     )
-    return TrainData(predict_data=p, true_labels=[["concept"]] * 20)
+    p_t = PredictTrainData(predict_data=p, true_labels=[["concept"]] * 20)
+    return TrainData(predict_split=p_t)

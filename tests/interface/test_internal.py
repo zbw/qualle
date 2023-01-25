@@ -38,7 +38,12 @@ import qualle.interface.internal as internal
 from qualle.interface.internal import train
 
 import tests.interface.common as c
-from qualle.models import PredictData, TrainData
+from qualle.models import (
+    PredictData,
+    TrainData,
+    LabelCalibrationTrainData,
+    PredictTrainData,
+)
 
 TRAINER_CLS_FULL_PATH = "qualle.interface.internal.Trainer"
 URI_PREFIX = "http://uri.tld/"
@@ -57,34 +62,67 @@ def train_data():
         predicted_labels=[[f"concept{i}"] for i in range(20)],
         scores=[[i / 20] for i in range(20)],
     )
-    return TrainData(predict_data=p, true_labels=[[f"concept{i}"] for i in range(20)])
+    lc_t_data = LabelCalibrationTrainData(
+        docs=[f"LC-Title{i}" for i in range(15)],
+        true_labels=[[f"lc-concept{i}"] for i in range(15)],
+    )
+    return TrainData(
+        predict_split=PredictTrainData(
+            predict_data=p, true_labels=[[f"concept{i}"] for i in range(20)]
+        ),
+        label_calibration_split=lc_t_data,
+    )
 
 
 @pytest.fixture
-def tsv_data_path(tmp_path):
-    tsv_file = tmp_path / "doc.tsv"
+def tsv_predict_train_data_path(tmp_path):
+    tsv_file = tmp_path / "predict-docs.tsv"
     content = "\n".join(f"Title{i}\tconcept{i}:{i / 20}\tconcept{i}" for i in range(20))
     tsv_file.write_text(content)
     return tsv_file
 
 
 @pytest.fixture
-def annif_data_dir(tmp_path):
-    for i in range(20):
-        doc0 = tmp_path / f"doc{i}.txt"
-        doc0.write_text(f"Title{i}")
-        scores0 = tmp_path / f"doc{i}.annif"
-        scores0.write_text(f"<{URI_PREFIX}concept{i}>\tlabel0\t{i / 20}\n")
-
-        labels0 = tmp_path / f"doc{i}.tsv"
-        labels0.write_text(f"<{URI_PREFIX}concept{i}>\tlabel1\n")
-    return tmp_path
+def tsv_lc_train_data_path(tmp_path):
+    tsv_file = tmp_path / "lc-docs.tsv"
+    content = "\n".join(f"LC-Title{i}\tlc-concept{i}" for i in range(15))
+    tsv_file.write_text(content)
+    return tsv_file
 
 
 @pytest.fixture
-def train_settings(tsv_data_path):
+def annif_predict_train_data_dir(tmp_path):
+    p_dir = tmp_path / "predict"
+    p_dir.mkdir()
+    for i in range(20):
+        doc0 = p_dir / f"doc{i}.txt"
+        doc0.write_text(f"Title{i}")
+        scores0 = p_dir / f"doc{i}.annif"
+        scores0.write_text(f"<{URI_PREFIX}concept{i}>\tlabel0\t{i / 20}\n")
+
+        labels0 = p_dir / f"doc{i}.tsv"
+        labels0.write_text(f"<{URI_PREFIX}concept{i}>\tlabel1\n")
+    return p_dir
+
+
+@pytest.fixture
+def annif_lc_train_data_dir(tmp_path):
+    lc_dir = tmp_path / "lc"
+    lc_dir.mkdir()
+    for i in range(15):
+        doc0 = lc_dir / f"doc{i}.txt"
+        doc0.write_text(f"LC-Title{i}")
+
+        labels0 = lc_dir / f"doc{i}.tsv"
+        labels0.write_text(f"<{URI_PREFIX}lc-concept{i}>\tlabel1\n")
+    return lc_dir
+
+
+@pytest.fixture
+def train_settings(tsv_predict_train_data_path, tsv_lc_train_data_path):
     return TrainSettings(
-        train_data_path=tsv_data_path,
+        label_calibration_train_data_path=tsv_lc_train_data_path,
+        predict_train_data_path=tsv_predict_train_data_path,
         output_path="/tmp/output",
         should_debug=False,
         features=[FeaturesEnum.TEXT],
@@ -100,6 +138,19 @@ def train_settings(tsv_data_path):
 
 
 def test_train_trains_trainer(train_settings, mocker):
+    m_trainer = mocker.Mock()
+    m_trainer_cls = mocker.Mock(return_value=m_trainer)
+    m_trainer.train = mocker.Mock(return_value="testmodel")
+    mocker.patch(TRAINER_CLS_FULL_PATH, m_trainer_cls)
+    train(train_settings)
+
+    m_trainer.train.assert_called_once()
+    internal.dump.assert_called_once_with("testmodel", Path("/tmp/output"))
+
+
+def test_train_trains_trainer_without_lc_train_data(train_settings, mocker):
+    train_settings.label_calibration_train_data_path = None
+
     m_trainer = mocker.Mock()
     m_trainer_cls = mocker.Mock(return_value=m_trainer)
     m_trainer.train = mocker.Mock(return_value="testmodel")
@@ -237,47 +288,133 @@ def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
     )
 
 
-def test_evaluate(mocker, tsv_data_path, train_data, model_path):
+def test_evaluate(mocker, tsv_predict_train_data_path, train_data, model_path):
     m_eval = mocker.Mock()
     m_eval.evaluate.return_value = {}
     m_eval_cls = mocker.Mock(return_value=m_eval)
     mocker.patch("qualle.interface.internal.Evaluator", m_eval_cls)
     internal.load.return_value = "testmodel"
 
-    settings = EvalSettings(test_data_path=tsv_data_path, model_file=model_path)
+    settings = EvalSettings(
+        test_data_path=tsv_predict_train_data_path, model_file=model_path
+    )
     internal.evaluate(settings)
 
-    m_eval_cls.assert_called_once_with(train_data, "testmodel")
+    m_eval_cls.assert_called_once_with(train_data.predict_split, "testmodel")
     m_eval.evaluate.assert_called_once()
 
 
-def test_load_train_input_from_annif(annif_data_dir, train_data):
-    actual_train_data = internal._load_train_input(annif_data_dir)
-    actual_train_data_tpls = zip(
-        actual_train_data.predict_data.docs,
-        actual_train_data.predict_data.predicted_labels,
-        actual_train_data.predict_data.scores,
-        actual_train_data.true_labels,
-    )
-    expected_train_data_tpls = zip(
-        train_data.predict_data.docs,
-        train_data.predict_data.predicted_labels,
-        train_data.predict_data.scores,
-        train_data.true_labels,
-    )
-    assert sorted(actual_train_data_tpls, key=lambda t: t[0]) == sorted(
-        expected_train_data_tpls, key=lambda t: t[0]
+def test_load_train_input_from_annif(
+    annif_predict_train_data_dir, annif_lc_train_data_dir, train_data
+):
+    actual_train_data = internal._load_train_input(
+        annif_predict_train_data_dir, annif_lc_train_data_dir
     )
 
+    actual_predict_train_data_tpls = zip(
+        actual_train_data.predict_split.predict_data.docs,
+        actual_train_data.predict_split.predict_data.predicted_labels,
+        actual_train_data.predict_split.predict_data.scores,
+        actual_train_data.predict_split.true_labels,
+    )
+    actual_lc_train_data_tpls = zip(
+        actual_train_data.label_calibration_split.docs,
+        actual_train_data.label_calibration_split.true_labels,
+    )
+    expected_predict_train_data_tpls = zip(
+        train_data.predict_split.predict_data.docs,
+        train_data.predict_split.predict_data.predicted_labels,
+        train_data.predict_split.predict_data.scores,
+        train_data.predict_split.true_labels,
+    )
+    expected_lc_train_data_tpls = zip(
+        train_data.label_calibration_split.docs,
+        train_data.label_calibration_split.true_labels,
+    )
 
-def test_load_train_input_from_tsv(tsv_data_path, train_data):
-    assert internal._load_train_input(tsv_data_path) == train_data
+    assert sorted(actual_predict_train_data_tpls, key=lambda t: t[0]) == sorted(
+        expected_predict_train_data_tpls, key=lambda t: t[0]
+    )
+    assert sorted(actual_lc_train_data_tpls, key=lambda t: t[0]) == sorted(
+        expected_lc_train_data_tpls, key=lambda t: t[0]
+    )
 
 
-def test_predict_stores_scores_from_model(tsv_data_path, tmp_path, model_path):
+def test_load_train_input_from_annif_without_lc(
+    annif_predict_train_data_dir, train_data
+):
+    actual_train_data = internal._load_train_input(annif_predict_train_data_dir)
+
+    assert not actual_train_data.label_calibration_split
+
+    actual_predict_train_data_tpls = zip(
+        actual_train_data.predict_split.predict_data.docs,
+        actual_train_data.predict_split.predict_data.predicted_labels,
+        actual_train_data.predict_split.predict_data.scores,
+        actual_train_data.predict_split.true_labels,
+    )
+    expected_predict_train_data_tpls = zip(
+        train_data.predict_split.predict_data.docs,
+        train_data.predict_split.predict_data.predicted_labels,
+        train_data.predict_split.predict_data.scores,
+        train_data.predict_split.true_labels,
+    )
+
+    assert sorted(actual_predict_train_data_tpls, key=lambda t: t[0]) == sorted(
+        expected_predict_train_data_tpls, key=lambda t: t[0]
+    )
+
+
+def test_load_eval_input_from_annif(annif_predict_train_data_dir, train_data):
+    actual_eval_data = internal._load_eval_input(annif_predict_train_data_dir)
+
+    actual_eval_data_tpls = zip(
+        actual_eval_data.predict_data.docs,
+        actual_eval_data.predict_data.predicted_labels,
+        actual_eval_data.predict_data.scores,
+        actual_eval_data.true_labels,
+    )
+    expected_eval_data_tpls = zip(
+        train_data.predict_split.predict_data.docs,
+        train_data.predict_split.predict_data.predicted_labels,
+        train_data.predict_split.predict_data.scores,
+        train_data.predict_split.true_labels,
+    )
+
+    assert sorted(actual_eval_data_tpls, key=lambda t: t[0]) == sorted(
+        expected_eval_data_tpls, key=lambda t: t[0]
+    )
+
+
+def test_load_train_input_from_tsv(
+    tsv_predict_train_data_path, tsv_lc_train_data_path, train_data
+):
+    assert (
+        internal._load_train_input(tsv_predict_train_data_path, tsv_lc_train_data_path)
+        == train_data
+    )
+
+
+def test_load_train_input_from_tsv_without_lc(tsv_predict_train_data_path, train_data):
+    train_data.label_calibration_split = None
+    assert internal._load_train_input(tsv_predict_train_data_path) == train_data
+
+
+def test_load_eval_input_from_tsv(tsv_predict_train_data_path, train_data):
+    assert (
+        internal._load_eval_input(tsv_predict_train_data_path)
+        == train_data.predict_split
+    )
+
+
+def test_predict_stores_scores_from_model(
+    tsv_predict_train_data_path, tmp_path, model_path
+):
     output_path = tmp_path / "qualle.txt"
     settings = PredictSettings(
-        predict_data_path=tsv_data_path, model_file=model_path, output_path=output_path
+        predict_data_path=tsv_predict_train_data_path,
+        model_file=model_path,
+        output_path=output_path,
     )
     mock_model = internal.load.return_value
     mock_model.predict.side_effect = lambda p_data: map(lambda s: s[0], p_data.scores)
@@ -290,10 +427,10 @@ def test_predict_stores_scores_from_model(tsv_data_path, tmp_path, model_path):
 
 
 def test_predict_with_annif_data_stores_scores_from_model(
-    annif_data_dir, tmp_path, model_path
+    annif_predict_train_data_dir, tmp_path, model_path
 ):
     settings = PredictSettings(
-        predict_data_path=annif_data_dir,
+        predict_data_path=annif_predict_train_data_dir,
         model_file=model_path,
     )
     mock_model = internal.load.return_value
@@ -302,6 +439,6 @@ def test_predict_with_annif_data_stores_scores_from_model(
     internal.predict(settings)
 
     for i in range(20):
-        fp = annif_data_dir / f"doc{i}.qualle"
+        fp = annif_predict_train_data_dir / f"doc{i}.qualle"
         assert fp.exists()
         assert fp.read_text() == str(i / 20), f"fail for {fp}"

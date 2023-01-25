@@ -22,7 +22,7 @@ from qualle.features.label_calibration.simple_label_calibration import (
     SimpleLabelCalibrator,
     SimpleLabelCalibrationFeatures,
 )
-from qualle.models import TrainData, PredictData
+from qualle.models import TrainData, PredictData, PredictTrainData
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import QualityEstimator
 
@@ -46,23 +46,33 @@ def qp(mocker):
 def train_data():
     labels = [["c"] for _ in range(5)]
     return TrainData(
-        predict_data=PredictData(
-            docs=[f"d{i}" for i in range(5)], predicted_labels=labels, scores=[[0]] * 5
-        ),
-        true_labels=labels,
+        predict_split=PredictTrainData(
+            predict_data=PredictData(
+                docs=[f"d{i}" for i in range(5)],
+                predicted_labels=labels,
+                scores=[[0]] * 5,
+            ),
+            true_labels=labels,
+        )
     )
 
 
 @pytest.fixture
 def train_data_with_some_empty_labels(train_data):
-    train_data.predict_data.predicted_labels = [["c"], [], ["c"], [], ["c"]]
+    train_data.predict_split.predict_data.predicted_labels = [
+        ["c"],
+        [],
+        ["c"],
+        [],
+        ["c"],
+    ]
 
     return train_data
 
 
 @pytest.fixture
 def train_data_with_all_empty_labels(train_data):
-    train_data.predict_data.predicted_labels = [[]] * 5
+    train_data.predict_split.predict_data.predicted_labels = [[]] * 5
 
     return train_data
 
@@ -80,8 +90,8 @@ def test_train(qp, train_data, mocker):
     actual_lc_docs = calibrator.fit.call_args[0][0]
     actual_lc_true_labels = calibrator.fit.call_args[0][1]
 
-    assert actual_lc_docs == train_data.predict_data.docs
-    assert actual_lc_true_labels == train_data.true_labels
+    assert actual_lc_docs == train_data.predict_split.predict_data.docs
+    assert actual_lc_true_labels == train_data.predict_split.true_labels
 
     features_data = qp._recall_predictor.fit.call_args[0][0]
     actual_true_recall = qp._recall_predictor.fit.call_args[0][1]
@@ -97,7 +107,7 @@ def test_train(qp, train_data, mocker):
 
 
 def test_predict(qp, train_data):
-    p_data = train_data.predict_data
+    p_data = train_data.predict_split.predict_data
 
     qp.train(train_data)
 
@@ -109,7 +119,7 @@ def test_predict(qp, train_data):
 def test_predict_with_some_empty_labels_returns_zero_recall(
     qp, train_data_with_some_empty_labels
 ):
-    p_data = train_data_with_some_empty_labels.predict_data
+    p_data = train_data_with_some_empty_labels.predict_split.predict_data
 
     qp.train(train_data_with_some_empty_labels)
 
@@ -119,7 +129,7 @@ def test_predict_with_some_empty_labels_returns_zero_recall(
 def test_predict_with_all_empty_labels_returns_only_zero_recall(
     qp, train_data_with_all_empty_labels
 ):
-    p_data = train_data_with_all_empty_labels.predict_data
+    p_data = train_data_with_all_empty_labels.predict_split.predict_data
 
     qp.train(train_data_with_all_empty_labels)
 
