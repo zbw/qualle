@@ -18,7 +18,9 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from qualle.interface import internal
+import qualle.interface.evaluation
+import qualle.interface.prediction
+import qualle.interface.training
 from qualle.interface.config import (
     TrainSettings,
     FeaturesEnum,
@@ -66,7 +68,7 @@ def test_eval_prints_scores(train_data_file, model_path, caplog):
     train(train_data_file, model_path)
 
     settings = EvalSettings(test_data_path=train_data_file, model_file=model_path)
-    internal.evaluate(settings)
+    qualle.interface.evaluation.evaluate(settings)
 
     assert "Scores:" in caplog.text
 
@@ -112,7 +114,7 @@ def test_predict_stores_quality_estimation(
         model_file=model_path,
         output_path=predict_output_path,
     )
-    internal.predict(settings)
+    qualle.interface.prediction.predict(settings)
 
     assert predict_output_path.exists()
     # We can make following assumption due to the construction of train data
@@ -132,4 +134,4 @@ def train(train_data_file, output_path):
         features=[FeaturesEnum.TEXT],
     )
 
-    internal.train(settings)
+    qualle.interface.training.train(settings)

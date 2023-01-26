@@ -21,7 +21,7 @@ from fastapi import status, FastAPI, Depends, APIRouter
 from pydantic.main import BaseModel
 
 from qualle.interface.config import RESTSettings
-from qualle.interface.internal import load_model as internal_load_model
+from qualle.interface.common import load_model as internal_load_model
 from qualle.models import PredictData
 from qualle.pipeline import QualityEstimationPipeline
 

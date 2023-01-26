@@ -65,9 +65,9 @@ def train_args_dict_with_slc(train_args_dict, thsys_file_path):
 
 @pytest.fixture(autouse=True)
 def mock_internal_interface(mocker):
-    mocker.patch("qualle.interface.cli.train")
-    mocker.patch("qualle.interface.cli.evaluate")
-    mocker.patch("qualle.interface.cli.predict")
+    mocker.patch("qualle.interface.cli.training")
+    mocker.patch("qualle.interface.cli.evaluation")
+    mocker.patch("qualle.interface.cli.prediction")
 
 
 @pytest.fixture
@@ -95,8 +95,8 @@ def test_handle_train_slc_with_subthesauri(train_args_dict_with_slc, thsys_file_
 
     handle_train(Namespace(**train_args_dict_with_slc))
 
-    cli.train.assert_called_once()
-    actual_settings = cli.train.call_args[0][0]
+    cli.training.train.assert_called_once()
+    actual_settings = cli.training.train.call_args[0][0]
 
     assert isinstance(actual_settings, TrainSettings)
     assert (
@@ -116,8 +116,8 @@ def test_handle_train_slc_without_subthesauri(
 ):
     handle_train(Namespace(**train_args_dict_with_slc))
 
-    cli.train.assert_called_once()
-    actual_settings = cli.train.call_args[0][0]
+    cli.training.train.assert_called_once()
+    actual_settings = cli.training.train.call_args[0][0]
 
     assert isinstance(actual_settings, TrainSettings)
     assert (
@@ -139,8 +139,8 @@ def test_handle_train_slc_with_sparse_count_matrix(
 
     handle_train(Namespace(**train_args_dict_with_slc))
 
-    cli.train.assert_called_once()
-    actual_settings = cli.train.call_args[0][0]
+    cli.training.train.assert_called_once()
+    actual_settings = cli.training.train.call_args[0][0]
 
     assert isinstance(actual_settings, TrainSettings)
     assert (
@@ -159,8 +159,8 @@ def test_handle_train_slc_with_sparse_count_matrix(
 def test_handle_train_without_slc(train_args_dict):
     handle_train(Namespace(**train_args_dict))
 
-    cli.train.assert_called_once()
-    actual_settings = cli.train.call_args[0][0]
+    cli.training.train.assert_called_once()
+    actual_settings = cli.training.train.call_args[0][0]
 
     assert isinstance(actual_settings, TrainSettings)
     assert actual_settings.subthesauri_label_calibration is None
@@ -171,8 +171,8 @@ def test_handle_train_all_features(train_args_dict):
 
     handle_train(Namespace(**train_args_dict))
 
-    cli.train.assert_called_once()
-    actual_settings = cli.train.call_args[0][0]
+    cli.training.train.assert_called_once()
+    actual_settings = cli.training.train.call_args[0][0]
 
     assert isinstance(actual_settings, TrainSettings)
     assert actual_settings.features == [FeaturesEnum.CONFIDENCE, FeaturesEnum.TEXT]
@@ -183,8 +183,8 @@ def test_handle_train_confidence_features(train_args_dict):
 
     handle_train(Namespace(**train_args_dict))
 
-    cli.train.assert_called_once()
-    actual_settings = cli.train.call_args[0][0]
+    cli.training.train.assert_called_once()
+    actual_settings = cli.training.train.call_args[0][0]
 
     assert isinstance(actual_settings, TrainSettings)
     assert actual_settings.features == [FeaturesEnum.CONFIDENCE]
@@ -193,8 +193,8 @@ def test_handle_train_confidence_features(train_args_dict):
 def test_handle_train_no_features(train_args_dict):
     handle_train(Namespace(**train_args_dict))
 
-    cli.train.assert_called_once()
-    actual_settings = cli.train.call_args[0][0]
+    cli.training.train.assert_called_once()
+    actual_settings = cli.training.train.call_args[0][0]
 
     assert isinstance(actual_settings, TrainSettings)
     assert actual_settings.features == []
@@ -203,8 +203,8 @@ def test_handle_train_no_features(train_args_dict):
 def test_handle_train_creates_regressors(train_args_dict):
     handle_train(Namespace(**train_args_dict))
 
-    cli.train.assert_called_once()
-    actual_settings = cli.train.call_args[0][0]
+    cli.training.train.assert_called_once()
+    actual_settings = cli.training.train.call_args[0][0]
 
     assert isinstance(actual_settings, TrainSettings)
     assert actual_settings.label_calibrator_regressor == RegressorSettings(
@@ -220,8 +220,8 @@ def test_handle_eval(tmp_path, model_path):
     test_data_path = tmp_path / "testdata"
     test_data_path.mkdir()
     handle_eval(Namespace(**dict(test_data_path=test_data_path, model=model_path)))
-    cli.evaluate.assert_called_once()
-    actual_settings = cli.evaluate.call_args[0][0]
+    cli.evaluation.evaluate.assert_called_once()
+    actual_settings = cli.evaluation.evaluate.call_args[0][0]
     assert actual_settings == EvalSettings(
         test_data_path=test_data_path, model_file=model_path
     )
@@ -246,8 +246,8 @@ def test_handle_predict_with_dir(tmp_path, model_path):
             **dict(predict_data_path=predict_data_path, model=model_path, output=None)
         )
     )
-    cli.predict.assert_called_once()
-    actual_settings = cli.predict.call_args[0][0]
+    cli.prediction.predict.assert_called_once()
+    actual_settings = cli.prediction.predict.call_args[0][0]
     assert actual_settings == PredictSettings(
         predict_data_path=predict_data_path, model_file=model_path
     )
@@ -262,8 +262,8 @@ def test_handle_predict_with_file(tsv_file_path, tmp_path, model_path):
             )
         )
     )
-    cli.predict.assert_called_once()
-    actual_settings = cli.predict.call_args[0][0]
+    cli.prediction.predict.assert_called_once()
+    actual_settings = cli.prediction.predict.call_args[0][0]
     assert actual_settings == PredictSettings(
         predict_data_path=tsv_file_path, model_file=model_path, output_path=output_path
     )

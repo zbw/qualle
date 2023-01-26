@@ -1,16 +1,29 @@
-#  Copyright 2021-2023 ZBW – Leibniz Information Centre for Economics
+#  Copyright 2021-2023 ZBW  – Leibniz Information Centre for Economics
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#       http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
 from pathlib import Path
 
 import pytest
@@ -31,11 +44,8 @@ from qualle.interface.config import (
     FeaturesEnum,
     RegressorSettings,
     SubthesauriLabelCalibrationSettings,
-    EvalSettings,
-    PredictSettings,
 )
-import qualle.interface.internal as internal
-from qualle.interface.internal import train
+from qualle.interface import training as t
 
 import tests.interface.common as c
 from qualle.models import (
@@ -44,15 +54,14 @@ from qualle.models import (
     LabelCalibrationTrainData,
     PredictTrainData,
 )
+from tests.interface.common import URI_PREFIX
 
-TRAINER_CLS_FULL_PATH = "qualle.interface.internal.Trainer"
-URI_PREFIX = "http://uri.tld/"
+TRAINER_CLS_FULL_PATH = "qualle.interface.training.Trainer"
 
 
 @pytest.fixture(autouse=True)
 def mock_io(mocker):
-    mocker.patch("qualle.interface.internal.dump")
-    mocker.patch("qualle.interface.internal.load")
+    mocker.patch("qualle.interface.training.dump")
 
 
 @pytest.fixture
@@ -142,10 +151,10 @@ def test_train_trains_trainer(train_settings, mocker):
     m_trainer_cls = mocker.Mock(return_value=m_trainer)
     m_trainer.train = mocker.Mock(return_value="testmodel")
     mocker.patch(TRAINER_CLS_FULL_PATH, m_trainer_cls)
-    train(train_settings)
+    t.train(train_settings)
 
     m_trainer.train.assert_called_once()
-    internal.dump.assert_called_once_with("testmodel", Path("/tmp/output"))
+    t.dump.assert_called_once_with("testmodel", Path("/tmp/output"))
 
 
 def test_train_trains_trainer_without_lc_train_data(train_settings, mocker):
@@ -155,10 +164,10 @@ def test_train_trains_trainer_without_lc_train_data(train_settings, mocker):
     m_trainer_cls = mocker.Mock(return_value=m_trainer)
     m_trainer.train = mocker.Mock(return_value="testmodel")
     mocker.patch(TRAINER_CLS_FULL_PATH, m_trainer_cls)
-    train(train_settings)
+    t.train(train_settings)
 
     m_trainer.train.assert_called_once()
-    internal.dump.assert_called_once_with("testmodel", Path("/tmp/output"))
+    t.dump.assert_called_once_with("testmodel", Path("/tmp/output"))
 
 
 def test_train_without_slc_creates_respective_trainer(
@@ -166,10 +175,10 @@ def test_train_without_slc_creates_respective_trainer(
 ):
     mocker.patch(TRAINER_CLS_FULL_PATH)
 
-    train(train_settings)
+    t.train(train_settings)
 
-    internal.Trainer.assert_called_once()
-    call_args = internal.Trainer.call_args[1]
+    t.Trainer.assert_called_once()
+    call_args = t.Trainer.call_args[1]
     assert call_args.get("train_data") == train_data
     lc = call_args.get("label_calibrator")
     assert isinstance(lc, SimpleLabelCalibrator)
@@ -195,14 +204,15 @@ def test_train_with_slc_creates_respective_trainer(
 ):
     m_graph = mocker.Mock()
     m_graph_cls = mocker.Mock(return_value=m_graph)
-    mocker.patch("qualle.interface.internal.Graph", m_graph_cls)
+    mocker.patch("qualle.interface.training.Graph", m_graph_cls)
     m_thesaurus = mocker.Mock()
     m_thesaurus_cls = mocker.Mock(return_value=m_thesaurus)
-    mocker.patch("qualle.interface.internal.Thesaurus", m_thesaurus_cls)
+    mocker.patch("qualle.interface.training.Thesaurus", m_thesaurus_cls)
     m_lcfst = mocker.Mock()
     m_lcfst_cls = mocker.Mock(return_value=m_lcfst)
     mocker.patch(
-        "qualle.interface.internal.LabelCountForSubthesauriTransformer", m_lcfst_cls
+        "qualle.interface.training.LabelCountForSubthesauriTransformer",
+        m_lcfst_cls,
     )
     mocker.patch(TRAINER_CLS_FULL_PATH)
 
@@ -215,7 +225,7 @@ def test_train_with_slc_creates_respective_trainer(
         use_sparse_count_matrix=True,
     )
 
-    train(train_settings)
+    t.train(train_settings)
 
     m_graph_cls.assert_called_once()
     m_graph.parse.assert_called_once_with(thsys_file_path)
@@ -233,9 +243,9 @@ def test_train_with_slc_creates_respective_trainer(
         subthesauri=[URIRef(c.DUMMY_SUBTHESAURUS_A), URIRef(c.DUMMY_SUBTHESAURUS_B)],
     )
 
-    internal.Trainer.assert_called_once()
+    t.Trainer.assert_called_once()
 
-    call_args = internal.Trainer.call_args[1]
+    call_args = t.Trainer.call_args[1]
     assert call_args.get("train_data") == train_data
     lc = call_args.get("label_calibrator")
     assert isinstance(lc, ThesauriLabelCalibrator)
@@ -259,15 +269,16 @@ def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
 ):
     m_graph = mocker.Mock()
     m_graph_cls = mocker.Mock(return_value=m_graph)
-    mocker.patch("qualle.interface.internal.Graph", m_graph_cls)
+    mocker.patch("qualle.interface.training.Graph", m_graph_cls)
     m_thesaurus = mocker.Mock()
     m_thesaurus.get_all_subthesauri.return_value = [URIRef(c.DUMMY_SUBTHESAURUS_B)]
     m_thesaurus_cls = mocker.Mock(return_value=m_thesaurus)
-    mocker.patch("qualle.interface.internal.Thesaurus", m_thesaurus_cls)
+    mocker.patch("qualle.interface.training.Thesaurus", m_thesaurus_cls)
     m_lcfst = mocker.Mock()
     m_lcfst_cls = mocker.Mock(return_value=m_lcfst)
     mocker.patch(
-        "qualle.interface.internal.LabelCountForSubthesauriTransformer", m_lcfst_cls
+        "qualle.interface.training.LabelCountForSubthesauriTransformer",
+        m_lcfst_cls,
     )
     mocker.patch(TRAINER_CLS_FULL_PATH)
 
@@ -280,7 +291,7 @@ def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
         use_sparse_count_matrix=True,
     )
 
-    train(train_settings)
+    t.train(train_settings)
 
     m_lcfst.init.assert_called_once_with(
         thesaurus=m_thesaurus,
@@ -288,26 +299,10 @@ def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
     )
 
 
-def test_evaluate(mocker, tsv_predict_train_data_path, train_data, model_path):
-    m_eval = mocker.Mock()
-    m_eval.evaluate.return_value = {}
-    m_eval_cls = mocker.Mock(return_value=m_eval)
-    mocker.patch("qualle.interface.internal.Evaluator", m_eval_cls)
-    internal.load.return_value = "testmodel"
-
-    settings = EvalSettings(
-        test_data_path=tsv_predict_train_data_path, model_file=model_path
-    )
-    internal.evaluate(settings)
-
-    m_eval_cls.assert_called_once_with(train_data.predict_split, "testmodel")
-    m_eval.evaluate.assert_called_once()
-
-
 def test_load_train_input_from_annif(
     annif_predict_train_data_dir, annif_lc_train_data_dir, train_data
 ):
-    actual_train_data = internal._load_train_input(
+    actual_train_data = t._load_train_input(
         annif_predict_train_data_dir, annif_lc_train_data_dir
     )
 
@@ -343,7 +338,7 @@ def test_load_train_input_from_annif(
 def test_load_train_input_from_annif_without_lc(
     annif_predict_train_data_dir, train_data
 ):
-    actual_train_data = internal._load_train_input(annif_predict_train_data_dir)
+    actual_train_data = t._load_train_input(annif_predict_train_data_dir)
 
     assert not actual_train_data.label_calibration_split
 
@@ -365,80 +360,15 @@ def test_load_train_input_from_annif_without_lc(
     )
 
 
-def test_load_eval_input_from_annif(annif_predict_train_data_dir, train_data):
-    actual_eval_data = internal._load_eval_input(annif_predict_train_data_dir)
-
-    actual_eval_data_tpls = zip(
-        actual_eval_data.predict_data.docs,
-        actual_eval_data.predict_data.predicted_labels,
-        actual_eval_data.predict_data.scores,
-        actual_eval_data.true_labels,
-    )
-    expected_eval_data_tpls = zip(
-        train_data.predict_split.predict_data.docs,
-        train_data.predict_split.predict_data.predicted_labels,
-        train_data.predict_split.predict_data.scores,
-        train_data.predict_split.true_labels,
-    )
-
-    assert sorted(actual_eval_data_tpls, key=lambda t: t[0]) == sorted(
-        expected_eval_data_tpls, key=lambda t: t[0]
-    )
-
-
 def test_load_train_input_from_tsv(
     tsv_predict_train_data_path, tsv_lc_train_data_path, train_data
 ):
     assert (
-        internal._load_train_input(tsv_predict_train_data_path, tsv_lc_train_data_path)
+        t._load_train_input(tsv_predict_train_data_path, tsv_lc_train_data_path)
         == train_data
     )
 
 
 def test_load_train_input_from_tsv_without_lc(tsv_predict_train_data_path, train_data):
     train_data.label_calibration_split = None
-    assert internal._load_train_input(tsv_predict_train_data_path) == train_data
-
-
-def test_load_eval_input_from_tsv(tsv_predict_train_data_path, train_data):
-    assert (
-        internal._load_eval_input(tsv_predict_train_data_path)
-        == train_data.predict_split
-    )
-
-
-def test_predict_stores_scores_from_model(
-    tsv_predict_train_data_path, tmp_path, model_path
-):
-    output_path = tmp_path / "qualle.txt"
-    settings = PredictSettings(
-        predict_data_path=tsv_predict_train_data_path,
-        model_file=model_path,
-        output_path=output_path,
-    )
-    mock_model = internal.load.return_value
-    mock_model.predict.side_effect = lambda p_data: map(lambda s: s[0], p_data.scores)
-
-    internal.predict(settings)
-
-    assert output_path.read_text().rstrip("\n") == "\n".join(
-        [str(x / 20) for x in range(20)]
-    )
-
-
-def test_predict_with_annif_data_stores_scores_from_model(
-    annif_predict_train_data_dir, tmp_path, model_path
-):
-    settings = PredictSettings(
-        predict_data_path=annif_predict_train_data_dir,
-        model_file=model_path,
-    )
-    mock_model = internal.load.return_value
-    mock_model.predict.side_effect = lambda p_data: map(lambda s: s[0], p_data.scores)
-
-    internal.predict(settings)
-
-    for i in range(20):
-        fp = annif_predict_train_data_dir / f"doc{i}.qualle"
-        assert fp.exists()
-        assert fp.read_text() == str(i / 20), f"fail for {fp}"
+    assert t._load_train_input(tsv_predict_train_data_path) == train_data

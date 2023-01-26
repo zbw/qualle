@@ -29,7 +29,7 @@ from qualle.interface.config import (
     RESTSettings,
     PredictSettings,
 )
-from qualle.interface.internal import train, evaluate, predict
+from qualle.interface import prediction, training, evaluation
 from qualle.interface.rest import run
 from qualle.utils import get_logger
 
@@ -109,12 +109,12 @@ def handle_train(args: argparse.Namespace):
         should_debug=args.should_debug,
     )
 
-    train(settings)
+    training.train(settings)
 
 
 def handle_eval(args: argparse.Namespace):
     settings = EvalSettings(test_data_path=args.test_data_path, model_file=args.model)
-    evaluate(settings)
+    evaluation.evaluate(settings)
 
 
 def handle_rest(args: argparse.Namespace):
@@ -135,7 +135,7 @@ def handle_predict(args: argparse.Namespace):
         model_file=args.model,
         output_path=output_path,
     )
-    predict(settings)
+    prediction.predict(settings)
 
 
 def cli_entrypoint():

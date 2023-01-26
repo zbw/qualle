@@ -19,3 +19,4 @@ DUMMY_CONCEPT_TYPE = "http://ctype"
 DUMMY_CONCEPT_TYPE_PREFIX = "http://prefix"
 DUMMY_SUBTHESAURUS_TYPE = "http://stype"
 DUMMY_THESAURUS_FILE = Path("/tmp/thesaurus")
+URI_PREFIX = "http://uri.tld/"
