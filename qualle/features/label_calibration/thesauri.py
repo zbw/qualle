@@ -70,7 +70,7 @@ class Thesaurus:
 
 
 class LabelCountForSubthesauriTransformer:
-    """Compute count of labels per Subthesauri for a given RDF Graph."""
+    """Compute count of labels per Subthesauri for a given Thesaurus."""
 
     def __init__(
         self,

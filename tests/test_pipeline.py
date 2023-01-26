@@ -18,7 +18,7 @@ import pytest
 from sklearn.ensemble import ExtraTreesRegressor
 
 from qualle.features.combined import CombinedFeatures
-from qualle.features.label_calibration.simple_label_calibration import (
+from qualle.features.label_calibration.simple import (
     SimpleLabelCalibrator,
     SimpleLabelCalibrationFeatures,
 )

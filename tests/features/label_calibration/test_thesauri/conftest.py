@@ -15,11 +15,11 @@ import pytest
 from rdflib import Graph, RDF, URIRef
 from rdflib.namespace import SKOS
 
-from qualle.features.label_calibration.thesauri_label_calibration import (
+from qualle.features.label_calibration.thesauri import (
     LabelCountForSubthesauriTransformer,
     Thesaurus,
 )
-from tests.features.label_calibration.test_thesauri_label_calibration import common as c
+from tests.features.label_calibration.test_thesauri import common as c
 
 
 @pytest.fixture

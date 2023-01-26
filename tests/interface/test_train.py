@@ -30,11 +30,11 @@ import pytest
 from rdflib import URIRef
 from sklearn.ensemble import GradientBoostingRegressor
 
-from qualle.features.label_calibration.simple_label_calibration import (
+from qualle.features.label_calibration.simple import (
     SimpleLabelCalibrator,
     SimpleLabelCalibrationFeatures,
 )
-from qualle.features.label_calibration.thesauri_label_calibration import (
+from qualle.features.label_calibration.thesauri import (
     ThesauriLabelCalibrator,
     ThesauriLabelCalibrationFeatures,
 )

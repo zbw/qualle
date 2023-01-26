@@ -19,10 +19,10 @@ from qualle.features.base import Features
 from qualle.features.combined import CombinedFeaturesData, CombinedFeatures
 from qualle.features.confidence import ConfidenceFeatures
 from qualle.features.label_calibration.base import AbstractLabelCalibrator
-from qualle.features.label_calibration.simple_label_calibration import (
+from qualle.features.label_calibration.simple import (
     SimpleLabelCalibrationFeatures,
 )
-from qualle.features.label_calibration.thesauri_label_calibration import (
+from qualle.features.label_calibration.thesauri import (
     ThesauriLabelCalibrationFeatures,
 )
 from qualle.features.text import TextFeatures

@@ -16,10 +16,10 @@ import numpy as np
 import pytest
 from scipy.sparse import issparse
 
-from qualle.features.label_calibration.thesauri_label_calibration import (
+from qualle.features.label_calibration.thesauri import (
     NotInitializedException,
 )
-from tests.features.label_calibration.test_thesauri_label_calibration import common as c
+from tests.features.label_calibration.test_thesauri import common as c
 
 
 def test_transform_without_init_raises_exc(uninitialized_transformer):

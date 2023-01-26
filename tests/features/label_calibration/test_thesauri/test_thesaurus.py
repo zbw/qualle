@@ -14,8 +14,8 @@
 
 from rdflib import URIRef, Graph
 
-from qualle.features.label_calibration.thesauri_label_calibration import Thesaurus
-from tests.features.label_calibration.test_thesauri_label_calibration import common as c
+from qualle.features.label_calibration.thesauri import Thesaurus
+from tests.features.label_calibration.test_thesauri import common as c
 
 
 def test_get_concepts_for_thesaurus(thesaurus):

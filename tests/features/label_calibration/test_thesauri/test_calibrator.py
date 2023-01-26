@@ -16,11 +16,11 @@ import numpy as np
 import pytest
 from sklearn.exceptions import NotFittedError
 
-from qualle.features.label_calibration.thesauri_label_calibration import (
+from qualle.features.label_calibration.thesauri import (
     ThesauriLabelCalibrator,
     NotInitializedException,
 )
-import tests.features.label_calibration.test_thesauri_label_calibration.common as c
+import tests.features.label_calibration.test_thesauri.common as c
 
 
 class DummyRegressor:

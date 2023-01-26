@@ -13,7 +13,7 @@
 #   limitations under the License.
 from pathlib import Path
 
-from qualle.evaluate import Evaluator
+from qualle.evaluation import Evaluator
 from qualle.interface.config import EvalSettings
 from qualle.interface.common import load_model
 from qualle.models import EvalData

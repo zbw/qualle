@@ -14,8 +14,8 @@
 import pytest
 from sklearn.ensemble import ExtraTreesRegressor
 
-from qualle.evaluate import Evaluator, scores
-from qualle.features.label_calibration.simple_label_calibration import (
+from qualle.evaluation import Evaluator, scores
+from qualle.features.label_calibration.simple import (
     SimpleLabelCalibrationFeatures,
     SimpleLabelCalibrator,
 )

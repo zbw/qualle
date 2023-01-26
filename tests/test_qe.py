@@ -16,7 +16,7 @@ import numpy as np
 import pytest
 from sklearn.exceptions import NotFittedError
 
-from qualle.features.label_calibration.simple_label_calibration import (
+from qualle.features.label_calibration.simple import (
     SimpleLabelCalibrationFeatures,
 )
 from qualle.models import LabelCalibrationData

@@ -18,11 +18,11 @@ from typing import Type, Optional
 from joblib import dump
 from rdflib import Graph, URIRef
 
-from qualle.features.label_calibration.simple_label_calibration import (
+from qualle.features.label_calibration.simple import (
     SimpleLabelCalibrationFeatures,
     SimpleLabelCalibrator,
 )
-from qualle.features.label_calibration.thesauri_label_calibration import (
+from qualle.features.label_calibration.thesauri import (
     Thesaurus,
     LabelCountForSubthesauriTransformer,
     ThesauriLabelCalibrationFeatures,
@@ -31,7 +31,7 @@ from qualle.features.label_calibration.thesauri_label_calibration import (
 from qualle.interface.config import TrainSettings
 from qualle.interface.data import annif as annif, tsv as tsv
 from qualle.models import TrainData
-from qualle.train import Trainer
+from qualle.training import Trainer
 from qualle.utils import get_logger, timeit
 
 
