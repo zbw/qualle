@@ -12,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import pytest
-from pydantic import ValidationError
 
 from qualle.interface.data.annif import (
     AnnifPredictTrainData,
@@ -20,79 +19,87 @@ from qualle.interface.data.annif import (
     load_predict_train_input,
     load_predict_input,
     store_quality_estimations,
-    _extract_concept_id_from_annif_label,
     AnnifLabelCalibrationTrainData,
     load_label_calibration_train_input,
+    AnnifLoadError,
 )
+
+DOC_0_NAME = "doc0"
+DOC_1_NAME = "doc1"
+DOC_0_ANNIF = f"{DOC_0_NAME}.annif"
+DOC_1_ANNIF = f"{DOC_1_NAME}.annif"
+DOC_0_TSV = f"{DOC_0_NAME}.tsv"
+DOC_1_TSV = f"{DOC_1_NAME}.tsv"
+DOC_0_TXT = f"{DOC_0_NAME}.txt"
+DOC_1_TXT = f"{DOC_1_NAME}.txt"
 
 DOC_0_CONTENT = "title0\ncontent0"
 DOC_1_CONTENT = "title1\ncontent1"
 
-
-_URI_PREFIX = "http://uri.tld/"
+URI_PREFIX = "http://uri.tld/"
 
 
 @pytest.fixture
 def dir_without_true_labels(tmp_path):
-    doc0 = tmp_path / "doc0.txt"
+    doc0 = tmp_path / DOC_0_TXT
     doc0.write_text(DOC_0_CONTENT)
-    doc1 = tmp_path / "doc1.txt"
+    doc1 = tmp_path / DOC_1_TXT
     doc1.write_text(DOC_1_CONTENT)
-    scores0 = tmp_path / "doc0.annif"
+    scores0 = tmp_path / DOC_0_ANNIF
     scores0.write_text(
-        f"<{_URI_PREFIX}concept0>\tlabel0\t1\n<{_URI_PREFIX}concept1>\tlabel1\t0.5"
+        f"<{URI_PREFIX}concept0>\tlabel0\t1\n<{URI_PREFIX}concept1>\tlabel1\t0.5"
     )
-    scores1 = tmp_path / "doc1.annif"
+    scores1 = tmp_path / DOC_1_ANNIF
     scores1.write_text(
-        f"<{_URI_PREFIX}concept2>\tlabel2\t0\n<{_URI_PREFIX}concept3>\tlabel3\t0.5"
+        f"<{URI_PREFIX}concept2>\tlabel2\t0\n<{URI_PREFIX}concept3>\tlabel3\t0.5"
     )
     return tmp_path
 
 
 @pytest.fixture
 def dir_without_predicted_labels(tmp_path):
-    doc0 = tmp_path / "doc0.txt"
+    doc0 = tmp_path / DOC_0_TXT
     doc0.write_text(DOC_0_CONTENT)
-    doc1 = tmp_path / "doc1.txt"
+    doc1 = tmp_path / DOC_1_TXT
     doc1.write_text(DOC_1_CONTENT)
-    labels0 = tmp_path / "doc0.tsv"
+    labels0 = tmp_path / DOC_0_TSV
     labels0.write_text(
-        f"<{_URI_PREFIX}concept1>\tlabel1\n<{_URI_PREFIX}concept3>\tlabel3"
+        f"<{URI_PREFIX}concept1>\tlabel1\n<{URI_PREFIX}concept3>\tlabel3"
     )
-    labels1 = tmp_path / "doc1.tsv"
-    labels1.write_text(f"{_URI_PREFIX}concept3>\tlabel3")
+    labels1 = tmp_path / DOC_1_TSV
+    labels1.write_text(f"{URI_PREFIX}concept3>\tlabel3")
     return tmp_path
 
 
 @pytest.fixture
 def data_dir(dir_without_true_labels):
-    labels0 = dir_without_true_labels / "doc0.tsv"
+    labels0 = dir_without_true_labels / DOC_0_TSV
     labels0.write_text(
-        f"<{_URI_PREFIX}concept1>\tlabel1\n<{_URI_PREFIX}concept3>\tlabel3"
+        f"<{URI_PREFIX}concept1>\tlabel1\n<{URI_PREFIX}concept3>\tlabel3"
     )
-    labels1 = dir_without_true_labels / "doc1.tsv"
-    labels1.write_text(f"{_URI_PREFIX}concept3>\tlabel3")
+    labels1 = dir_without_true_labels / DOC_1_TSV
+    labels1.write_text(f"{URI_PREFIX}concept3>\tlabel3")
     return dir_without_true_labels
 
 
 @pytest.fixture
 def dir_with_empty_labels(tmp_path):
-    doc0 = tmp_path / "doc0.txt"
+    doc0 = tmp_path / DOC_0_TXT
     doc0.write_text(DOC_0_CONTENT)
-    doc1 = tmp_path / "doc1.txt"
+    doc1 = tmp_path / DOC_1_TXT
     doc1.write_text(DOC_1_CONTENT)
-    scores0 = tmp_path / "doc0.annif"
+    scores0 = tmp_path / DOC_0_ANNIF
     scores0.write_text("")
-    scores1 = tmp_path / "doc1.annif"
+    scores1 = tmp_path / DOC_1_ANNIF
     scores1.write_text(
-        f"<{_URI_PREFIX}concept2>\tlabel2\t0\n<{_URI_PREFIX}concept3>\tlabel3\t0.5"
+        f"<{URI_PREFIX}concept2>\tlabel2\t0\n<{URI_PREFIX}concept3>\tlabel3\t0.5"
     )
 
-    labels0 = tmp_path / "doc0.tsv"
+    labels0 = tmp_path / DOC_0_TSV
     labels0.write_text(
-        f"<{_URI_PREFIX}concept1>\tlabel1\n<{_URI_PREFIX}concept3>\tlabel3"
+        f"<{URI_PREFIX}concept1>\tlabel1\n<{URI_PREFIX}concept3>\tlabel3"
     )
-    labels1 = tmp_path / "doc1.tsv"
+    labels1 = tmp_path / DOC_1_TSV
     labels1.write_text("")
     return tmp_path
 
@@ -101,7 +108,7 @@ def test_load_predict_train_input(data_dir):
     parsed_input = load_predict_train_input(data_dir)
     assert isinstance(parsed_input, AnnifPredictTrainData)
 
-    assert set(parsed_input.document_ids) == {"doc0", "doc1"}
+    assert set(parsed_input.document_ids) == {DOC_0_NAME, DOC_1_NAME}
 
     train_data = parsed_input.predict_train_data
     train_data_tpls = zip(
@@ -119,7 +126,7 @@ def test_load_predict_train_input(data_dir):
 def test_load_predict_train_input_without_true_labels_raises_exc(
     dir_without_true_labels,
 ):
-    with pytest.raises(ValidationError):
+    with pytest.raises(AnnifLoadError):
         load_predict_train_input(dir_without_true_labels)
 
 
@@ -145,7 +152,7 @@ def test_load_predict_input(data_dir):
     parsed_input = load_predict_input(data_dir)
     assert isinstance(parsed_input, AnnifPredictData)
 
-    assert set(parsed_input.document_ids) == {"doc0", "doc1"}
+    assert set(parsed_input.document_ids) == {DOC_0_NAME, DOC_1_NAME}
 
     predict_data_tpls = zip(
         parsed_input.predict_data.docs,
@@ -189,11 +196,18 @@ def test_load_predict_input_with_empty_labels_return_empty_list(dir_with_empty_l
     ]
 
 
+def test_load_predict_input_without_predicted_labels_raises_exc(
+    dir_without_predicted_labels,
+):
+    with pytest.raises(AnnifLoadError):
+        load_predict_input(dir_without_predicted_labels)
+
+
 def test_load_lc_train_input(dir_without_predicted_labels):
     parsed_input = load_label_calibration_train_input(dir_without_predicted_labels)
     assert isinstance(parsed_input, AnnifLabelCalibrationTrainData)
 
-    assert set(parsed_input.document_ids) == {"doc0", "doc1"}
+    assert set(parsed_input.document_ids) == {DOC_0_NAME, DOC_1_NAME}
 
     lc_train_data_tpls = zip(
         parsed_input.label_calibration_train_data.docs,
@@ -212,7 +226,7 @@ def test_load_lc_train_input(dir_without_predicted_labels):
 
 
 def test_load_lc_train_input_without_true_labels_raises_exc(dir_without_true_labels):
-    with pytest.raises(ValidationError):
+    with pytest.raises(AnnifLoadError):
         load_label_calibration_train_input(dir_without_true_labels)
 
 
@@ -249,9 +263,3 @@ def test_store_quality_ests_writes_files(data_dir):
         qualle_fp = data_dir / (doc_id + ".qualle")
         assert qualle_fp.exists()
         assert qualle_fp.read_text() == str(scores[i])
-
-
-def test_extract_concept_id():
-    assert "concept_0" == _extract_concept_id_from_annif_label(
-        f"<{_URI_PREFIX}concept_0>"
-    )

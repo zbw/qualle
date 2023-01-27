@@ -44,7 +44,7 @@ class _DataRow(BaseModel):
 
 class RowParseError(Exception):
     def __init__(self, msg):
-        self.msg = msg
+        super().__init__(msg)
 
 
 def load_predict_train_input(p: Path) -> PredictTrainData:
