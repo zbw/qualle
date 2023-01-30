@@ -45,17 +45,30 @@ class QualityEstimationPipeline:
 
     def train(self, data: TrainData):
         predict_data = data.predict_split.predict_data
-        with self._debug("cross_val_predict with label calibrator"):
-            predicted_no_of_labels = cross_val_predict(
-                self._label_calibrator,
-                predict_data.docs,
-                data.predict_split.true_labels,
-            )
 
-        with self._debug("label calibrator fit"):
-            self._label_calibrator.fit(
-                predict_data.docs, data.predict_split.true_labels
-            )
+        if lc_split := data.label_calibration_split:
+            with self._debug("label calibrator fit"):
+                self._label_calibrator.fit(lc_split.docs, lc_split.true_labels)
+
+            with self._debug("label calibrator predict"):
+                predicted_no_of_labels = self._label_calibrator.predict(
+                    predict_data.docs
+                )
+        else:
+            with self._debug(
+                "label calibration split missing -> "
+                "run cross_val_predict with label calibrator"
+            ):
+                predicted_no_of_labels = cross_val_predict(
+                    self._label_calibrator,
+                    predict_data.docs,
+                    data.predict_split.true_labels,
+                )
+
+            with self._debug("label calibrator fit"):
+                self._label_calibrator.fit(
+                    predict_data.docs, data.predict_split.true_labels
+                )
 
         label_calibration_data = LabelCalibrationData(
             predicted_labels=predict_data.predicted_labels,

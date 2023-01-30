@@ -22,7 +22,12 @@ from qualle.features.label_calibration.simple import (
     SimpleLabelCalibrator,
     SimpleLabelCalibrationFeatures,
 )
-from qualle.models import TrainData, PredictData, PredictTrainData
+from qualle.models import (
+    TrainData,
+    PredictData,
+    PredictTrainData,
+    LabelCalibrationTrainData,
+)
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import QualityEstimator
 
@@ -55,6 +60,15 @@ def train_data():
             true_labels=labels,
         )
     )
+
+
+@pytest.fixture
+def train_data_with_lc_split(train_data):
+
+    train_data.label_calibration_split = LabelCalibrationTrainData(
+        docs=[f"lc-d{i}" for i in range(5)], true_labels=[["c"] for _ in range(5)]
+    )
+    return train_data
 
 
 @pytest.fixture
@@ -104,6 +118,29 @@ def test_train(qp, train_data, mocker):
     assert actual_label_calibration_data.predicted_no_of_labels == only_ones
     assert actual_label_calibration_data.predicted_labels == [["c"]] * 5
     assert actual_true_recall == only_ones
+
+
+def test_train_with_lc_split_fits_lc_on_split(qp, train_data_with_lc_split, mocker):
+    calibrator = qp._label_calibrator
+    mocker.spy(calibrator, "fit")
+    mocker.spy(calibrator, "predict")
+
+    qp.train(train_data_with_lc_split)
+
+    lc_split = train_data_with_lc_split.label_calibration_split
+    calibrator.fit.assert_called_once_with(lc_split.docs, lc_split.true_labels)
+
+
+def test_train_without_lc_split_fits_lc_on_predict_split(qp, train_data, mocker):
+    calibrator = qp._label_calibrator
+    mocker.spy(calibrator, "fit")
+
+    qp.train(train_data)
+
+    predict_split = train_data.predict_split
+    calibrator.fit.assert_called_once_with(
+        predict_split.predict_data.docs, predict_split.true_labels
+    )
 
 
 def test_predict(qp, train_data):
