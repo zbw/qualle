@@ -102,7 +102,8 @@ def handle_train(args: argparse.Namespace):
     settings = TrainSettings(
         label_calibrator_regressor=lc_regressor,
         quality_estimator_regressor=qe_regressor,
-        predict_train_data_path=args.train_data_path,
+        predict_train_data_path=args.predict_train_data_path,
+        label_calibration_train_data_path=args.label_calibration_train_data_path,
         output_path=args.output,
         features=features,
         subthesauri_label_calibration=slc,
@@ -179,13 +180,25 @@ def cli_entrypoint():
     )
     train_parser.set_defaults(func=handle_train)
     train_parser.add_argument(
-        "train_data_path",
-        type=str,
-        help="Path to train data. "
+        "predict_train_data_path",
+        type=Path,
+        help="Path to train data for the Recall Predictor. "
         "Accepted inputs are either a tsv file or "
         "a folder in Annif format.",
     )
     train_parser.add_argument("output", type=str, help="Path to output model file")
+    train_parser.add_argument(
+        "--label-calibration-train-data",
+        "-l",
+        type=Path,
+        dest="label_calibration_train_data_path",
+        help="Path to train data for the Label Calibrator. If omitted, the Label "
+        "Calibrator trained on the same split as the Recall Predictor. "
+        "In this case, the required input for the Recall Predictor is estimated "
+        "by cross-validation (sklearn.model_selection.cross_val_predict)."
+        "Accepted inputs are either a tsv file or "
+        "a folder in Annif format.",
+    )
     train_parser.add_argument(
         "--features",
         "-f",

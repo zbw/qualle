@@ -32,10 +32,11 @@ import tests.interface.common as c
 
 @pytest.fixture
 def train_args_dict(tmp_path):
-    train_data_path = tmp_path / "train"
-    train_data_path.mkdir()
+    predict_train_data_path = tmp_path / "pred_train"
+    predict_train_data_path.mkdir()
     return dict(
-        train_data_path=train_data_path,
+        predict_train_data_path=predict_train_data_path,
+        label_calibration_train_data_path=None,
         output="/tmp/output",
         slc=False,
         should_debug=False,
@@ -48,6 +49,14 @@ def train_args_dict(tmp_path):
             '{"class": "sklearn.ensemble.ExtraTreesRegressor"}'
         ],
     )
+
+
+@pytest.fixture
+def train_args_dict_with_lc_split(train_args_dict, tmp_path):
+    lc_d_p = tmp_path / "lc_train"
+    lc_d_p.mkdir()
+    train_args_dict["label_calibration_train_data_path"] = lc_d_p
+    return lc_d_p
 
 
 @pytest.fixture
