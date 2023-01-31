@@ -88,7 +88,7 @@ docker run --rm -it -v \
 
 ## Usage
 
-### Input data 
+### Input data
 In order to train a model, evaluate a model or predict the quality of an MLC result
 you have to provide data.
 
@@ -103,12 +103,18 @@ where
 (this is basically the output of the MLC method)
 - ``true_labels`` is a comma-separated list of true labels (ground truth)
 
-Note that you can omit the ``true_labels`` section if you only want to predict the 
+Note that you can omit the ``true_labels`` section if you only want to predict the
 quality of the MLC result.
 
 For example, a row in the data file could look like this:
 
 ``Optimal investment policy of the regulated firm\tConcept0:0.5,Concept1:1\tConcept0,Concept3``
+
+You have the option to provide a separate data split for Label Calibration training
+(see section Train for more information). In this case,
+you must omit the ``predict_labels_with_scores`` section, so that the format looks like
+
+```document-content\ttrue_labels```
 
 For those who use an MLC method via the toolkit [Annif](https://github.com/NatLibFi/annif) for automated subject indexing:
 You can alternatively specify a
@@ -121,15 +127,27 @@ This is a  folder with three files per document:
 * ``doc.txt`` : document content
 
 As above, you may omit the ``doc.tsv`` if you just want to
-predict the quality of the MLC result.
+predict the quality of the MLC result and you may omit the ``doc.annif`` if you provide
+the split for Label Calibration training.
 
 ### Train
 To train a model, use the ``train`` mode, e.g.:
 
 ``qualle train /path/to/train_data_file /path/to/output/model``
 
-It is also possible to use label calibration (comparison of predicted vs actual labels) using the subthesauri of a thesaurus (such as the [STW](http://zbw.eu/stw/version/latest/about))
-as categories (please read the paper for more explanations). Consult the help (see above) for the required options.
+Qualle uses a feature called Label Calibration, which is a multi-output regression model that provides expectations
+of the correct number of concepts for a document. This model is trained before the quality estimation regressor (Recall Predictor)
+is trained.
+You can provide a separate training data split for Label Calibration:
+
+``qualle train /path/to/train_data_file /path/to/output/model --label-calibration-train-data /path/to/lc_train_data_file``
+
+If a separate training data split is not provided, the Label calibrator will be trained with the same training data split as the
+Recall Predictor, and the required input for training the Recall Predictor is provided by
+[cross-validated estimates](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.cross_val_predict.html) .
+
+It is also possible to use Label Calibration  using the subthesauri of a thesaurus (such as the [STW](http://zbw.eu/stw/version/latest/about))
+as categories (please read the paper for more explanations). Consult the help (``qualle train -h``) for the required options.
 
 ### Evaluate
 You must provide test data and the path to a trained model in order to evaluate that model. Metrics
