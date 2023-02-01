@@ -145,6 +145,10 @@ You can provide a separate training data split for Label Calibration:
 If a separate training data split is not provided, the Label calibrator will be trained with the same training data split as the
 Recall Predictor, and the required input for training the Recall Predictor is provided by
 [cross-validated estimates](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.cross_val_predict.html) .
+This implies that the quality estimation is not performed with the exact same Label Calibrator used in the training,
+and since the trained calibrators from the cross-validation use parts of the same training data as the Recall Predictor,
+the Recall Predictor is not trained on "unseen" data, what could lead to a bias.
+Whether one or the other approach has a negative effect must be tested individually.
 
 It is also possible to apply Label Calibration using the subthesauri of a thesaurus (such as the [STW](http://zbw.eu/stw/version/latest/about))
 as categories (please read the paper for more explanations). Consult the help (``qualle train -h``) for the required options.
