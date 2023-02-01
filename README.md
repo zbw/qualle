@@ -58,7 +58,7 @@ Alternatively, you can use the Dockerfile included in this project to build a Do
 
 By default, a container built from this image launches a REST interface listening on ``0.0.0.0:8000``
 
-You need to pass the model file (see below the section REST interface) per bind mount or volume to the docker container.
+You need to pass the model file (see below the Section REST interface) per bind mount or volume to the docker container.
 Beyond that, you need to specify the location of the model file with an
 environment variable named `MODEL_FILE`:
 
@@ -103,16 +103,16 @@ where
 (this is basically the output of the MLC method)
 - ``true_labels`` is a comma-separated list of true labels (ground truth)
 
-Note that you can omit the ``true_labels`` section if you only want to predict the
-quality of the MLC result.
+Note that you can omit the ``true_labels`` column if you only want to obtain a
+prediction of the quality of the MLC result.
 
 For example, a row in the data file could look like this:
 
 ``Optimal investment policy of the regulated firm\tConcept0:0.5,Concept1:1\tConcept0,Concept3``
 
 You have the option to provide a separate data split for Label Calibration training
-(see section Train for more information). In this case,
-you must omit the ``predict_labels_with_scores`` section, so that the format looks like
+(see Section "Train" for more information). In this case,
+you must omit the ``predict_labels_with_scores`` column, so that the format looks like
 
 ```document-content\ttrue_labels```
 
@@ -128,7 +128,7 @@ This is a  folder with three files per document:
 
 As above, you may omit the ``doc.tsv`` if you just want to
 predict the quality of the MLC result and you may omit the ``doc.annif`` if you provide
-the split for Label Calibration training.
+the split for Label Calibration training yourself.
 
 ### Train
 To train a model, use the ``train`` mode, e.g.:
@@ -146,7 +146,7 @@ If a separate training data split is not provided, the Label calibrator will be 
 Recall Predictor, and the required input for training the Recall Predictor is provided by
 [cross-validated estimates](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.cross_val_predict.html) .
 
-It is also possible to use Label Calibration  using the subthesauri of a thesaurus (such as the [STW](http://zbw.eu/stw/version/latest/about))
+It is also possible to apply Label Calibration using the subthesauri of a thesaurus (such as the [STW](http://zbw.eu/stw/version/latest/about))
 as categories (please read the paper for more explanations). Consult the help (``qualle train -h``) for the required options.
 
 ### Evaluate

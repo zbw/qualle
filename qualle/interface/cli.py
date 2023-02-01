@@ -171,7 +171,9 @@ def cli_entrypoint():
         type=str,
         help="Path to test data. "
         "Accepted inputs are either a tsv file or "
-        "a folder in Annif format.",
+        "a folder in Annif format. "
+        "For more information about the input format, "
+        "see the README file at https://github.com/zbw/qualle.",
     )
     eval_parser.add_argument("model", type=str, help=PATH_TO_MODEL_FILE_STR)
 
@@ -184,7 +186,9 @@ def cli_entrypoint():
         type=Path,
         help="Path to train data for the Recall Predictor. "
         "Accepted inputs are either a tsv file or "
-        "a folder in Annif format.",
+        "a folder in Annif format. "
+        "For more information about the input format, "
+        "see the README file at https://github.com/zbw/qualle.",
     )
     train_parser.add_argument("output", type=str, help="Path to output model file")
     train_parser.add_argument(
@@ -193,11 +197,13 @@ def cli_entrypoint():
         type=Path,
         dest="label_calibration_train_data_path",
         help="Path to train data for the Label Calibrator. If omitted, the Label "
-        "Calibrator trained on the same split as the Recall Predictor. "
+        "Calibrator is trained on the same split as the Recall Predictor. "
         "In this case, the required input for the Recall Predictor is estimated "
         "by cross-validation (sklearn.model_selection.cross_val_predict)."
         "Accepted inputs are either a tsv file or "
-        "a folder in Annif format.",
+        "a folder in Annif format. "
+        "For more information about the input format, "
+        "see the README file at https://github.com/zbw/qualle.",
     )
     train_parser.add_argument(
         "--features",
@@ -319,7 +325,10 @@ def cli_entrypoint():
         type=Path,
         help="Path to data. "
         "Accepted inputs are either a tsv file or a folder in annif "
-        "format. If a tsv file is provided, the flag --output must be "
+        "format. "
+        "For more information about the input format, "
+        "see the README file at https://github.com/zbw/qualle. "
+        "If a tsv file is provided, the flag --output must be "
         "specified. If a folder is provided, the predicted quality is "
         'written into files using the ".qualle" prefix inside the folder.',
     )
