@@ -28,7 +28,7 @@ Python ``>= 3.8`` is required.
 Choose one of these installation methods:
 
 ### With pip
-Qualle is available on [PyPI](pypi.org) . You can install Qualle using pip:
+Qualle is available on [PyPI](https://pypi.org/) . You can install Qualle using pip:
 
 ``pip install qualle``
 
