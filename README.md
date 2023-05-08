@@ -73,8 +73,8 @@ You can also use the Docker image to train or evaluate by using the Qualle comma
 
 ```shell
 docker run --rm -it -v \
- /path/to/train_data_file:/train_data_file /path/to/model:/model ghcr.io/zbw/qualle \
- qualle train /train_data_file /model
+ /path/to/train_data_file:/train_data_file -v /path/to/model_dir:/model_dir ghcr.io/zbw/qualle \
+ qualle train /train_data_file /model_dir/model
  ```
 
 The Qualle command line tool is not available for the release 0.1.0 and 0.1.1. For these releases,
@@ -82,8 +82,8 @@ you need to call the python module ``qualle.main`` instead:
 
 ```shell
 docker run --rm -it -v \
- /path/to/train_data_file:/train_data_file /path/to/model:/model ghcr.io/zbw/qualle:0.1.1 \
- python -m qualle.main train /train_data_file /model
+ /path/to/train_data_file:/train_data_file -v /path/to/model_dir:/model_dir ghcr.io/zbw/qualle:0.1.1 \
+ python -m qualle.main train /train_data_file /model_dir/model
 ```
 
 ## Usage
