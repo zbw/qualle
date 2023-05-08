@@ -137,8 +137,9 @@ class LabelCountForSubthesauriTransformer:
             subthesauri_membership = self._mapping.get(concept)
             if not subthesauri_membership:
                 self._logger.warning(
-                    'Concept "%s" not found in concept map. '
-                    "Seems to be invalid for this thesaurus.",
+                    'Concept "%s" does not appear in any subthesaurus specified'
+                    " for label calibration. "
+                    "Will ignore this concept for label calibration. ",
                     concept,
                 )
             else:
