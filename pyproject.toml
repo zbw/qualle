@@ -30,9 +30,10 @@ black = "^22"
 
 
 [tool.poetry.group.ci.dependencies]
-safety = "~3.0.0"
+safety = "~2.3"
 bandit = "~1.7"
 flake8 = "~5"
+packaging = ">=22.0"
 
 
 [build-system]
