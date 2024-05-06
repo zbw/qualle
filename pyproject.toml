@@ -33,6 +33,7 @@ black = "^22"
 safety = "~2.3"
 bandit = "~1.7"
 flake8 = "~5"
+packaging = ">=22.0"
 
 
 [build-system]
