@@ -65,5 +65,5 @@ jobs:
         if: matrix.python-version == '3.8'
 
       - name: Look for security vulnerabilities in dependencies
-        run: poetry run safety check --full-report
+        run: poetry run safety scan --full-report
         continue-on-error: true
