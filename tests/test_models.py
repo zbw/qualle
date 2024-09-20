@@ -68,7 +68,6 @@ def test_unequal_length_in_train_data_raises_validator_exc_():
                 predicted_labels=DUMMY_PRED_LABELS_2,
                 scores=DUMMY_SCORES_2,
             ),
-
             true_labels=DUMMY_PRED_LABELS_1,
         )
 
@@ -91,5 +90,5 @@ def test_train_data_no_validator_exc_():
             predicted_labels=DUMMY_PRED_LABELS_2,
             scores=DUMMY_SCORES_2,
         ),
-        true_labels=DUMMY_TRUE_LABELS
+        true_labels=DUMMY_TRUE_LABELS,
     )
