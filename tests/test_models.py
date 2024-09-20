@@ -19,11 +19,11 @@ from qualle.models import PredictData, TrainData
 
 DUMMY_DOCS = ["doc1", "doc2"]
 DUMMY_PRED_LABELS_1 = [["label 1"], ]
-DUMMY_PRED_LABELS_2 = [["label 1"], ["label 2"],]
+DUMMY_PRED_LABELS_2 = [["label 1"], ["label 2"], ]
 DUMMY_SCORES_1 = [[2.5, 3.0], ]
-DUMMY_SCORES_2 = [[2.5, 3.0], [5.5, 7.2],]
+DUMMY_SCORES_2 = [[2.5, 3.0], [5.5, 7.2], ]
 DUMMY_SCORES_3 = [[2.5, 3.0], [5.5, 7.2], [11.5, 23.1]]
-DUMMY_TRUE_LABELS = [["true label 1"], ["true label 2"],]
+DUMMY_TRUE_LABELS = [["true label 1"], ["true label 2"], ]
 
 
 def test_unequal_length_in_predict_data_raises_validator_exc_1():
