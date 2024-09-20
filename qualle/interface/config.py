@@ -66,7 +66,7 @@ class EvalSettings(BaseSettings):
 class PredictSettings(BaseSettings):
     predict_data_path: FileOrDirPath
     model_file: FilePath
-    output_path: Optional[Path]
+    output_path: Optional[Path] = None
 
     @root_validator
     def check_output_path_specified_for_input_file(cls, values):
