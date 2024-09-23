@@ -16,7 +16,14 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 from typing_extensions import Annotated
 
-from pydantic import model_validator, FilePath, DirectoryPath, TypeAdapter, PlainValidator, AfterValidator
+from pydantic import (
+    model_validator,
+    FilePath,
+    DirectoryPath,
+    TypeAdapter,
+    PlainValidator,
+    AfterValidator,
+)
 from pydantic_settings import BaseSettings
 from pydantic.networks import AnyUrl
 from qualle.features.confidence import ConfidenceFeatures
