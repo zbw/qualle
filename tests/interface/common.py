@@ -13,8 +13,8 @@
 #  limitations under the License.
 from pathlib import Path
 
-DUMMY_SUBTHESAURUS_B = "http://subB"
-DUMMY_SUBTHESAURUS_A = "http://subA"
+DUMMY_SUBTHESAURUS_B = "http://subb"
+DUMMY_SUBTHESAURUS_A = "http://suba"
 DUMMY_CONCEPT_TYPE = "http://ctype"
 DUMMY_CONCEPT_TYPE_PREFIX = "http://prefix"
 DUMMY_SUBTHESAURUS_TYPE = "http://stype"
