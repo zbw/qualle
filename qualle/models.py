@@ -29,7 +29,7 @@ class PredictData(BaseModel):
     predicted_labels: List[Labels]
     scores: List[Scores]
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_equal_length(self):
         length = None
         for v in self.__dict__.values():
@@ -49,7 +49,7 @@ class TrainData(BaseModel):
     predict_data: PredictData
     true_labels: List[Labels]
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_equal_length(self):
         p_data = self.predict_data
         t_labels = self.true_labels

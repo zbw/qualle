@@ -29,8 +29,10 @@ from qualle.features.text import TextFeatures
 # appended in pydantic v2 and it is being removed in the code block given below.
 
 AnyUrlAdapter = TypeAdapter(AnyUrl)
-HttpUrlStr = Annotated[str, PlainValidator(lambda x: AnyUrlAdapter.validate_strings(x)),
-                       AfterValidator(lambda x: str(x).rstrip("/"))]
+HttpUrlStr = Annotated[str,
+                       PlainValidator(lambda x: AnyUrlAdapter.validate_strings(x)),
+                       AfterValidator(lambda x: str(x).rstrip("/")),
+                       ]
 
 
 FileOrDirPath = Union[FilePath, DirectoryPath]
@@ -80,7 +82,7 @@ class PredictSettings(BaseSettings):
     model_file: FilePath
     output_path: Optional[Path] = None
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_output_path_specified_for_input_file(self):
         predict_data_path = self.predict_data_path
         output_path = self.output_path
