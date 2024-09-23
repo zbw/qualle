@@ -98,8 +98,7 @@ def test_rest(train_data_file, model_path):
     assert res.status_code == status.HTTP_200_OK
     # We can make following assumption due to the construction of train data
     assert res.json() == json.loads(
-        QualityEstimation(scores=[QualityScores(
-            name=Metric.RECALL, scores=[1])]).model_dump_json()
+        QualityEstimation(scores=[QualityScores(name=Metric.RECALL, scores=[1])]).model_dump_json()
     )
 
 
