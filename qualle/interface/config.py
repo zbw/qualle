@@ -29,10 +29,11 @@ from qualle.features.text import TextFeatures
 # appended in pydantic v2 and it is being removed in the code block given below.
 
 AnyUrlAdapter = TypeAdapter(AnyUrl)
-HttpUrlStr = Annotated[str,
-                       PlainValidator(lambda x: AnyUrlAdapter.validate_strings(x)),
-                       AfterValidator(lambda x: str(x).rstrip("/")),
-                       ]
+HttpUrlStr = Annotated[
+    str,
+    PlainValidator(lambda x: AnyUrlAdapter.validate_strings(x)),
+    AfterValidator(lambda x: str(x).rstrip("/")),
+]
 
 
 FileOrDirPath = Union[FilePath, DirectoryPath]
