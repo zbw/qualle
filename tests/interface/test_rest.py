@@ -65,12 +65,12 @@ def documents(train_data):
 
 
 def test_return_http_200_for_predict(client, documents):
-    resp = client.post(PREDICT_ENDPOINT, json=documents.dict())
+    resp = client.post(PREDICT_ENDPOINT, json=documents.model_dump())
     assert resp.status_code == status.HTTP_200_OK
 
 
 def test_return_scores_for_predict(client, documents):
-    resp = client.post(PREDICT_ENDPOINT, json=documents.dict())
+    resp = client.post(PREDICT_ENDPOINT, json=documents.model_dump())
 
     expected_scores = QualityEstimation(
         scores=[
@@ -79,7 +79,7 @@ def test_return_scores_for_predict(client, documents):
             )
         ]
     )
-    assert resp.json() == json.loads(expected_scores.json())
+    assert resp.json() == json.loads(expected_scores.model_dump_json())
 
 
 def test_return_http_200_for_up(client):
