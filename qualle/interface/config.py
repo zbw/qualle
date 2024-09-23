@@ -13,7 +13,8 @@
 #  limitations under the License.
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Union, Annotated
+from typing import Dict, List, Optional, Union
+from typing_extensions import Annotated
 
 from pydantic import model_validator, FilePath, DirectoryPath, TypeAdapter
 from pydantic import PlainValidator, AfterValidator
@@ -29,7 +30,7 @@ from qualle.features.text import TextFeatures
 
 AnyUrlAdapter = TypeAdapter(AnyUrl)
 HttpUrlStr = Annotated[str, PlainValidator(lambda x: AnyUrlAdapter.validate_strings(x)),
-                       AfterValidator(lambda x: str(x).rstrip("/")),]
+                       AfterValidator(lambda x: str(x).rstrip("/"))]
 
 
 FileOrDirPath = Union[FilePath, DirectoryPath]
