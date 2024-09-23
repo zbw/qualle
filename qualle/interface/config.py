@@ -15,7 +15,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Annotated
 
-from pydantic import model_validator, FilePath, DirectoryPath, TypeAdapter, PlainValidator, AfterValidator
+from pydantic import model_validator, FilePath, DirectoryPath, TypeAdapter
+from pydantic import PlainValidator, AfterValidator
 from pydantic_settings import BaseSettings
 from pydantic.networks import AnyUrl
 from qualle.features.confidence import ConfidenceFeatures
@@ -41,10 +42,10 @@ class RegressorSettings(BaseSettings):
 
 class SubthesauriLabelCalibrationSettings(BaseSettings):
     thesaurus_file: FilePath
-    subthesaurus_type: AnyUrl
-    concept_type: AnyUrl
-    concept_type_prefix: AnyUrl
-    subthesauri: List[AnyUrl]
+    subthesaurus_type: HttpUrlStr
+    concept_type: HttpUrlStr
+    concept_type_prefix: HttpUrlStr
+    subthesauri: List[HttpUrlStr]
     use_sparse_count_matrix: bool = False
 
 
