@@ -27,7 +27,7 @@ jobs:
         run: poetry install --no-root
 
       - name: Lint with flake8
-        run: poetry run flake8 --extend-ignore E501
+        run: poetry run flake8
 
       - name: Test Black Code Style compliance
         run: poetry run black . --check --diff
