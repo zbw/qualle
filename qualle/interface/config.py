@@ -14,11 +14,32 @@
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Union
+from typing_extensions import Annotated
 
-from pydantic import BaseSettings, root_validator, FilePath, DirectoryPath
+from pydantic import (
+    model_validator,
+    FilePath,
+    DirectoryPath,
+    TypeAdapter,
+    PlainValidator,
+    AfterValidator,
+)
+from pydantic_settings import BaseSettings
 from pydantic.networks import AnyUrl
 from qualle.features.confidence import ConfidenceFeatures
 from qualle.features.text import TextFeatures
+
+# From pydantic v2 onwards, AnyUrl object does not inherit from a string class.
+# The following code block performs validation on a pydantic AnyUrl object
+# as if it were a string.  Another problem is that a trailing '/' character is also
+# appended in pydantic v2 and it is being removed in the code block given below.
+
+AnyUrlAdapter = TypeAdapter(AnyUrl)
+HttpUrlStr = Annotated[
+    str,
+    PlainValidator(lambda x: AnyUrlAdapter.validate_strings(x)),
+    AfterValidator(lambda x: str(x).rstrip("/")),
+]
 
 
 FileOrDirPath = Union[FilePath, DirectoryPath]
@@ -31,10 +52,10 @@ class RegressorSettings(BaseSettings):
 
 class SubthesauriLabelCalibrationSettings(BaseSettings):
     thesaurus_file: FilePath
-    subthesaurus_type: AnyUrl
-    concept_type: AnyUrl
-    concept_type_prefix: AnyUrl
-    subthesauri: List[AnyUrl]
+    subthesaurus_type: HttpUrlStr
+    concept_type: HttpUrlStr
+    concept_type_prefix: HttpUrlStr
+    subthesauri: List[HttpUrlStr]
     use_sparse_count_matrix: bool = False
 
 
@@ -66,18 +87,18 @@ class EvalSettings(BaseSettings):
 class PredictSettings(BaseSettings):
     predict_data_path: FileOrDirPath
     model_file: FilePath
-    output_path: Optional[Path]
+    output_path: Optional[Path] = None
 
-    @root_validator
-    def check_output_path_specified_for_input_file(cls, values):
-        predict_data_path = values.get("predict_data_path")
-        output_path = values.get("output_path")
+    @model_validator(mode="after")
+    def check_output_path_specified_for_input_file(self):
+        predict_data_path = self.predict_data_path
+        output_path = self.output_path
         if predict_data_path.is_file() and not output_path:
             raise ValueError(
                 "output_path has to be specified if predict_data_path "
                 "refers to a file"
             )
-        return values
+        return self
 
 
 class RESTSettings(BaseSettings):

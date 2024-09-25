@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import List, Union
 
 import numpy as np
-from pydantic import root_validator, BaseModel
+from pydantic import model_validator, BaseModel
 from scipy.sparse import spmatrix
 
 Labels = List[str]
@@ -29,10 +29,10 @@ class PredictData(BaseModel):
     predicted_labels: List[Labels]
     scores: List[Scores]
 
-    @root_validator
-    def check_equal_length(cls, values):
+    @model_validator(mode="after")
+    def check_equal_length(self):
         length = None
-        for v in values.values():
+        for v in self.__dict__.values():
             if length is None:
                 length = len(v)
             else:
@@ -41,7 +41,7 @@ class PredictData(BaseModel):
                         "docs, predicted_labels and scores "
                         "should have the same length"
                     )
-        return values
+        return self
 
 
 class TrainData(BaseModel):
@@ -49,13 +49,13 @@ class TrainData(BaseModel):
     predict_data: PredictData
     true_labels: List[Labels]
 
-    @root_validator
-    def check_equal_length(cls, values):
-        p_data = values.get("predict_data")
-        t_labels = values.get("true_labels")
+    @model_validator(mode="after")
+    def check_equal_length(self):
+        p_data = self.predict_data
+        t_labels = self.true_labels
         if len(p_data.predicted_labels) != len(t_labels):
             raise ValueError("length of true labels and predicted labels do not match")
-        return values
+        return self
 
 
 @dataclass
