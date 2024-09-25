@@ -69,6 +69,14 @@ def test_return_http_200_for_predict(client, documents):
     assert resp.status_code == status.HTTP_200_OK
 
 
+def test_return_http_422_for_predict(client, documents):
+    docs = documents.model_dump()["documents"]
+    for doc in docs:
+        del doc["predicted_labels"]
+    resp = client.post(PREDICT_ENDPOINT, json=docs)
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
 def test_return_scores_for_predict(client, documents):
     resp = client.post(PREDICT_ENDPOINT, json=documents.model_dump())
 
