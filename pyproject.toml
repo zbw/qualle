@@ -14,6 +14,7 @@ homepage = "https://github.com/zbw/qualle"
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
 scipy = "~1.13"
+numpy = "~1.26"
 scikit-learn = "~1.5"
 rdflib = "7.0.*"
 pydantic = "~2.8"
