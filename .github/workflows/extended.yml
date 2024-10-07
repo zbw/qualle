@@ -17,10 +17,10 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
 
-      - name: Set up Python 3.8
+      - name: Set up Python 3.9
         uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: 3.9
           cache: 'poetry'
 
       - name: Install dependencies
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,7 +64,7 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-        if: matrix.python-version == '3.8'
+        if: matrix.python-version == '3.9'
 
       - name: Look for security vulnerabilities in dependencies
         run: poetry run safety check --full-report --ignore 70612
