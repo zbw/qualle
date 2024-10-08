@@ -21,7 +21,7 @@ the recall of a MLC result is provided.
 
 ## Requirements
 
-Python ``>= 3.8`` is required.
+Python ``>= 3.9`` is required.
 
 ## Installation
 

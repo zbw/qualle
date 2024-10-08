@@ -63,7 +63,9 @@ def train_data():
 @pytest.fixture
 def tsv_data_path(tmp_path):
     tsv_file = tmp_path / "doc.tsv"
-    content = "\n".join(f"Title{i}\tconcept{i}:{i / 20}\tconcept{i}" for i in range(20))
+    content = "\n".join(
+        f"Title{i}\tconcept{i}: {i / 20}\tconcept{i}" for i in range(20)
+    )
     tsv_file.write_text(content)
     return tsv_file
 
