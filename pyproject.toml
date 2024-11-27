@@ -19,7 +19,7 @@ scikit-learn = "~1.5"
 rdflib = "7.0.*"
 pydantic = "~2.8"
 pydantic-settings = "~2.4"
-fastapi = "~0.110"
+fastapi = {version = "~0.115", extras = ["standard"]}
 uvicorn = "~0.22"
 
 
