@@ -43,8 +43,8 @@ def mocked_pipeline(mocker):
 
 
 @pytest.fixture
-def client(mocked_pipeline, model_path):
-    app = create_app(RESTSettings(model_file=model_path))
+def client(mocked_pipeline, mdl_path):
+    app = create_app(RESTSettings(mdl_file=mdl_path))
     client = TestClient(app)
     return client
 
@@ -95,14 +95,14 @@ def test_return_http_200_for_up(client):
     assert resp.status_code == status.HTTP_200_OK
 
 
-def test_run(mocker, model_path):
+def test_run(mocker, mdl_path):
     m_app = mocker.Mock()
     m_create_app = mocker.Mock(return_value=m_app)
     mocker.patch("qualle.interface.rest.create_app", m_create_app)
     m_uvicorn_run = mocker.Mock()
     mocker.patch("qualle.interface.rest.uvicorn.run", m_uvicorn_run)
 
-    settings = RESTSettings(model_file=model_path)
+    settings = RESTSettings(mdl_file=mdl_path)
 
     run(settings)
 

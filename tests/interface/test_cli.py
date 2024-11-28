@@ -216,65 +216,65 @@ def test_handle_train_creates_regressors(train_args_dict):
     )
 
 
-def test_handle_eval(tmp_path, model_path):
+def test_handle_eval(tmp_path, mdl_path):
     test_data_path = tmp_path / "testdata"
     test_data_path.mkdir()
-    handle_eval(Namespace(**dict(test_data_path=test_data_path, model=model_path)))
+    handle_eval(Namespace(**dict(test_data_path=test_data_path, model=mdl_path)))
     cli.evaluate.assert_called_once()
     actual_settings = cli.evaluate.call_args[0][0]
     assert actual_settings == EvalSettings(
-        test_data_path=test_data_path, model_file=model_path
+        test_data_path=test_data_path, mdl_file=mdl_path
     )
 
 
-def test_handle_rest(mocker, model_path):
+def test_handle_rest(mocker, mdl_path):
     m_run = mocker.Mock()
     mocker.patch("qualle.interface.cli.run", m_run)
 
-    cli.handle_rest(Namespace(**dict(model=model_path, port=[9000], host=["x"])))
+    cli.handle_rest(Namespace(**dict(model=mdl_path, port=[9000], host=["x"])))
 
     m_run.assert_called_once_with(
-        RESTSettings(model_file=model_path, host="x", port=9000)
+        RESTSettings(mdl_file=mdl_path, host="x", port=9000)
     )
 
 
-def test_handle_predict_with_dir(tmp_path, model_path):
+def test_handle_predict_with_dir(tmp_path, mdl_path):
     predict_data_path = tmp_path / "predict"
     predict_data_path.mkdir()
     cli.handle_predict(
         Namespace(
-            **dict(predict_data_path=predict_data_path, model=model_path, output=None)
+            **dict(predict_data_path=predict_data_path, model=mdl_path, output=None)
         )
     )
     cli.predict.assert_called_once()
     actual_settings = cli.predict.call_args[0][0]
     assert actual_settings == PredictSettings(
-        predict_data_path=predict_data_path, model_file=model_path
+        predict_data_path=predict_data_path, mdl_file=mdl_path
     )
 
 
-def test_handle_predict_with_file(tsv_file_path, tmp_path, model_path):
+def test_handle_predict_with_file(tsv_file_path, tmp_path, mdl_path):
     output_path = tmp_path / "output.txt"
     cli.handle_predict(
         Namespace(
             **dict(
-                predict_data_path=tsv_file_path, model=model_path, output=[output_path]
+                predict_data_path=tsv_file_path, model=mdl_path, output=[output_path]
             )
         )
     )
     cli.predict.assert_called_once()
     actual_settings = cli.predict.call_args[0][0]
     assert actual_settings == PredictSettings(
-        predict_data_path=tsv_file_path, model_file=model_path, output_path=output_path
+        predict_data_path=tsv_file_path, mdl_file=mdl_path, output_path=output_path
     )
 
 
 def test_handle_predict_with_file_raises_exc_if_no_output_file(
-    tsv_file_path, model_path
+    tsv_file_path, mdl_path
 ):
     with pytest.raises(CliValidationError):
         cli.handle_predict(
             Namespace(
-                **dict(predict_data_path=tsv_file_path, model=model_path, output=None)
+                **dict(predict_data_path=tsv_file_path, model=mdl_path, output=None)
             )
         )

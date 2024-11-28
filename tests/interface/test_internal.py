@@ -239,14 +239,14 @@ def test_train_with_slc_uses_all_subthesauri_if_no_subthesauri_passed(
     )
 
 
-def test_evaluate(mocker, tsv_data_path, train_data, model_path):
+def test_evaluate(mocker, tsv_data_path, train_data, mdl_path):
     m_eval = mocker.Mock()
     m_eval.evaluate.return_value = {}
     m_eval_cls = mocker.Mock(return_value=m_eval)
     mocker.patch("qualle.interface.internal.Evaluator", m_eval_cls)
     internal.load.return_value = "testmodel"
 
-    settings = EvalSettings(test_data_path=tsv_data_path, model_file=model_path)
+    settings = EvalSettings(test_data_path=tsv_data_path, mdl_file=mdl_path)
     internal.evaluate(settings)
 
     m_eval_cls.assert_called_once_with(train_data, "testmodel")
@@ -276,10 +276,10 @@ def test_load_train_input_from_tsv(tsv_data_path, train_data):
     assert internal._load_train_input(tsv_data_path) == train_data
 
 
-def test_predict_stores_scores_from_model(tsv_data_path, tmp_path, model_path):
+def test_predict_stores_scores_from_model(tsv_data_path, tmp_path, mdl_path):
     output_path = tmp_path / "qualle.txt"
     settings = PredictSettings(
-        predict_data_path=tsv_data_path, model_file=model_path, output_path=output_path
+        predict_data_path=tsv_data_path, mdl_file=mdl_path, output_path=output_path
     )
     mock_model = internal.load.return_value
     mock_model.predict.side_effect = lambda p_data: map(lambda s: s[0], p_data.scores)
@@ -292,11 +292,11 @@ def test_predict_stores_scores_from_model(tsv_data_path, tmp_path, model_path):
 
 
 def test_predict_with_annif_data_stores_scores_from_model(
-    annif_data_dir, tmp_path, model_path
+    annif_data_dir, tmp_path, mdl_path
 ):
     settings = PredictSettings(
         predict_data_path=annif_data_dir,
-        model_file=model_path,
+        mdl_file=mdl_path,
     )
     mock_model = internal.load.return_value
     mock_model.predict.side_effect = lambda p_data: map(lambda s: s[0], p_data.scores)

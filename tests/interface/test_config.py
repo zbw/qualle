@@ -24,7 +24,7 @@ def test_predict_settings_input_file_but_no_output_raises_exc(tmp_path):
     mp = tmp_path / "model"
     mp.write_text("modelInfo")
     with pytest.raises(ValidationError):
-        PredictSettings(predict_data_path=fp, model_file=mp)
+        PredictSettings(predict_data_path=fp, mdl_file=mp)
 
 
 def test_predict_settings_input_path_no_exc_1(tmp_path):
@@ -32,7 +32,7 @@ def test_predict_settings_input_path_no_exc_1(tmp_path):
     fp.mkdir()
     mp = tmp_path / "model"
     mp.write_text("modelInfo")
-    PredictSettings(predict_data_path=fp, model_file=mp)
+    PredictSettings(predict_data_path=fp, mdl_file=mp)
 
 
 def test_predict_settings_input_path_no_exc_2(tmp_path):
@@ -40,4 +40,4 @@ def test_predict_settings_input_path_no_exc_2(tmp_path):
     fp.write_text("t\tc:0\tc")
     mp = tmp_path / "model"
     mp.write_text("modelInfo")
-    PredictSettings(predict_data_path=fp, model_file=mp, output_path=tmp_path)
+    PredictSettings(predict_data_path=fp, mdl_file=mp, output_path=tmp_path)

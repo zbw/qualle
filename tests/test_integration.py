@@ -46,7 +46,7 @@ def train_data_file(tmp_path):
 
 
 @pytest.fixture
-def model_path(tmp_path):
+def mdl_path(tmp_path):
     return tmp_path / "output.model"
 
 
@@ -55,17 +55,17 @@ def predict_output_path(tmp_path):
     return tmp_path / "output.txt"
 
 
-def test_train_stores_model(train_data_file, model_path):
-    train(train_data_file, model_path)
-    assert model_path.is_file()
+def test_train_stores_model(train_data_file, mdl_path):
+    train(train_data_file, mdl_path)
+    assert mdl_path.is_file()
 
 
-def test_eval_prints_scores(train_data_file, model_path, caplog):
+def test_eval_prints_scores(train_data_file, mdl_path, caplog):
     caplog.set_level(logging.INFO)
 
-    train(train_data_file, model_path)
+    train(train_data_file, mdl_path)
 
-    settings = EvalSettings(test_data_path=train_data_file, model_file=model_path)
+    settings = EvalSettings(test_data_path=train_data_file, mdl_file=mdl_path)
     internal.evaluate(settings)
 
     assert "Scores:" in caplog.text
@@ -77,9 +77,9 @@ def test_eval_prints_scores(train_data_file, model_path, caplog):
     assert "correlation_coefficient: nan" in caplog.text
 
 
-def test_rest(train_data_file, model_path):
-    train(train_data_file, model_path)
-    settings = RESTSettings(model_file=model_path)
+def test_rest(train_data_file, mdl_path):
+    train(train_data_file, mdl_path)
+    settings = RESTSettings(mdl_file=mdl_path)
     app = create_app(settings)
     client = TestClient(app)
     res = client.post(
@@ -105,13 +105,13 @@ def test_rest(train_data_file, model_path):
 
 
 def test_predict_stores_quality_estimation(
-    train_data_file, model_path, predict_output_path
+    train_data_file, mdl_path, predict_output_path
 ):
-    train(train_data_file, model_path)
+    train(train_data_file, mdl_path)
 
     settings = PredictSettings(
         predict_data_path=train_data_file,
-        model_file=model_path,
+        mdl_file=mdl_path,
         output_path=predict_output_path,
     )
     internal.predict(settings)

@@ -58,7 +58,7 @@ router = APIRouter()
 @lru_cache
 def load_model() -> QualityEstimationPipeline:
     settings = RESTSettings()
-    return internal_load_model(str(settings.model_file))
+    return internal_load_model(str(settings.mdl_file))
 
 
 @router.post(
@@ -95,7 +95,7 @@ def create_app(settings: Optional[RESTSettings] = None):
     settings = settings or RESTSettings()
     app = FastAPI()
     app.include_router(router)
-    m = internal_load_model(str(settings.model_file))
+    m = internal_load_model(str(settings.mdl_file))
     app.dependency_overrides[load_model] = lambda: m
 
     return app
