@@ -233,9 +233,7 @@ def test_handle_rest(mocker, mdl_path):
 
     cli.handle_rest(Namespace(**dict(model=mdl_path, port=[9000], host=["x"])))
 
-    m_run.assert_called_once_with(
-        RESTSettings(mdl_file=mdl_path, host="x", port=9000)
-    )
+    m_run.assert_called_once_with(RESTSettings(mdl_file=mdl_path, host="x", port=9000))
 
 
 def test_handle_predict_with_dir(tmp_path, mdl_path):
@@ -269,9 +267,7 @@ def test_handle_predict_with_file(tsv_file_path, tmp_path, mdl_path):
     )
 
 
-def test_handle_predict_with_file_raises_exc_if_no_output_file(
-    tsv_file_path, mdl_path
-):
+def test_handle_predict_with_file_raises_exc_if_no_output_file(tsv_file_path, mdl_path):
     with pytest.raises(CliValidationError):
         cli.handle_predict(
             Namespace(
