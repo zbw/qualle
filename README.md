@@ -60,21 +60,21 @@ By default, a container built from this image launches a REST interface listenin
 
 You need to pass the model file (see below the section REST interface) per bind mount or volume to the docker container.
 Beyond that, you need to specify the location of the model file with an
-environment variable named `MODEL_FILE`:
+environment variable named `MDL_FILE`:
 
-``docker run --rm -it --env MODEL_FILE=/model -v /path/to/model:/model -p 8000:8000 ghcr.io/zbw/qualle``
+``docker run --rm -it --env MDL_FILE=/model -v /path/to/model:/model -p 8000:8000 ghcr.io/zbw/qualle``
 
 [Gunicorn](https://gunicorn.org/) is used as HTTP Server. You can use the environment variable ``GUNICORN_CMD_ARGS`` to customize
 Gunicorn settings, such as the number of worker processes to use:
 
-``docker run --rm -it --env MODEL_FILE=/model --env GUNICORN_CMD_ARGS="--workers 4" -v /path/to/model:/model -p 8000:8000 ghcr.io/zbw/qualle``
+``docker run --rm -it --env MDL_FILE=/model --env GUNICORN_CMD_ARGS="--workers 4" -v /path/to/model:/model -p 8000:8000 ghcr.io/zbw/qualle``
 
 You can also use the Docker image to train or evaluate by using the Qualle command line tool:
 
 ```shell
 docker run --rm -it -v \
- /path/to/train_data_file:/train_data_file -v /path/to/model_dir:/model_dir ghcr.io/zbw/qualle \
- qualle train /train_data_file /model_dir/model
+ /path/to/train_data_file:/train_data_file -v /path/to/model_dir:/mdl_dir ghcr.io/zbw/qualle \
+ qualle train /train_data_file /mdl_dir/model
  ```
 
 The Qualle command line tool is not available for the release 0.1.0 and 0.1.1. For these releases,
