@@ -22,7 +22,7 @@ def thsys_file_path(tmp_path):
 
 
 @pytest.fixture
-def model_path(tmp_path):
+def mdl_path(tmp_path):
     fp = tmp_path / "model"
     fp.write_text("")
     return fp

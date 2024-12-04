@@ -81,12 +81,12 @@ class TrainSettings(BaseSettings):
 
 class EvalSettings(BaseSettings):
     test_data_path: FileOrDirPath
-    model_file: FilePath
+    mdl_file: FilePath
 
 
 class PredictSettings(BaseSettings):
     predict_data_path: FileOrDirPath
-    model_file: FilePath
+    mdl_file: FilePath
     output_path: Optional[Path] = None
 
     @model_validator(mode="after")
@@ -102,6 +102,6 @@ class PredictSettings(BaseSettings):
 
 
 class RESTSettings(BaseSettings):
-    model_file: FilePath
+    mdl_file: FilePath
     port: int = 8000
     host: str = "127.0.0.1"

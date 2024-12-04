@@ -113,12 +113,12 @@ def handle_train(args: argparse.Namespace):
 
 
 def handle_eval(args: argparse.Namespace):
-    settings = EvalSettings(test_data_path=args.test_data_path, model_file=args.model)
+    settings = EvalSettings(test_data_path=args.test_data_path, mdl_file=args.model)
     evaluate(settings)
 
 
 def handle_rest(args: argparse.Namespace):
-    settings = RESTSettings(model_file=args.model, port=args.port[0], host=args.host[0])
+    settings = RESTSettings(mdl_file=args.model, port=args.port[0], host=args.host[0])
     run(settings)
 
 
@@ -132,7 +132,7 @@ def handle_predict(args: argparse.Namespace):
         )
     settings = PredictSettings(
         predict_data_path=predict_data_path,
-        model_file=args.model,
+        mdl_file=args.model,
         output_path=output_path,
     )
     predict(settings)

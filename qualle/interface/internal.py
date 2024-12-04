@@ -149,7 +149,7 @@ def _get_class_from_str(fully_qualified_path: str) -> Type:
 def evaluate(settings: EvalSettings):
     logger = get_logger()
     path_to_test_data = settings.test_data_path
-    path_to_model_file = settings.model_file
+    path_to_model_file = settings.mdl_file
     model = load_model(str(path_to_model_file))
     logger.info("Run evaluation with model:\n%s", model)
     test_input = _load_train_input(path_to_test_data)
@@ -163,7 +163,7 @@ def evaluate(settings: EvalSettings):
 def predict(settings: PredictSettings):
     logger = get_logger()
     path_to_predict_data = settings.predict_data_path
-    path_to_model_file = settings.model_file
+    path_to_model_file = settings.mdl_file
     output_path = settings.output_path
     model = load_model(str(path_to_model_file))
     io_handler = _get_predict_io_handler(

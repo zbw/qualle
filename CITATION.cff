@@ -15,9 +15,9 @@ authors:
     affiliation: "ZBW - Leibniz Information Centre for Economics"
 title: "qualle (a framework to predict the quality of a multi-label classification result)"
 abstract: "This framework allows to train a model which can be used to predict the quality of the result of applying a multi-label classification (MLC) method on a document. In this implementation, only the recall is predicted for a document, but in principle any document-level quality estimation (such as the prediction of precision) can be implemented analogously."
-version: 0.3.1
+version: 0.3.2
 license: Apache-2.0
-date-released: 2024-10-10
+date-released: 2024-12-04
 repository-code: "https://github.com/zbw/qualle"
 contact:
   - name: "Automatization of subject indexing using methods from artificial intelligence (AutoSE)"
