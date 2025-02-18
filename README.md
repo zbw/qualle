@@ -88,7 +88,7 @@ docker run --rm -it -v \
 
 ## Usage
 
-### Input data 
+### Input data
 In order to train a model, evaluate a model or predict the quality of an MLC result
 you have to provide data.
 
@@ -103,7 +103,7 @@ where
 (this is basically the output of the MLC method)
 - ``true_labels`` is a comma-separated list of true labels (ground truth)
 
-Note that you can omit the ``true_labels`` section if you only want to predict the 
+Note that you can omit the ``true_labels`` section if you only want to predict the
 quality of the MLC result.
 
 For example, a row in the data file could look like this:
@@ -154,7 +154,8 @@ Contributions via pull requests are welcome. Please create an issue beforehand
 to explain and discuss the reasons for the respective contribution.
 
 qualle code should follow the [Black style](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html).
-The Black tool is included as a development dependency; you can run `black .` in the project root to autoformat code.
+The Black tool is included as a development dependency; you can run `black .` in the project root to autoformat code. There is also the possibility of doing this with a Git Pre-Commit hook script. It is already configured in the `.pre-commit-config.yaml` file. You must install [pre-commit](https://pre-commit.com/#installation) and run the command `pre-commit install`
+afterwards. Subsequently, the Black formatter will automatically check the formatting of modified or new scripts after a `git commit` command is executed.
 
 ## References
 [1] [Toepfer, Martin, and Christin Seifert. "Content-based quality estimation for automatic subject indexing of short texts under precision and recall constraints." International Conference on Theory and Practice of Digital Libraries. Springer, Cham, 2018., DOI 10.1007/978-3-030-00066-0_1](https://arxiv.org/abs/1806.02743)
