@@ -51,7 +51,7 @@ def test_mclc_fit_fits_calibrators(calibrator, X):
         y_actual = clbtr.regressor.y
 
         assert X_actual.shape[0] == len(X)
-        assert type(y_actual) == np.ndarray
+        assert isinstance(y_actual, np.ndarray)
         assert (y_actual == y[:, i]).all()
 
 
@@ -66,5 +66,5 @@ def test_mlc_fit_with_sparse_matrix_fits_calibrators_with_nparray(calibrator, X)
         y_actual = clbtr.regressor.y
 
         assert X_actual.shape[0] == len(X)
-        assert type(y_actual) == np.ndarray
+        assert isinstance(y_actual, np.ndarray)
         assert (y_actual == y[:, i]).all()

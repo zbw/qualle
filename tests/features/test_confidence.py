@@ -25,7 +25,7 @@ def data():
 def test_transform_computes_all_features(data):
     cf = ConfidenceFeatures()
     features = cf.transform(data)
-    assert type(features) == np.ndarray
+    assert isinstance(features, np.ndarray)
     assert (
         features
         == np.vstack([[0] * 4, [1] * 4, [0, 1, 1, 0], [0, 1, 1, 0], [1, 7 / 3, 2, 8]])
@@ -36,7 +36,7 @@ def test_transform_empty_row_gets_zero_value_as_default():
     cf = ConfidenceFeatures()
 
     features = cf.transform([[], [1] * 5])
-    assert type(features) == np.ndarray
+    assert isinstance(features, np.ndarray)
     assert (
         features
         == np.vstack(
