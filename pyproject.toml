@@ -30,11 +30,11 @@ pytest-mock = "~3.14"
 pytest-cov = "~6.0"
 httpx = "*"
 black = "^24.3"
-
+pre-commit = "~4.1"
 
 [tool.poetry.group.ci.dependencies]
 safety = "~3.2"
-bandit = "~1.7"
+bandit = "~1.8"
 ruff = "~0.9"
 
 [tool.ruff.lint]

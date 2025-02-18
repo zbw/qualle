@@ -2,6 +2,8 @@
 [![Extended Tests](https://github.com/zbw/qualle/actions/workflows/extended.yml/badge.svg)](https://github.com/zbw/qualle/actions/workflows/extended.yml)
 [![codecov](https://codecov.io/gh/zbw/qualle/branch/master/graph/badge.svg?token=ZE7OWKA83Q)](https://codecov.io/gh/zbw/qualle)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
 This is an implementation of the Qualle framework as proposed in the paper
 [1] and accompanying source code.
@@ -154,8 +156,7 @@ Contributions via pull requests are welcome. Please create an issue beforehand
 to explain and discuss the reasons for the respective contribution.
 
 qualle code should follow the [Black style](https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html).
-The Black tool is included as a development dependency; you can run `black .` in the project root to autoformat code. There is also the possibility of doing this with a Git Pre-Commit hook script. It is already configured in the `.pre-commit-config.yaml` file. You must install [pre-commit](https://pre-commit.com/#installation) and run the command `pre-commit install`
-afterwards. Subsequently, the Black formatter will automatically check the formatting of modified or new scripts after a `git commit` command is executed.
+The Black tool is included as a development dependency; you can run `black .` in the project root to autoformat code. There is also the possibility of doing this with a Git Pre-Commit hook script. It is already configured in the `.pre-commit-config.yaml` file. The [pre-commit](https://pre-commit.com/#installation) tool has been included as a development dependency. You would have to run the command `pre-commit install` inside your local virtual environment. Subsequently, the Black tool will automatically check the formatting of modified or new scripts after each time a `git commit` command is executed.
 
 ## References
 [1] [Toepfer, Martin, and Christin Seifert. "Content-based quality estimation for automatic subject indexing of short texts under precision and recall constraints." International Conference on Theory and Practice of Digital Libraries. Springer, Cham, 2018., DOI 10.1007/978-3-030-00066-0_1](https://arxiv.org/abs/1806.02743)
