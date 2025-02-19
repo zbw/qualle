@@ -59,7 +59,7 @@ def test_transform_without_fit_raises_exc(combined_features, X):
 def test_transform_hstacks_result(combined_features, X):
     combined_features.fit(X)
     transformed = combined_features.transform(X)
-    assert type(transformed) == np.ndarray
+    assert isinstance(transformed, np.ndarray)
     assert transformed.shape == (2, 2)
     assert (transformed == [[2, 7], [1, 5]]).all()
 

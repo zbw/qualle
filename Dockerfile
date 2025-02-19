@@ -18,7 +18,7 @@ LABEL maintainer="AutoSE <AutoSE@zbw.eu>"
 ARG POETRY_VIRTUALENVS_CREATE=false
 
 RUN pip install --upgrade pip --no-cache-dir
-RUN pip install poetry gunicorn==23.0.* "uvicorn[standard]==0.22" --no-cache-dir
+RUN pip install poetry gunicorn==23.0.* "uvicorn[standard]==0.34" "uvicorn-worker~=0.3" --no-cache-dir
 
 COPY pyproject.toml poetry.lock README.md  /app/
 
@@ -30,4 +30,4 @@ RUN poetry install --without dev,ci \
 	&& pip uninstall -y poetry \
 	&& rm -rf /root/.cache/pypoetry
 
-CMD gunicorn "qualle.interface.rest:create_app()"  -b 0.0.0.0 -k "uvicorn.workers.UvicornWorker"
+CMD gunicorn "qualle.interface.rest:create_app()"  -b 0.0.0.0 -k "uvicorn_worker.UvicornWorker"

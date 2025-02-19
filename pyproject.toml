@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qualle"
-version = "0.3.2-dev"
+version = "0.4.0-dev"
 description = "A framework to predict the quality of a multi-label classification result"
 authors = ["AutoSE <autose@zbw.eu>"]
 license = "Apache-2.0"
@@ -18,24 +18,27 @@ numpy = "~1.26"
 scikit-learn = "~1.5"
 rdflib = "7.0.*"
 pydantic = "~2.8"
-pydantic-settings = "~2.4"
+pydantic-settings = "~2.7"
 fastapi = "~0.115"
-uvicorn = "~0.22"
+uvicorn = "~0.34"
+uvicorn-worker = "~0.3"
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "~7.4"
+pytest = "~8.3"
 pytest-mock = "~3.14"
 pytest-cov = "~6.0"
 httpx = "*"
 black = "^24.3"
-
+pre-commit = "~4.1"
 
 [tool.poetry.group.ci.dependencies]
 safety = "~3.2"
-bandit = "~1.7"
-flake8 = "~5"
+bandit = "~1.8"
+ruff = "~0.9"
 
+[tool.ruff.lint]
+ignore = ["E203"]
 
 [build-system]
 requires = ["poetry-core"]
