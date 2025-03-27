@@ -21,8 +21,6 @@ pydantic = "~2.8"
 pydantic-settings = "~2.7"
 fastapi = "~0.115"
 uvicorn = "~0.34"
-uvicorn-worker = "~0.3"
-
 
 [tool.poetry.group.dev.dependencies]
 pytest = "~8.3"
@@ -33,7 +31,7 @@ black = "^24.3"
 pre-commit = "~4.1"
 
 [tool.poetry.group.ci.dependencies]
-safety = "~3.2"
+safety = "2.3.4"
 bandit = "~1.8"
 ruff = "~0.9"
 
