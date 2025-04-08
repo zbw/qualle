@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import json
-
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -28,7 +27,9 @@ from qualle.interface.rest import (
     create_app,
     PREDICT_ENDPOINT,
     run,
+    load_model,
 )
+from pathlib import Path
 
 
 @pytest.fixture
@@ -62,6 +63,21 @@ def documents(train_data):
             for idx in range(len(p_data.docs))
         ]
     )
+
+
+def test_load_model(mocker, mdl_path):
+    m_pipe = mocker.Mock()
+    m_load_model = mocker.Mock(return_value=m_pipe)
+
+    mock_settings = mocker.patch("qualle.interface.rest.RESTSettings")
+    mock_settings.return_value.mdl_file = mdl_path
+
+    mocker.patch("qualle.interface.rest.internal_load_model", m_load_model)
+
+    qe_pipe = load_model()
+    assert qe_pipe == m_pipe
+    called_path = m_load_model.call_args[0][0]
+    assert Path(called_path) == mdl_path
 
 
 def test_return_http_200_for_predict(client, documents):
