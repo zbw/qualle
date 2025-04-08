@@ -60,6 +60,7 @@ def test_train_stores_model(train_data_file, mdl_path):
     assert mdl_path.is_file()
 
 
+@pytest.mark.filterwarnings("ignore:invalid value encountered in divide:RuntimeWarning")
 def test_eval_prints_scores(train_data_file, mdl_path, caplog):
     caplog.set_level(logging.INFO)
 
