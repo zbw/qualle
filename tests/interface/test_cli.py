@@ -14,7 +14,8 @@
 from argparse import Namespace
 
 import pytest
-
+import sys
+import json
 import qualle.interface.cli as cli
 from qualle.interface.config import (
     FeaturesEnum,
@@ -26,6 +27,7 @@ from qualle.interface.config import (
     PredictSettings,
 )
 from qualle.interface.cli import CliValidationError, handle_train, handle_eval
+from pathlib import Path
 
 import tests.interface.common as c
 
@@ -274,3 +276,119 @@ def test_handle_predict_with_file_raises_exc_if_no_output_file(tsv_file_path, md
                 **dict(predict_data_path=tsv_file_path, model=mdl_path, output=None)
             )
         )
+
+
+def test_cli_entrypoint_with_eval_parser(mocker, monkeypatch, tmp_path, mdl_path):
+    test_data_path = tmp_path / "testdata"
+    test_data_path.mkdir()
+    mock_eval_func = mocker.patch("qualle.interface.cli.handle_eval")
+
+    # config_logging() method needs to be mocked otherwise it will be called and
+    # disturb the global settings for the logger used in qualle. This results in
+    # a failed unit test namely, test_debug_prints_time_if_activated() inside tests/test_pipeline.py
+    mock_config_logging = mocker.patch(
+        "qualle.interface.cli.config_logging", return_value="foo"
+    )
+
+    monkeypatch.setattr(
+        sys, "argv", ["cli.py", "eval", str(test_data_path), str(mdl_path)]
+    )
+    cli.cli_entrypoint()
+    args_passed = mock_eval_func.call_args[0][0]
+    assert Path(args_passed.test_data_path) == test_data_path
+    assert Path(args_passed.model) == mdl_path
+
+
+def test_cli_entrypoint_with_rest_parser(mocker, monkeypatch, mdl_path):
+    mock_rest_func = mocker.patch("qualle.interface.cli.handle_rest")
+
+    # config_logging() method needs to be mocked otherwise it will be called and
+    # disturb the global settings for the logger used in qualle. Without mocking this method
+    # a unit test fails, namely test_debug_prints_time_if_activated() inside tests/test_pipeline.py
+    mock_config_logging = mocker.patch(
+        "qualle.interface.cli.config_logging", return_value="foo"
+    )
+
+    monkeypatch.setattr(
+        sys, "argv", ["cli.py", "rest", str(mdl_path), "--host=x", "--port=9000"]
+    )
+    cli.cli_entrypoint()
+    args_passed = mock_rest_func.call_args[0][0]
+    assert Path(args_passed.model) == mdl_path
+    assert args_passed.host == ["x"]
+    assert args_passed.port == [9000]
+
+
+def test_cli_entrypoint_with_predict_parser(
+    mocker, monkeypatch, tmp_path, tsv_file_path, mdl_path
+):
+    output_path = tmp_path / "output.txt"
+    mock_predict_func = mocker.patch("qualle.interface.cli.handle_predict")
+
+    # config_logging() method needs to be mocked otherwise it will be called and
+    # disturb the global settings for the logger used in qualle. Without mocking this method
+    # a unit test fails, namely test_debug_prints_time_if_activated() inside tests/test_pipeline.py
+    mock_config_logging = mocker.patch(
+        "qualle.interface.cli.config_logging", return_value="foo"
+    )
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cli.py",
+            "predict",
+            str(tsv_file_path),
+            str(mdl_path),
+            "--output=" + str(output_path),
+        ],
+    )
+    cli.cli_entrypoint()
+    args_passed = mock_predict_func.call_args[0][0]
+    assert Path(args_passed.predict_data_path) == tsv_file_path
+    assert Path(args_passed.model) == mdl_path
+    assert args_passed.output == [output_path]
+
+
+def test_cli_entrypoint_for_train_parser_without_slc(
+    mocker, monkeypatch, train_args_dict
+):
+    mock_train_func = mocker.patch("qualle.interface.cli.handle_train")
+
+    # config_logging() method needs to be mocked otherwise it will be called and
+    # disturb the global settings for the logger used in qualle. Without mocking this method
+    # a unit test fails, namely test_debug_prints_time_if_activated() inside tests/test_pipeline.py
+    mock_config_logging = mocker.patch(
+        "qualle.interface.cli.config_logging", return_value="foo"
+    )
+
+    train_data_path = train_args_dict["train_data_path"]
+    output = train_args_dict["output"]
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cli.py",
+            "train",
+            str(train_data_path),
+            str(output),
+            "--label-calibrator-regressor="
+            + train_args_dict["label_calibrator_regressor"][0],
+            "--quality-estimator-regressor="
+            + train_args_dict["quality_estimator_regressor"][0],
+        ],
+    )
+
+    cli.cli_entrypoint()
+    args_passed = mock_train_func.call_args[0][0]
+    assert Path(args_passed.train_data_path) == train_args_dict["train_data_path"]
+    assert Path(args_passed.output) == Path(train_args_dict["output"])
+    assert (
+        args_passed.label_calibrator_regressor
+        == train_args_dict["label_calibrator_regressor"]
+    )
+    assert (
+        args_passed.quality_estimator_regressor
+        == train_args_dict["quality_estimator_regressor"]
+    )
