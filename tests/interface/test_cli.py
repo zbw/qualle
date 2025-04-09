@@ -15,7 +15,6 @@ from argparse import Namespace
 
 import pytest
 import sys
-import json
 import qualle.interface.cli as cli
 from qualle.interface.config import (
     FeaturesEnum,
@@ -286,9 +285,7 @@ def test_cli_entrypoint_with_eval_parser(mocker, monkeypatch, tmp_path, mdl_path
     # config_logging() method needs to be mocked otherwise it will be called and
     # disturb the global settings for the logger used in qualle. This results in
     # a failed unit test namely, test_debug_prints_time_if_activated() inside tests/test_pipeline.py
-    mock_config_logging = mocker.patch(
-        "qualle.interface.cli.config_logging", return_value="foo"
-    )
+    _ = mocker.patch("qualle.interface.cli.config_logging", return_value="foo")
 
     monkeypatch.setattr(
         sys, "argv", ["cli.py", "eval", str(test_data_path), str(mdl_path)]
@@ -305,9 +302,7 @@ def test_cli_entrypoint_with_rest_parser(mocker, monkeypatch, mdl_path):
     # config_logging() method needs to be mocked otherwise it will be called and
     # disturb the global settings for the logger used in qualle. Without mocking this method
     # a unit test fails, namely test_debug_prints_time_if_activated() inside tests/test_pipeline.py
-    mock_config_logging = mocker.patch(
-        "qualle.interface.cli.config_logging", return_value="foo"
-    )
+    _ = mocker.patch("qualle.interface.cli.config_logging", return_value="foo")
 
     monkeypatch.setattr(
         sys, "argv", ["cli.py", "rest", str(mdl_path), "--host=x", "--port=9000"]
@@ -328,9 +323,7 @@ def test_cli_entrypoint_with_predict_parser(
     # config_logging() method needs to be mocked otherwise it will be called and
     # disturb the global settings for the logger used in qualle. Without mocking this method
     # a unit test fails, namely test_debug_prints_time_if_activated() inside tests/test_pipeline.py
-    mock_config_logging = mocker.patch(
-        "qualle.interface.cli.config_logging", return_value="foo"
-    )
+    _ = mocker.patch("qualle.interface.cli.config_logging", return_value="foo")
 
     monkeypatch.setattr(
         sys,
@@ -358,9 +351,7 @@ def test_cli_entrypoint_for_train_parser_without_slc(
     # config_logging() method needs to be mocked otherwise it will be called and
     # disturb the global settings for the logger used in qualle. Without mocking this method
     # a unit test fails, namely test_debug_prints_time_if_activated() inside tests/test_pipeline.py
-    mock_config_logging = mocker.patch(
-        "qualle.interface.cli.config_logging", return_value="foo"
-    )
+    _ = mocker.patch("qualle.interface.cli.config_logging", return_value="foo")
 
     train_data_path = train_args_dict["train_data_path"]
     output = train_args_dict["output"]
