@@ -36,6 +36,7 @@ def evaluator(train_data):
     return Evaluator(train_data, qe_p)
 
 
+@pytest.mark.filterwarnings("ignore:invalid value encountered in divide:RuntimeWarning")
 def test_evaluate_returns_scores(evaluator):
     scores = evaluator.evaluate()
 

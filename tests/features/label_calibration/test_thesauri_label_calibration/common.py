@@ -15,13 +15,16 @@ from rdflib import URIRef
 
 DUMMY_SUBTHESAURUS_TYPE = URIRef("http://type/Thsys")
 DUMMY_CONCEPT_TYPE = URIRef("http://type/Descriptor")
+DUMMY_UNKNOWN_TYPE = URIRef("http://type/Unknown")
 
 SUBTHESAURUS_A = URIRef("http://thsys/A")
 SUBTHESAURUS_B = URIRef("http://thsys/B")
 SUBTHESAURUS_C = URIRef("http://thsys/C")
+SUBTHESAURUS_D = URIRef("http://thsys/D")
 
 CONCEPT_URI_PREFIX = "http://concept"
 CONCEPT_x0 = "x0"
 CONCEPT_x1 = "x1"
 CONCEPT_x2 = "x2"
 CONCEPT_INVALID = "invalid"
+CONCEPT_UNKOWN = "unknown"

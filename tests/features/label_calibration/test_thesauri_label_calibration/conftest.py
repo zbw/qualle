@@ -27,12 +27,15 @@ def graph():
     c_x0 = URIRef(f"{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x0}")
     c_x1 = URIRef(f"{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x1}")
     c_x2 = URIRef(f"{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_x2}")
+    c_unkown = URIRef(f"{c.CONCEPT_URI_PREFIX}/{c.CONCEPT_UNKOWN}")
 
     g = Graph()
     for s in (c.SUBTHESAURUS_A, c.SUBTHESAURUS_B, c.SUBTHESAURUS_C):
         g.add((s, RDF.type, c.DUMMY_SUBTHESAURUS_TYPE))
     for concept in (c_x0, c_x1, c_x2):
         g.add((concept, RDF.type, c.DUMMY_CONCEPT_TYPE))
+
+    g.add((c_unkown, RDF.type, c.DUMMY_UNKNOWN_TYPE))
 
     g.add(
         (
@@ -75,6 +78,13 @@ def graph():
             c.SUBTHESAURUS_C,
             SKOS.narrower,
             c_x2,
+        )
+    )
+    g.add(
+        (
+            c.SUBTHESAURUS_D,
+            SKOS.narrower,
+            c_unkown,
         )
     )
     return g

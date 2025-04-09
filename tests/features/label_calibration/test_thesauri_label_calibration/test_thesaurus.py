@@ -16,9 +16,10 @@ from rdflib import URIRef, Graph
 
 from qualle.features.label_calibration.thesauri_label_calibration import Thesaurus
 from tests.features.label_calibration.test_thesauri_label_calibration import common as c
+import logging
 
 
-def test_get_concepts_for_thesaurus(thesaurus):
+def test_get_concepts_for_thesaurus(thesaurus, caplog):
     concepts = thesaurus.get_concepts_for_subthesaurus(c.SUBTHESAURUS_A)
     assert concepts == {c.CONCEPT_x0, c.CONCEPT_x1, c.CONCEPT_x2}
 
@@ -27,6 +28,14 @@ def test_get_concepts_for_thesaurus(thesaurus):
 
     concepts = thesaurus.get_concepts_for_subthesaurus(c.SUBTHESAURUS_C)
     assert concepts == {c.CONCEPT_x2}
+
+    caplog.set_level(logging.WARNING)
+    concepts = thesaurus.get_concepts_for_subthesaurus(c.SUBTHESAURUS_D)
+    assert concepts == set()
+    assert (
+        f"unknown narrower type {c.CONCEPT_URI_PREFIX}/{c.CONCEPT_UNKOWN}"
+        in caplog.text
+    )
 
 
 def test_get_concepts_for_thesaurus_not_found_returns_empty(thesaurus):
