@@ -433,9 +433,9 @@ def test_cli_entrypoint_for_train_parser_with_slc(
         args_passed.quality_estimator_regressor
         == train_args_dict_with_slc["quality_estimator_regressor"]
     )
-    assert args_passed.slc == True
+    assert args_passed.slc
     assert Path(args_passed.thsys[0]) == train_args_dict_with_slc["thsys"][0]
     assert args_passed.s_type == train_args_dict_with_slc["s_type"]
     assert args_passed.c_type == train_args_dict_with_slc["c_type"]
     assert args_passed.c_uri_prefix == train_args_dict_with_slc["c_uri_prefix"]
-    assert args_passed.use_sparse_count_matrix == False
+    assert not args_passed.use_sparse_count_matrix
