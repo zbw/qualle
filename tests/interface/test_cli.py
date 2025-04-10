@@ -497,7 +497,7 @@ def test_add_train_parser(mocker, train_args_dict):
     mock_train_func.assert_called_once_with(args)
 
 
-def test_add_slc_group(mocker, train_args_dict_with_slc):
+def test_add_slc_group(train_args_dict_with_slc):
     thsys_data_path = train_args_dict_with_slc["thsys"][0]
     parser = argparse.ArgumentParser()
     cli.add_slc_group(parser)
