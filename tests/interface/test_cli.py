@@ -383,3 +383,59 @@ def test_cli_entrypoint_for_train_parser_without_slc(
         args_passed.quality_estimator_regressor
         == train_args_dict["quality_estimator_regressor"]
     )
+
+
+def test_cli_entrypoint_for_train_parser_with_slc(
+    mocker, monkeypatch, train_args_dict_with_slc
+):
+    mock_train_func = mocker.patch("qualle.interface.cli.handle_train")
+
+    # config_logging() method needs to be mocked otherwise it will be called and
+    # disturb the global settings for the logger used in qualle. Without mocking this method
+    # a unit test fails, namely test_debug_prints_time_if_activated() inside tests/test_pipeline.py
+    _ = mocker.patch("qualle.interface.cli.config_logging", return_value="foo")
+
+    train_data_path = train_args_dict_with_slc["train_data_path"]
+    output = train_args_dict_with_slc["output"]
+    thsys_data_path = train_args_dict_with_slc["thsys"][0]
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cli.py",
+            "train",
+            str(train_data_path),
+            str(output),
+            "--label-calibrator-regressor="
+            + train_args_dict_with_slc["label_calibrator_regressor"][0],
+            "--quality-estimator-regressor="
+            + train_args_dict_with_slc["quality_estimator_regressor"][0],
+            "--slc",
+            "--thsys=" + str(thsys_data_path),
+            "--s-type=" + train_args_dict_with_slc["s_type"][0],
+            "--c-type=" + train_args_dict_with_slc["c_type"][0],
+            "--c-uri-prefix=" + train_args_dict_with_slc["c_uri_prefix"][0],
+        ],
+    )
+
+    cli.cli_entrypoint()
+    args_passed = mock_train_func.call_args[0][0]
+    assert (
+        Path(args_passed.train_data_path) == train_args_dict_with_slc["train_data_path"]
+    )
+    assert Path(args_passed.output) == Path(train_args_dict_with_slc["output"])
+    assert (
+        args_passed.label_calibrator_regressor
+        == train_args_dict_with_slc["label_calibrator_regressor"]
+    )
+    assert (
+        args_passed.quality_estimator_regressor
+        == train_args_dict_with_slc["quality_estimator_regressor"]
+    )
+    assert args_passed.slc == True
+    assert Path(args_passed.thsys[0]) == train_args_dict_with_slc["thsys"][0]
+    assert args_passed.s_type == train_args_dict_with_slc["s_type"]
+    assert args_passed.c_type == train_args_dict_with_slc["c_type"]
+    assert args_passed.c_uri_prefix == train_args_dict_with_slc["c_uri_prefix"]
+    assert args_passed.use_sparse_count_matrix == False
