@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 from argparse import Namespace
-
+import argparse
 import pytest
 import sys
 import qualle.interface.cli as cli
@@ -439,3 +439,124 @@ def test_cli_entrypoint_for_train_parser_with_slc(
     assert args_passed.c_type == train_args_dict_with_slc["c_type"]
     assert args_passed.c_uri_prefix == train_args_dict_with_slc["c_uri_prefix"]
     assert not args_passed.use_sparse_count_matrix
+
+
+def test_add_eval_parser(mocker, tmp_path, mdl_path):
+    test_data_path = tmp_path / "testdata"
+    test_data_path.mkdir()
+    mock_eval_func = mocker.patch("qualle.interface.cli.handle_eval")
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(
+        title="Subcommands", required=True, dest="command"
+    )
+    cli.add_eval_parser(subparsers)
+    args = parser.parse_args(["eval", str(test_data_path), str(mdl_path)])
+
+    assert args.command == "eval"
+    assert Path(args.test_data_path) == test_data_path
+    assert Path(args.model) == mdl_path
+    assert args.func == mock_eval_func
+
+    args.func(args)
+    mock_eval_func.assert_called_once_with(args)
+
+
+def test_add_train_parser(mocker, train_args_dict):
+    train_data_path = train_args_dict["train_data_path"]
+    output = train_args_dict["output"]
+    mock_train_func = mocker.patch("qualle.interface.cli.handle_train")
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(
+        title="Subcommands", required=True, dest="command"
+    )
+    cli.add_train_parser(subparsers)
+    args = parser.parse_args(
+        [
+            "train",
+            str(train_data_path),
+            str(output),
+            "--label-calibrator-regressor="
+            + train_args_dict["label_calibrator_regressor"][0],
+            "--quality-estimator-regressor="
+            + train_args_dict["quality_estimator_regressor"][0],
+        ]
+    )
+    assert args.command == "train"
+    assert Path(args.train_data_path) == train_args_dict["train_data_path"]
+    assert Path(args.output) == Path(train_args_dict["output"])
+    assert (
+        args.label_calibrator_regressor == train_args_dict["label_calibrator_regressor"]
+    )
+    assert (
+        args.quality_estimator_regressor
+        == train_args_dict["quality_estimator_regressor"]
+    )
+    assert args.func == mock_train_func
+
+    args.func(args)
+    mock_train_func.assert_called_once_with(args)
+
+
+def test_add_slc_group(mocker, train_args_dict_with_slc):
+    thsys_data_path = train_args_dict_with_slc["thsys"][0]
+    parser = argparse.ArgumentParser()
+    cli.add_slc_group(parser)
+    args = parser.parse_args(
+        [
+            "--slc",
+            "--thsys=" + str(thsys_data_path),
+            "--s-type=" + train_args_dict_with_slc["s_type"][0],
+            "--c-type=" + train_args_dict_with_slc["c_type"][0],
+            "--c-uri-prefix=" + train_args_dict_with_slc["c_uri_prefix"][0],
+        ]
+    )
+    assert args.slc
+    assert Path(args.thsys[0]) == train_args_dict_with_slc["thsys"][0]
+    assert args.s_type == train_args_dict_with_slc["s_type"]
+    assert args.c_type == train_args_dict_with_slc["c_type"]
+    assert args.c_uri_prefix == train_args_dict_with_slc["c_uri_prefix"]
+    assert not args.use_sparse_count_matrix
+
+    group_titles = [group.title for group in parser._action_groups]
+    assert "subthesauri-label-calibration" in group_titles
+
+
+def test_add_rest_parser(mocker, mdl_path):
+    mock_rest_func = mocker.patch("qualle.interface.cli.handle_rest")
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(
+        title="Subcommands", required=True, dest="command"
+    )
+    cli.add_rest_parser(subparsers)
+    args = parser.parse_args(["rest", str(mdl_path), "--host=x", "--port=9000"])
+
+    assert args.command == "rest"
+    assert Path(args.model) == mdl_path
+    assert args.host == ["x"]
+    assert args.port == [9000]
+    assert args.func == mock_rest_func
+
+    args.func(args)
+    mock_rest_func.assert_called_once_with(args)
+
+
+def test_add_predict_parser(mocker, tmp_path, tsv_file_path, mdl_path):
+    output_path = tmp_path / "output.txt"
+    mock_predict_func = mocker.patch("qualle.interface.cli.handle_predict")
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(
+        title="Subcommands", required=True, dest="command"
+    )
+    cli.add_predict_parser(subparsers)
+    args = parser.parse_args(
+        ["predict", str(tsv_file_path), str(mdl_path), "--output=" + str(output_path)]
+    )
+
+    assert args.command == "predict"
+    assert Path(args.predict_data_path) == tsv_file_path
+    assert Path(args.model) == mdl_path
+    assert args.output == [output_path]
+    assert args.func == mock_predict_func
+
+    args.func(args)
+    mock_predict_func.assert_called_once_with(args)

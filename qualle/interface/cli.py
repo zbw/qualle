@@ -138,28 +138,7 @@ def handle_predict(args: argparse.Namespace):
     predict(settings)
 
 
-def cli_entrypoint():
-    parser = argparse.ArgumentParser(
-        description="Quality Estimation for Automatic Subject Indexing"
-    )
-
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Set Log Level to Debug",
-        dest="should_debug",
-    )
-    parser.add_argument(
-        "--logging-conf",
-        nargs=1,
-        type=str,
-        help="Path to logging config file in configparser format. "
-        'The name of the logger which has to be configured is "qualle"',
-    )
-    subparsers = parser.add_subparsers(
-        title="Subcommands", required=True, dest="command"
-    )
-
+def add_eval_parser(subparsers: argparse._SubParsersAction):
     eval_parser = subparsers.add_parser(
         "eval", description="Run evaluation on training data."
     )
@@ -174,57 +153,9 @@ def cli_entrypoint():
     )
     eval_parser.add_argument("model", type=str, help=PATH_TO_MODEL_FILE_STR)
 
-    train_parser = subparsers.add_parser(
-        "train", description="Run training using default estimator."
-    )
-    train_parser.set_defaults(func=handle_train)
-    train_parser.add_argument(
-        "train_data_path",
-        type=str,
-        help="Path to train data. "
-        "Accepted inputs are either a tsv file or "
-        "a folder in Annif format.",
-    )
-    train_parser.add_argument("output", type=str, help="Path to output model file")
-    train_parser.add_argument(
-        "--features",
-        "-f",
-        choices=["all", "confidence", "text"],
-        action="append",
-        type=str,
-        help="Use features in addition to Label Calibration. "
-        "Can be passed multiple times. "
-        'If "all" is passed, all features will be used.',
-    )
-    train_parser.add_argument(
-        "--label-calibrator-regressor",
-        type=str,
-        nargs=1,
-        help="Specifiy regressor to use for Label Calibration in JSON format."
-        'Requires property "class" with fully qualified name of the '
-        "scikit-learn regressor class to use  for the Label Calibrator. "
-        'E.g.: {"class": "sklearn.ensemble.GradientBoostingRegressor",'
-        '"min_samples_leaf": 30, "max_depth": 5, "n_estimators": 10} ',
-        default=[
-            '{"class": "sklearn.ensemble.GradientBoostingRegressor",'
-            '"min_samples_leaf": 30, "max_depth": 5, "n_estimators": 10}'
-        ],
-    )
-    train_parser.add_argument(
-        "--quality-estimator-regressor",
-        type=str,
-        nargs=1,
-        help="Specifiy regressor to use for Label Calibration in JSON format."
-        'Requires property "class" with fully qualified name of the '
-        "scikit-learn regressor class to use  for the Quality Estimator. "
-        'E.g.: {"class": "sklearn.ensemble.GradientBoostingRegressor",'
-        '"min_samples_leaf": 30, "max_depth": 5, "n_estimators": 10} ',
-        default=[
-            '{"class": "sklearn.ensemble.GradientBoostingRegressor",'
-            '"n_estimators": 10, "max_depth": 8}'
-        ],
-    )
-    slc_group = train_parser.add_argument_group(
+
+def add_slc_group(parsers: argparse.ArgumentParser):
+    slc_group = parsers.add_argument_group(
         "subthesauri-label-calibration",
         description="Run Label Calibration by distinguishing between label "
         "count for different subthesauri. "
@@ -282,6 +213,62 @@ def cli_entrypoint():
         " if the distribution of labels over Subthesauri is sparse.",
     )
 
+
+def add_train_parser(subparsers: argparse._SubParsersAction):
+    train_parser = subparsers.add_parser(
+        "train", description="Run training using default estimator."
+    )
+    train_parser.set_defaults(func=handle_train)
+    train_parser.add_argument(
+        "train_data_path",
+        type=str,
+        help="Path to train data. "
+        "Accepted inputs are either a tsv file or "
+        "a folder in Annif format.",
+    )
+    train_parser.add_argument("output", type=str, help="Path to output model file")
+    train_parser.add_argument(
+        "--features",
+        "-f",
+        choices=["all", "confidence", "text"],
+        action="append",
+        type=str,
+        help="Use features in addition to Label Calibration. "
+        "Can be passed multiple times. "
+        'If "all" is passed, all features will be used.',
+    )
+    train_parser.add_argument(
+        "--label-calibrator-regressor",
+        type=str,
+        nargs=1,
+        help="Specifiy regressor to use for Label Calibration in JSON format."
+        'Requires property "class" with fully qualified name of the '
+        "scikit-learn regressor class to use  for the Label Calibrator. "
+        'E.g.: {"class": "sklearn.ensemble.GradientBoostingRegressor",'
+        '"min_samples_leaf": 30, "max_depth": 5, "n_estimators": 10} ',
+        default=[
+            '{"class": "sklearn.ensemble.GradientBoostingRegressor",'
+            '"min_samples_leaf": 30, "max_depth": 5, "n_estimators": 10}'
+        ],
+    )
+    train_parser.add_argument(
+        "--quality-estimator-regressor",
+        type=str,
+        nargs=1,
+        help="Specifiy regressor to use for Label Calibration in JSON format."
+        'Requires property "class" with fully qualified name of the '
+        "scikit-learn regressor class to use  for the Quality Estimator. "
+        'E.g.: {"class": "sklearn.ensemble.GradientBoostingRegressor",'
+        '"min_samples_leaf": 30, "max_depth": 5, "n_estimators": 10} ',
+        default=[
+            '{"class": "sklearn.ensemble.GradientBoostingRegressor",'
+            '"n_estimators": 10, "max_depth": 8}'
+        ],
+    )
+    add_slc_group(train_parser)
+
+
+def add_rest_parser(subparsers: argparse._SubParsersAction):
     rest_parser = subparsers.add_parser(
         "rest", description="Run Qualle as REST Webservice with predict endpoint"
     )
@@ -294,6 +281,8 @@ def cli_entrypoint():
     )
     rest_parser.set_defaults(func=handle_rest)
 
+
+def add_predict_parser(subparsers: argparse._SubParsersAction):
     predict_parser = subparsers.add_parser(
         "predict",
         description="Predict the quality for a collection of automated "
@@ -320,6 +309,34 @@ def cli_entrypoint():
         "line of the tsv file is written to the output on a separate "
         "line, preserving the order in the tsv file.",
     )
+
+
+def cli_entrypoint():
+    parser = argparse.ArgumentParser(
+        description="Quality Estimation for Automatic Subject Indexing"
+    )
+
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Set Log Level to Debug",
+        dest="should_debug",
+    )
+    parser.add_argument(
+        "--logging-conf",
+        nargs=1,
+        type=str,
+        help="Path to logging config file in configparser format. "
+        'The name of the logger which has to be configured is "qualle"',
+    )
+    subparsers = parser.add_subparsers(
+        title="Subcommands", required=True, dest="command"
+    )
+
+    add_eval_parser(subparsers)
+    add_train_parser(subparsers)
+    add_rest_parser(subparsers)
+    add_predict_parser(subparsers)
 
     args = parser.parse_args()
 
