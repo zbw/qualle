@@ -15,6 +15,7 @@ from argparse import Namespace
 import argparse
 import pytest
 import sys
+import logging
 import qualle.interface.cli as cli
 from qualle.interface.config import (
     FeaturesEnum,
@@ -560,3 +561,47 @@ def test_add_predict_parser(mocker, tmp_path, tsv_file_path, mdl_path):
 
     args.func(args)
     mock_predict_func.assert_called_once_with(args)
+
+
+def test_config_logging_with_file(mocker, tmp_path):
+    config_file = tmp_path / "logging.conf"
+    config_file.touch()
+
+    dummy_logger = logging.getLogger("foo")
+    dummy_logger.addHandler(logging.NullHandler())
+
+    mocker.patch("qualle.interface.cli.get_logger", return_value=dummy_logger)
+    mock_config_file = mocker.patch("qualle.interface.cli.logging.config.fileConfig")
+    cli.config_logging(config_file)
+    mock_config_file.assert_called_once_with(config_file)
+
+
+def test_config_logging_with_debug(mocker):
+    dummy_logger = logging.getLogger("bar")
+    dummy_logger.addHandler(logging.NullHandler())
+
+    mocker.patch("qualle.interface.cli.get_logger", return_value=dummy_logger)
+
+    cli.config_logging(debug=True)
+    handlers = dummy_logger.handlers
+    assert any(isinstance(h, logging.StreamHandler) for h in handlers)
+    for h in handlers:
+        if isinstance(h, logging.StreamHandler):
+            assert h.level == logging.DEBUG
+
+    assert dummy_logger.isEnabledFor(logging.DEBUG)
+
+
+def test_config_logging_without_debug(mocker):
+    dummy_logger = logging.getLogger("baz")
+    dummy_logger.addHandler(logging.NullHandler())
+
+    mocker.patch("qualle.interface.cli.get_logger", return_value=dummy_logger)
+
+    cli.config_logging()
+    handlers = dummy_logger.handlers
+    assert any(isinstance(h, logging.StreamHandler) for h in handlers)
+    for h in handlers:
+        if isinstance(h, logging.StreamHandler):
+            assert h.level == logging.INFO
+    assert dummy_logger.isEnabledFor(logging.INFO)
