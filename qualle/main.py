@@ -15,5 +15,9 @@
 from qualle.interface.cli import cli_entrypoint
 
 
-if __name__ == "__main__":
+def main():
     cli_entrypoint()
+
+
+if __name__ == "__main__":
+    main()  # pragma: no cover
