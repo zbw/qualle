@@ -14,7 +14,6 @@
 import pytest
 import qualle.main as main
 import sys
-import runpy
 import subprocess
 
 
