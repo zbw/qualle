@@ -38,6 +38,11 @@ ruff = "~0.9"
 [tool.ruff.lint]
 ignore = ["E203"]
 
+[tool.coverage.report]
+exclude_also = [
+    'if __name__ == .__main__.:',
+]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
