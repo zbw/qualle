@@ -38,6 +38,11 @@ ruff = "~0.9"
 [tool.ruff.lint]
 ignore = ["E203"]
 
+[tool.coverage.run]
+omit = [
+    "qualle/main.py",
+]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
