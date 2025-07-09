@@ -30,4 +30,4 @@ RUN poetry install --without dev,ci \
 	&& pip uninstall -y poetry \
 	&& rm -rf /root/.cache/pypoetry
 
-CMD gunicorn "qualle.interface.rest:create_app()"  -b 0.0.0.0 -k "uvicorn.workers.UvicornWorker"
+CMD ["gunicorn", "qualle.interface.rest:create_app()", "-b", "0.0.0.0", "-k", "uvicorn.workers.UvicornWorker"]
