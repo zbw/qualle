@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM python:3.9-slim-bullseye
+FROM python:3.10-slim-bullseye
 LABEL maintainer="AutoSE <AutoSE@zbw.eu>"
 
 ARG POETRY_VIRTUALENVS_CREATE=false
