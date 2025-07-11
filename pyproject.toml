@@ -23,20 +23,21 @@ fastapi = "~0.115"
 uvicorn = "~0.34"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "~8.3"
+pytest = "~8.4"
 pytest-mock = "~3.14"
 pytest-cov = "~6.0"
 httpx = "*"
-black = "^24.3"
+black = "~25.1"
 pre-commit = "~4.1"
 
 [tool.poetry.group.ci.dependencies]
-safety = "2.3.4"
+safety = "~3.5.2"
 bandit = "~1.8"
-ruff = "~0.9"
+ruff = "~0.12"
 
 [tool.ruff.lint]
 ignore = ["E203"]
+target-version = "py310"
 
 [tool.coverage.run]
 omit = [
