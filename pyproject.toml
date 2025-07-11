@@ -12,6 +12,7 @@ classifiers = [
 homepage = "https://github.com/zbw/qualle"
 
 [project]
+name = "qualle"
 requires-python = ">=3.10"
 
 [tool.poetry.dependencies]
