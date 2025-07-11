@@ -29,10 +29,10 @@ uvicorn = "~0.34"
 [tool.poetry.group.dev.dependencies]
 pytest = "~8.4"
 pytest-mock = "~3.14"
-pytest-cov = "~6.0"
+pytest-cov = "~6.2"
 httpx = "*"
 black = "~25.1"
-pre-commit = "~4.1"
+pre-commit = "~4.2"
 
 [tool.poetry.group.ci.dependencies]
 safety = "~3.5.2"
