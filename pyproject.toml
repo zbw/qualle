@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qualle"
-version = "0.4.3-dev"
+version = "0.5.0-dev"
 description = "A framework to predict the quality of a multi-label classification result"
 authors = ["AutoSE <autose@zbw.eu>"]
 license = "Apache-2.0"
@@ -12,28 +12,31 @@ classifiers = [
 homepage = "https://github.com/zbw/qualle"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
-scipy = "~1.13"
+python = ">=3.10,<3.14"
+scipy = "~1.15"
 numpy = "2.0.0"
 scikit-learn = "~1.5"
-rdflib = "7.0.*"
+rdflib = "~7.1"
 pydantic = "~2.8"
-pydantic-settings = "~2.7"
+pydantic-settings = "~2.10"
 fastapi = "~0.115"
 uvicorn = "~0.34"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "~8.3"
+pytest = "~8.4"
 pytest-mock = "~3.14"
-pytest-cov = "~6.0"
+pytest-cov = "~6.2"
 httpx = "*"
-black = "^24.3"
-pre-commit = "~4.1"
+black = "~25.1"
+pre-commit = "~4.2"
 
 [tool.poetry.group.ci.dependencies]
-safety = "2.3.4"
+safety = "~3.5.2"
 bandit = "~1.8"
-ruff = "~0.9"
+ruff = "~0.12"
+
+[tool.ruff]
+target-version = "py310"
 
 [tool.ruff.lint]
 ignore = ["E203"]
