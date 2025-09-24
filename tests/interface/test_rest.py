@@ -90,7 +90,7 @@ def test_return_http_422_for_predict(client, documents):
     for doc in docs:
         del doc["predicted_labels"]
     resp = client.post(PREDICT_ENDPOINT, json=docs)
-    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert resp.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_return_scores_for_predict(client, documents):
