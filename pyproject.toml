@@ -31,7 +31,7 @@ black = "~25.1"
 pre-commit = "~4.2"
 
 [tool.poetry.group.ci.dependencies]
-safety = "~3.6.1"
+safety = "~3.6.2"
 bandit = "~1.8"
 ruff = "~0.12"
 
