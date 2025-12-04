@@ -17,8 +17,8 @@ LABEL maintainer="AutoSE <AutoSE@zbw.eu>"
 
 ARG POETRY_VIRTUALENVS_CREATE=false
 
-RUN pip install --upgrade pip --no-cache-dir
-RUN pip install poetry gunicorn==23.0.* "uvicorn[standard]==0.34" --no-cache-dir
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt --no-deps --no-cache-dir
 
 COPY pyproject.toml poetry.lock README.md  /app/
 
