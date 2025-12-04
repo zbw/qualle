@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM python:3.10-slim-bullseye
+FROM python:3.10-slim-trixie@sha256:c299e10e0070171113f9a1f109dd05e7e634fa94589b056e0e87bb22b2b382a2
 LABEL maintainer="AutoSE <AutoSE@zbw.eu>"
 
 ARG POETRY_VIRTUALENVS_CREATE=false
