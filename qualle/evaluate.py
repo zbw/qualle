@@ -11,7 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import List, Dict
+from typing import Dict, List
 
 import numpy as np
 from sklearn.metrics import explained_variance_score, mean_squared_error

@@ -15,7 +15,7 @@ import csv
 from collections import namedtuple
 from pathlib import Path
 
-from qualle.models import TrainData, PredictData
+from qualle.models import PredictData, TrainData
 
 _Data = namedtuple("data", ["docs", "predicted_labels", "scores", "true_labels"])
 

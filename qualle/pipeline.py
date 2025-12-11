@@ -12,14 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 from contextlib import contextmanager
-from typing import List, Callable, Any, Collection
+from typing import Any, Callable, Collection, List
 
 from sklearn.model_selection import cross_val_predict
 
 from qualle.features.label_calibration.base import AbstractLabelCalibrator
-from qualle.models import TrainData, PredictData, LabelCalibrationData
+from qualle.models import LabelCalibrationData, PredictData, TrainData
 from qualle.quality_estimation import QualityEstimator
-from qualle.utils import recall, get_logger, timeit
+from qualle.utils import get_logger, recall, timeit
 
 
 class QualityEstimationPipeline:

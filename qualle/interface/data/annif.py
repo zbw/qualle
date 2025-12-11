@@ -14,9 +14,9 @@
 from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Tuple, Iterable, Any
+from typing import Any, Iterable, List, Tuple
 
-from qualle.models import TrainData, PredictData
+from qualle.models import PredictData, TrainData
 
 DocumentId = str
 Score = float

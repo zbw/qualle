@@ -13,7 +13,7 @@
 #  limitations under the License.
 import pytest
 
-from qualle.models import TrainData, PredictData
+from qualle.models import PredictData, TrainData
 
 
 @pytest.fixture

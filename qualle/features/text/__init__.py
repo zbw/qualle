@@ -17,10 +17,10 @@ from sklearn.pipeline import FeatureUnion
 
 from qualle.features.text.count import (
     CountCharsFeature,
-    CountWordsFeature,
+    CountDigitsFeature,
     CountSpecialCharsFeature,
     CountUpperCharsFeature,
-    CountDigitsFeature,
+    CountWordsFeature,
 )
 
 _NAME_VECTOR_FEATURE = "vectorizer"

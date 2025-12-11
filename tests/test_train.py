@@ -18,12 +18,12 @@ from sklearn.ensemble import ExtraTreesRegressor
 
 from qualle.features.confidence import ConfidenceFeatures
 from qualle.features.label_calibration.simple_label_calibration import (
-    SimpleLabelCalibrator,
     SimpleLabelCalibrationFeatures,
+    SimpleLabelCalibrator,
 )
 from qualle.features.text import TextFeatures
 from qualle.models import LabelCalibrationData
-from qualle.train import Trainer, FeaturesDataMapper
+from qualle.train import FeaturesDataMapper, Trainer
 
 
 @pytest.fixture

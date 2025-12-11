@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import List, Union
 
 import numpy as np
-from pydantic import model_validator, BaseModel
+from pydantic import BaseModel, model_validator
 from scipy.sparse import spmatrix
 
 Labels = List[str]

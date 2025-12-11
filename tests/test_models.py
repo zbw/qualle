@@ -16,7 +16,6 @@ from pydantic import ValidationError
 
 from qualle.models import PredictData, TrainData
 
-
 DUMMY_DOCS = ["doc1", "doc2"]
 DUMMY_PRED_LABELS_1 = [["label 1"]]
 DUMMY_PRED_LABELS_2 = [["label 1"], ["label 2"]]

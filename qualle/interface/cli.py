@@ -21,15 +21,15 @@ import logging.config
 from pathlib import Path
 
 from qualle.interface.config import (
-    TrainSettings,
-    SubthesauriLabelCalibrationSettings,
-    RegressorSettings,
     EvalSettings,
     FeaturesEnum,
-    RESTSettings,
     PredictSettings,
+    RegressorSettings,
+    RESTSettings,
+    SubthesauriLabelCalibrationSettings,
+    TrainSettings,
 )
-from qualle.interface.internal import train, evaluate, predict
+from qualle.interface.internal import evaluate, predict, train
 from qualle.interface.rest import run
 from qualle.utils import get_logger
 

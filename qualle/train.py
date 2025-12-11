@@ -11,12 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from typing import Set, Type, List
+from typing import List, Set, Type
 
 from sklearn.base import RegressorMixin
 
 from qualle.features.base import Features
-from qualle.features.combined import CombinedFeaturesData, CombinedFeatures
+from qualle.features.combined import CombinedFeatures, CombinedFeaturesData
 from qualle.features.confidence import ConfidenceFeatures
 from qualle.features.label_calibration.base import AbstractLabelCalibrator
 from qualle.features.label_calibration.simple_label_calibration import (
@@ -26,7 +26,7 @@ from qualle.features.label_calibration.thesauri_label_calibration import (
     ThesauriLabelCalibrationFeatures,
 )
 from qualle.features.text import TextFeatures
-from qualle.models import PredictData, LabelCalibrationData
+from qualle.models import LabelCalibrationData, PredictData
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import QualityEstimator
 

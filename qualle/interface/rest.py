@@ -17,7 +17,7 @@ from functools import lru_cache
 from typing import List, Optional
 
 import uvicorn
-from fastapi import status, FastAPI, Depends, APIRouter
+from fastapi import APIRouter, Depends, FastAPI, status
 from pydantic.main import BaseModel
 
 from qualle.interface.config import RESTSettings

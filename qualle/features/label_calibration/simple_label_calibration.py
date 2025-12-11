@@ -21,7 +21,7 @@ from sklearn.utils.validation import check_is_fitted
 from qualle.features.base import Features
 from qualle.features.label_calibration.base import AbstractLabelCalibrator
 from qualle.label_calibration.simple import LabelCalibrator
-from qualle.models import LabelCalibrationData, Documents, Labels
+from qualle.models import Documents, LabelCalibrationData, Labels
 
 
 def transform_to_label_count(X: List[Labels]) -> np.array:
