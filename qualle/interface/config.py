@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from pydantic import (
+    AfterValidator,
     DirectoryPath,
     FilePath,
     PlainValidator,
@@ -39,6 +40,7 @@ AnyUrlAdapter = TypeAdapter(Annotated[AnyUrl, UrlConstraints(preserve_empty_path
 HttpUrlStr = Annotated[
     str,
     PlainValidator(lambda x: AnyUrlAdapter.validate_strings(x)),
+    AfterValidator(lambda x: str(x)),
 ]
 
 
