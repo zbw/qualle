@@ -16,10 +16,10 @@ import pytest
 
 from qualle.features.text import (
     CountCharsFeature,
-    CountWordsFeature,
+    CountDigitsFeature,
     CountSpecialCharsFeature,
     CountUpperCharsFeature,
-    CountDigitsFeature,
+    CountWordsFeature,
 )
 from qualle.features.text.count import TextCountFeature
 

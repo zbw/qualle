@@ -12,24 +12,25 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import json
+from pathlib import Path
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 
 from qualle.interface.config import RESTSettings
 from qualle.interface.rest import (
-    Document,
-    QualityScores,
-    QualityEstimation,
-    Metric,
-    _map_documents_to_predict_data,
-    Documents,
-    create_app,
     PREDICT_ENDPOINT,
-    run,
+    Document,
+    Documents,
+    Metric,
+    QualityEstimation,
+    QualityScores,
+    _map_documents_to_predict_data,
+    create_app,
     load_model,
+    run,
 )
-from pathlib import Path
 
 
 @pytest.fixture

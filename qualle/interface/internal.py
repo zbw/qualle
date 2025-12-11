@@ -16,31 +16,33 @@
 
 from importlib import import_module
 from pathlib import Path
-from typing import Type, Optional, List, Any, Union
+from typing import Any, List, Optional, Type, Union
 
 from joblib import dump, load
 from rdflib import Graph, URIRef
 
 from qualle.evaluate import Evaluator
 from qualle.features.label_calibration.simple_label_calibration import (
-    SimpleLabelCalibrator,
     SimpleLabelCalibrationFeatures,
+    SimpleLabelCalibrator,
 )
 from qualle.features.label_calibration.thesauri_label_calibration import (
-    ThesauriLabelCalibrator,
-    ThesauriLabelCalibrationFeatures,
     LabelCountForSubthesauriTransformer,
+    ThesauriLabelCalibrationFeatures,
+    ThesauriLabelCalibrator,
     Thesaurus,
 )
-from qualle.interface.config import TrainSettings, EvalSettings, PredictSettings
-from qualle.models import TrainData, PredictData
-from qualle.train import Trainer
-from qualle.utils import get_logger, timeit
+from qualle.interface.config import EvalSettings, PredictSettings, TrainSettings
 from qualle.interface.data.annif import AnnifHandler
 from qualle.interface.data.tsv import (
-    load_train_input as load_tsv_train_input,
     load_predict_input,
 )
+from qualle.interface.data.tsv import (
+    load_train_input as load_tsv_train_input,
+)
+from qualle.models import PredictData, TrainData
+from qualle.train import Trainer
+from qualle.utils import get_logger, timeit
 
 
 def train(settings: TrainSettings):

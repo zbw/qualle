@@ -11,12 +11,11 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import pytest
 from pydantic import ValidationError
 
-from qualle.interface.data.tsv import load_train_input, load_predict_input
-from qualle.models import TrainData, PredictData
-
-import pytest
+from qualle.interface.data.tsv import load_predict_input, load_train_input
+from qualle.models import PredictData, TrainData
 
 DOC_TSV = "doc.tsv"
 

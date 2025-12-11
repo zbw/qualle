@@ -13,7 +13,7 @@
 #  limitations under the License.
 from typing import List
 
-from sklearn.base import RegressorMixin, BaseEstimator
+from sklearn.base import BaseEstimator, RegressorMixin
 
 from qualle.models import Documents, Labels
 

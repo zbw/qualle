@@ -11,25 +11,26 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from argparse import Namespace
 import argparse
-import pytest
-import sys
 import logging
-import qualle.interface.cli as cli
-from qualle.interface.config import (
-    FeaturesEnum,
-    RegressorSettings,
-    SubthesauriLabelCalibrationSettings,
-    TrainSettings,
-    EvalSettings,
-    RESTSettings,
-    PredictSettings,
-)
-from qualle.interface.cli import CliValidationError, handle_train, handle_eval
+import sys
+from argparse import Namespace
 from pathlib import Path
 
+import pytest
+
+import qualle.interface.cli as cli
 import tests.interface.common as c
+from qualle.interface.cli import CliValidationError, handle_eval, handle_train
+from qualle.interface.config import (
+    EvalSettings,
+    FeaturesEnum,
+    PredictSettings,
+    RegressorSettings,
+    RESTSettings,
+    SubthesauriLabelCalibrationSettings,
+    TrainSettings,
+)
 
 
 @pytest.fixture

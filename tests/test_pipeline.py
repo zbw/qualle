@@ -19,10 +19,10 @@ from sklearn.ensemble import ExtraTreesRegressor
 
 from qualle.features.combined import CombinedFeatures
 from qualle.features.label_calibration.simple_label_calibration import (
-    SimpleLabelCalibrator,
     SimpleLabelCalibrationFeatures,
+    SimpleLabelCalibrator,
 )
-from qualle.models import TrainData, PredictData
+from qualle.models import PredictData, TrainData
 from qualle.pipeline import QualityEstimationPipeline
 from qualle.quality_estimation import QualityEstimator
 

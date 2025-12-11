@@ -17,27 +17,26 @@ import pytest
 from rdflib import URIRef
 from sklearn.ensemble import GradientBoostingRegressor
 
+import qualle.interface.internal as internal
+import tests.interface.common as c
 from qualle.features.label_calibration.simple_label_calibration import (
-    SimpleLabelCalibrator,
     SimpleLabelCalibrationFeatures,
+    SimpleLabelCalibrator,
 )
 from qualle.features.label_calibration.thesauri_label_calibration import (
-    ThesauriLabelCalibrator,
     ThesauriLabelCalibrationFeatures,
+    ThesauriLabelCalibrator,
 )
 from qualle.features.text import TextFeatures
 from qualle.interface.config import (
-    TrainSettings,
+    EvalSettings,
     FeaturesEnum,
+    PredictSettings,
     RegressorSettings,
     SubthesauriLabelCalibrationSettings,
-    EvalSettings,
-    PredictSettings,
+    TrainSettings,
 )
-import qualle.interface.internal as internal
 from qualle.interface.internal import train
-
-import tests.interface.common as c
 from qualle.models import PredictData, TrainData
 
 TRAINER_CLS_FULL_PATH = "qualle.interface.internal.Trainer"

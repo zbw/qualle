@@ -14,18 +14,19 @@
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Union
-from typing_extensions import Annotated
 
 from pydantic import (
-    model_validator,
-    FilePath,
-    DirectoryPath,
-    TypeAdapter,
-    PlainValidator,
     AfterValidator,
+    DirectoryPath,
+    FilePath,
+    PlainValidator,
+    TypeAdapter,
+    model_validator,
 )
-from pydantic_settings import BaseSettings
 from pydantic.networks import AnyUrl
+from pydantic_settings import BaseSettings
+from typing_extensions import Annotated
+
 from qualle.features.confidence import ConfidenceFeatures
 from qualle.features.text import TextFeatures
 

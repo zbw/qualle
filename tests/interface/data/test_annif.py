@@ -14,7 +14,7 @@
 import pytest
 from pydantic import ValidationError
 
-from qualle.interface.data.annif import AnnifHandler, AnnifTrainData, AnnifPredictData
+from qualle.interface.data.annif import AnnifHandler, AnnifPredictData, AnnifTrainData
 
 DOC_0_CONTENT = "title0\ncontent0"
 DOC_1_CONTENT = "title1\ncontent1"

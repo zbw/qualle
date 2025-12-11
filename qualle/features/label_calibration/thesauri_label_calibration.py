@@ -14,11 +14,11 @@
 
 import logging
 from functools import lru_cache
-from typing import List, Set, Optional
+from typing import List, Optional, Set
 
 import numpy as np
-from rdflib import URIRef, Graph
-from rdflib.namespace import SKOS, RDF
+from rdflib import Graph, URIRef
+from rdflib.namespace import RDF, SKOS
 from scipy.sparse import coo_matrix
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.utils.validation import check_is_fitted
@@ -26,7 +26,7 @@ from sklearn.utils.validation import check_is_fitted
 from qualle.features.base import Features
 from qualle.features.label_calibration.base import AbstractLabelCalibrator
 from qualle.label_calibration.category import MultiCategoryLabelCalibrator
-from qualle.models import Labels, Documents, LabelCalibrationData, Matrix
+from qualle.models import Documents, LabelCalibrationData, Labels, Matrix
 from qualle.utils import get_logger
 
 

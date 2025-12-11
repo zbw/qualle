@@ -20,21 +20,21 @@ from fastapi.testclient import TestClient
 
 from qualle.interface import internal
 from qualle.interface.config import (
-    TrainSettings,
-    FeaturesEnum,
-    RegressorSettings,
     EvalSettings,
-    RESTSettings,
+    FeaturesEnum,
     PredictSettings,
+    RegressorSettings,
+    RESTSettings,
+    TrainSettings,
 )
 from qualle.interface.rest import (
-    create_app,
     PREDICT_ENDPOINT,
-    Documents,
     Document,
+    Documents,
+    Metric,
     QualityEstimation,
     QualityScores,
-    Metric,
+    create_app,
 )
 
 

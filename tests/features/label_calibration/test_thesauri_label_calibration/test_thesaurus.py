@@ -12,11 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from rdflib import URIRef, Graph
+import logging
+
+from rdflib import Graph, URIRef
 
 from qualle.features.label_calibration.thesauri_label_calibration import Thesaurus
 from tests.features.label_calibration.test_thesauri_label_calibration import common as c
-import logging
 
 
 def test_get_concepts_for_thesaurus(thesaurus, caplog):

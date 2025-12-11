@@ -15,13 +15,12 @@
 import numpy as np
 import pytest
 
+import tests.features.label_calibration.test_thesauri_label_calibration.common as c
 from qualle.features.label_calibration.thesauri_label_calibration import (
-    ThesauriLabelCalibrationFeatures,
     NotInitializedException,
+    ThesauriLabelCalibrationFeatures,
 )
 from qualle.models import LabelCalibrationData
-
-import tests.features.label_calibration.test_thesauri_label_calibration.common as c
 
 
 @pytest.fixture
