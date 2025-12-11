@@ -286,7 +286,7 @@ def test_cli_entrypoint_with_eval_parser(mocker, monkeypatch, tmp_path, mdl_path
 
     # config_logging() method needs to be mocked otherwise it will be called and
     # disturb the global settings for the logger used in qualle. This results in
-    # a failed unit test namely, test_debug_prints_time_if_activated() inside 
+    # a failed unit test namely, test_debug_prints_time_if_activated() inside
     # tests/test_pipeline.py
     _ = mocker.patch("qualle.interface.cli.config_logging", return_value="foo")
 
@@ -303,8 +303,8 @@ def test_cli_entrypoint_with_rest_parser(mocker, monkeypatch, mdl_path):
     mock_rest_func = mocker.patch("qualle.interface.cli.handle_rest")
 
     # config_logging() method needs to be mocked otherwise it will be called and
-    # disturb the global settings for the logger used in qualle. Without mocking 
-    # this method a unit test fails, namely test_debug_prints_time_if_activated() 
+    # disturb the global settings for the logger used in qualle. Without mocking
+    # this method a unit test fails, namely test_debug_prints_time_if_activated()
     # inside tests/test_pipeline.py
     _ = mocker.patch("qualle.interface.cli.config_logging", return_value="foo")
 
@@ -325,8 +325,8 @@ def test_cli_entrypoint_with_predict_parser(
     mock_predict_func = mocker.patch("qualle.interface.cli.handle_predict")
 
     # config_logging() method needs to be mocked otherwise it will be called and
-    # disturb the global settings for the logger used in qualle. Without mocking 
-    # this method a unit test fails, namely test_debug_prints_time_if_activated() 
+    # disturb the global settings for the logger used in qualle. Without mocking
+    # this method a unit test fails, namely test_debug_prints_time_if_activated()
     # inside tests/test_pipeline.py
     _ = mocker.patch("qualle.interface.cli.config_logging", return_value="foo")
 
@@ -354,8 +354,8 @@ def test_cli_entrypoint_for_train_parser_without_slc(
     mock_train_func = mocker.patch("qualle.interface.cli.handle_train")
 
     # config_logging() method needs to be mocked otherwise it will be called and
-    # disturb the global settings for the logger used in qualle. Without mocking 
-    # this method a unit test fails, namely test_debug_prints_time_if_activated() 
+    # disturb the global settings for the logger used in qualle. Without mocking
+    # this method a unit test fails, namely test_debug_prints_time_if_activated()
     # inside tests/test_pipeline.py
     _ = mocker.patch("qualle.interface.cli.config_logging", return_value="foo")
 
@@ -397,8 +397,8 @@ def test_cli_entrypoint_for_train_parser_with_slc(
     mock_train_func = mocker.patch("qualle.interface.cli.handle_train")
 
     # config_logging() method needs to be mocked otherwise it will be called and
-    # disturb the global settings for the logger used in qualle. Without mocking 
-    # this method a unit test fails, namely test_debug_prints_time_if_activated() 
+    # disturb the global settings for the logger used in qualle. Without mocking
+    # this method a unit test fails, namely test_debug_prints_time_if_activated()
     # inside tests/test_pipeline.py
     _ = mocker.patch("qualle.interface.cli.config_logging", return_value="foo")
 
