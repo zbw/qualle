@@ -21,6 +21,7 @@ from pydantic import (
     FilePath,
     PlainValidator,
     TypeAdapter,
+    UrlConstraints,
     model_validator,
 )
 from pydantic.networks import AnyUrl
@@ -35,11 +36,11 @@ from qualle.features.text import TextFeatures
 # as if it were a string.  Another problem is that a trailing '/' character is also
 # appended in pydantic v2 and it is being removed in the code block given below.
 
-AnyUrlAdapter = TypeAdapter(AnyUrl)
+AnyUrlAdapter = TypeAdapter(Annotated[AnyUrl, UrlConstraints(preserve_empty_path=True)])
 HttpUrlStr = Annotated[
     str,
     PlainValidator(lambda x: AnyUrlAdapter.validate_strings(x)),
-    AfterValidator(lambda x: str(x).rstrip("/")),
+    AfterValidator(lambda x: str(x)),
 ]
 
 
