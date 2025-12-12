@@ -19,8 +19,8 @@ scikit-learn = "~1.5"
 rdflib = "~7.1"
 pydantic = "~2.12"
 pydantic-settings = "~2.12"
-fastapi = "~0.121"
-uvicorn = "~0.34"
+fastapi = "~0.124"
+uvicorn = "~0.38"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "~8.4"
