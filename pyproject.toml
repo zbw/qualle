@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qualle"
-version = "0.5.2-dev"
+version = "0.6.0-dev"
 description = "A framework to predict the quality of a multi-label classification result"
 authors = ["AutoSE <autose@zbw.eu>"]
 license = "Apache-2.0"
