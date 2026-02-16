@@ -23,7 +23,7 @@ the recall of a MLC result is provided.
 
 ## Requirements
 
-Python ``>= 3.10`` is required.
+Python ``>= 3.10,<3.14`` is required.
 
 ## Installation
 
@@ -143,7 +143,7 @@ To perform the prediction on a MLC result, a REST interface can be started.
 [uvicorn](https://www.uvicorn.org/) is used as HTTP server. You can also use any
 ASGI server implementation and create the ASGI app directly with the method
 ``qualle.interface.rest.create_app``. You need to provide the environment variable
-MDL_FILE with the path to the model (see ``qualle.interface.config.RESTSettings``).
+`MDL_FILE` with the path to the model (see ``qualle.interface.config.RESTSettings``).
 
 The REST endpoint expects a HTTP POST with the result of a MLC for a list of documents
 as body. The format is JSON as specified in ``qualle/openapi.json``. You can also use
