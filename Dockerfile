@@ -12,13 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM python:3.10-slim-trixie@sha256:8769cc10045c67eac267537ff0950ce644eeebd9f0e88bec0604548a88f1f33d
+FROM python:3.10-slim-trixie@sha256:e508a34e5491225a76fbb9e0f43ebde1f691c6a689d096d7510cf7fb17d4ba6f
 LABEL maintainer="AutoSE <AutoSE@zbw.eu>"
 
 ARG POETRY_VIRTUALENVS_CREATE=false
 
 RUN pip install --upgrade pip --no-cache-dir
-RUN pip install poetry gunicorn==23.0.* "uvicorn[standard]==0.38" --no-cache-dir
+RUN pip install poetry gunicorn==23.0.* "uvicorn[standard]==0.40" --no-cache-dir
 
 COPY pyproject.toml poetry.lock README.md  /app/
 

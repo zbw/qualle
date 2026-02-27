@@ -16,18 +16,18 @@ python = ">=3.10,<3.14"
 scipy = "~1.15"
 numpy = "2.0.0"
 scikit-learn = "~1.5"
-rdflib = "~7.1"
+rdflib = "~7.5"
 pydantic = "~2.12"
 pydantic-settings = "~2.12"
-fastapi = "~0.124"
-uvicorn = "~0.38"
+fastapi = "~0.129"
+uvicorn = "~0.40"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "~8.4"
 pytest-mock = "~3.14"
 pytest-cov = "~6.2"
 httpx = "*"
-black = "~25.12"
+black = "~26.1"
 pre-commit = "~4.5"
 
 [tool.poetry.group.ci.dependencies]
